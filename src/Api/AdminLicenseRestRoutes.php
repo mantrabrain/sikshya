@@ -2,6 +2,7 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Licensing\PricingUrl;
 use Sikshya\Licensing\TierCapabilities;
 use WP_Error;
 use WP_REST_Request;
@@ -157,7 +158,7 @@ final class AdminLicenseRestRoutes
              * Commercial add-on PHP is loaded (filter) — kept as `pro_plugin_active` for admin shell compatibility.
              */
             'pro_plugin_active' => self::is_extension_runtime_active(),
-            'upgrade_url' => (string) ($lic['upgradeUrl'] ?? 'https://mantrabrain.com/plugins/sikshya-lms/#pricing'),
+            'upgrade_url' => (string) ($lic['upgradeUrl'] ?? PricingUrl::withUtm('license-screen')),
             'site_tier' => (string) ($lic['siteTier'] ?? 'free'),
             'site_tier_label' => (string) ($lic['siteTierLabel'] ?? ''),
         ];

@@ -112,6 +112,7 @@ export function AppShell({
           toolsHref={toolsHref}
           isDark={isDark}
           onToggleDark={onToggleDark}
+          showProTrialPill={!proPluginVersion}
         />
         <main
           className={

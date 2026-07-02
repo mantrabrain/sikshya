@@ -174,31 +174,29 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
     >
       <CreateCourseModal config={config} open={createOpen} onClose={() => setCreateOpen(false)} />
       <div className="w-full min-w-0 space-y-8">
-        <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-brand-600 via-brand-600 to-accent-700 px-6 py-8 text-white shadow-lg dark:border-slate-800 dark:from-brand-700 dark:via-brand-800 dark:to-slate-900">
-          <div
-            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-accent-400/20 blur-2xl"
-            aria-hidden
-          />
-          <div className="relative">
-            <p className="text-sm font-medium text-brand-100/90">{dateLine}</p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-              {greetingLabel()}, {config.user.name}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-brand-100/95">
-              {siteName ? (
-                <>
-                  You are managing <span className="font-semibold text-white">{siteName}</span>. Track catalog
-                  growth, learner sign-ups, and revenue from this overview.
-                </>
-              ) : (
-                <>{__('Track catalog growth, learner sign-ups, and revenue from this overview.', 'sikshya')}</>
-              )}
-            </p>
-          </div>
+        {/*
+         * Dashboard hero — subtle brand tint. We landed here after two rounds:
+         * the original brand→accent gradient with decorative blurs was too
+         * heavy, plain white read as flat. A faint diagonal brand-50 → white
+         * wash carries a hint of the plugin identity without competing with
+         * the widgets below. Border also tinted (brand-100) so the edge
+         * doesn't feel neutrally-outlined against the coloured fill.
+         */}
+        <section className="rounded-2xl border border-blue-100 bg-blue-50 px-6 py-8 shadow-sm dark:border-blue-900/40 dark:bg-blue-950/30">
+          <p className="text-sm font-medium text-blue-700/80 dark:text-blue-300/80">{dateLine}</p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+            {greetingLabel()}, {config.user.name}
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            {siteName ? (
+              <>
+                You are managing <span className="font-semibold text-slate-900 dark:text-white">{siteName}</span>. Track catalog
+                growth, learner sign-ups, and revenue from this overview.
+              </>
+            ) : (
+              <>{__('Track catalog growth, learner sign-ups, and revenue from this overview.', 'sikshya')}</>
+            )}
+          </p>
         </section>
 
         {licensing && !licensing.isProActive ? (

@@ -3,8 +3,28 @@ import type React from 'react';
 import { getConfig } from '../config/env';
 import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
 import { __, sprintf } from '../lib/i18n';
+import { sikshyaPricingUrl } from '../lib/upgradeUrl';
 import { NavIcon } from './NavIcon';
 import type { NavItem, NavItemBadge } from '../types';
+
+/** Inline crown SVG (lucide-style) for the Upgrade to Pro card. */
+function CrownIcon({ className = 'h-3.5 w-3.5' }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M2 6l4 6 6-8 6 8 4-6-2 12H4L2 6z" />
+      <path d="M5 20h14" />
+    </svg>
+  );
+}
 
 function NavBadge({ badge }: { badge: NavItemBadge }) {
   const isOff = badge === 'off';
@@ -357,6 +377,32 @@ export function Sidebar({
           />
         ))}
       </nav>
+      {/*
+       * Upgrade card — Free-only. Hidden as soon as the Pro plugin is loaded
+       * (regardless of licence): a licenced site is already Pro, and an
+       * installed-but-unlicensed site should route through the License
+       * screen to activate, not through the pricing page. Links via the
+       * shared UTM helper so mantrabrain.com analytics can attribute this
+       * click to the sidebar surface.
+       */}
+      {!proPluginVersion ? (
+        <div className="shrink-0 px-3 pb-2">
+          <a
+            href={sikshyaPricingUrl('sidebar-pro')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col gap-0.5 rounded-lg border border-amber-200/90 bg-amber-50/60 px-3 py-2.5 text-left transition-colors hover:bg-amber-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-amber-800/40 dark:bg-amber-950/25 dark:hover:bg-amber-950/40 dark:focus-visible:ring-offset-slate-900"
+          >
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-900 dark:text-amber-200">
+              <CrownIcon className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+              {__('Upgrade to Pro', 'sikshya')}
+            </span>
+            <span className="text-[11px] leading-snug text-amber-800/75 dark:text-amber-300/70">
+              {__('Premium features & integrations — view plans.', 'sikshya')}
+            </span>
+          </a>
+        </div>
+      ) : null}
       <div
         className={`sticky bottom-0 border-t p-3 backdrop-blur ${
           brandedChrome ? 'border-current/10' : 'border-slate-100 bg-white/95 dark:border-slate-800 dark:bg-slate-900/95'

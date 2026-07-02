@@ -3,6 +3,7 @@
 namespace Sikshya\Admin;
 
 use Sikshya\Constants\AdminPages;
+use Sikshya\Licensing\PricingUrl;
 
 /**
  * “Upgrade to Pro” entry points when no commercial Sikshya tier is active.
@@ -57,7 +58,7 @@ final class ProUpgradeAdminNudge
      */
     public static function upgradeUrl(): string
     {
-        $default = 'https://mantrabrain.com/plugins/sikshya-lms/#pricing';
+        $default = PricingUrl::withUtm('admin-nudge');
         $from_commercial = apply_filters('sikshya_commercial_upgrade_url', $default);
         $base = is_string($from_commercial) && $from_commercial !== '' ? $from_commercial : $default;
 

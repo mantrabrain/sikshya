@@ -525,7 +525,52 @@ final class ReactAdminConfig
             ];
         }
 
+        // Free-plugin-only pruning: on sites without an active Pro licence we
+        // hide every nav row that carries the "upgrade" badge (i.e. the entire
+        // route is behind a tier the site doesn't own). Rationale — during the
+        // free-user acquisition push we don't want the sidebar full of locked
+        // rows the operator can't actually use. Pro sites keep the full nav
+        // tree so licensed features are always one click away.
+        //
+        // `badge = 'off'` stays visible (that means Pro IS licensed but the
+        // addon is turned off — the operator just needs to flip it back on
+        // in Addons). `badge = 'upgrade'` is the true "gated behind money"
+        // signal and is what we strip.
+        if (! TierCapabilities::isActive()) {
+            $items = self::stripUpgradeGatedItems($items);
+        }
+
         return $items;
+    }
+
+    /**
+     * Recursively drop nav rows whose {@see NavItemBadge} is `upgrade`, and
+     * collapse any parent whose children all disappear. Used only on Free
+     * sites to keep the sidebar focused on routes the operator can actually
+     * open. Pro-licensed sites always see the full tree.
+     *
+     * @param array<int, array<string, mixed>> $items
+     * @return array<int, array<string, mixed>>
+     */
+    private static function stripUpgradeGatedItems(array $items): array
+    {
+        $out = [];
+        foreach ($items as $item) {
+            if (isset($item['badge']) && $item['badge'] === 'upgrade') {
+                continue;
+            }
+            if (isset($item['children']) && is_array($item['children'])) {
+                $children = self::stripUpgradeGatedItems($item['children']);
+                if ($children === []) {
+                    // Parent hub is empty once all Pro-only rows are gone —
+                    // drop the parent too (avoids empty accordions).
+                    continue;
+                }
+                $item['children'] = $children;
+            }
+            $out[] = $item;
+        }
+        return $out;
     }
 
     /**

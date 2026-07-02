@@ -21,7 +21,7 @@ msgid "Edit content"
 msgstr ""
 
 #: client/src/App.tsx:254
-#: client/src/pages/DashboardPage.tsx:320
+#: client/src/pages/DashboardPage.tsx:318
 #: client/src/pages/ToolsPage.tsx:271
 #: client/src/pages/content-editors/editors.tsx:1052
 #: client/src/pages/hubs/HubPages.tsx:97
@@ -34,7 +34,7 @@ msgid "All questions"
 msgstr ""
 
 #: client/src/App.tsx:263
-#: client/src/pages/DashboardPage.tsx:327
+#: client/src/pages/DashboardPage.tsx:325
 #: client/src/pages/ToolsPage.tsx:272
 msgid "Chapters"
 msgstr ""
@@ -44,7 +44,7 @@ msgid "All %s"
 msgstr ""
 
 #: client/src/App.tsx:273
-#: client/src/pages/DashboardPage.tsx:313
+#: client/src/pages/DashboardPage.tsx:311
 #: client/src/pages/hubs/HubPages.tsx:200
 msgid "Certificate templates"
 msgstr ""
@@ -218,7 +218,7 @@ msgid "Reports"
 msgstr ""
 
 #: client/src/App.tsx:391
-#: client/src/pages/DashboardPage.tsx:459
+#: client/src/pages/DashboardPage.tsx:457
 #: client/src/pages/hubs/HubPages.tsx:271
 msgid "Payments"
 msgstr ""
@@ -241,7 +241,7 @@ msgid "Email template"
 msgstr ""
 
 #: client/src/App.tsx:401
-#: client/src/components/TopBar.tsx:113
+#: client/src/components/TopBar.tsx:165
 #: client/src/pages/EmailMarketingPage.tsx:842
 #: client/src/pages/hubs/HubPages.tsx:497
 msgid "Tools"
@@ -315,7 +315,7 @@ msgid "New %s"
 msgstr ""
 
 #: client/src/App.tsx:484
-#: client/src/pages/SettingsPage.tsx:754
+#: client/src/pages/SettingsPage.tsx:812
 msgid "Site-wide defaults for every course"
 msgstr ""
 
@@ -356,7 +356,7 @@ msgstr ""
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:461
 #: client/src/pages/AddonsPage.tsx:339
 #: client/src/pages/ContentDripPage.tsx:948
-#: client/src/pages/SettingsPage.tsx:240
+#: client/src/pages/SettingsPage.tsx:262
 msgid "Enabled"
 msgstr ""
 
@@ -378,7 +378,7 @@ msgid "Upgrade to unlock"
 msgstr ""
 
 #: client/src/components/AppShell.tsx:58
-#: client/src/components/TopBar.tsx:43
+#: client/src/components/TopBar.tsx:75
 #: client/src/pages/CourseTeamPage.tsx:933
 msgid "Admin"
 msgstr ""
@@ -484,7 +484,7 @@ msgstr ""
 
 #: client/src/components/EmailDeliverySettings.tsx:294
 #: client/src/pages/ReportsPage.tsx:931
-#: client/src/pages/SettingsPage.tsx:929
+#: client/src/pages/SettingsPage.tsx:987
 msgid "Sending…"
 msgstr ""
 
@@ -550,7 +550,7 @@ msgid ""
 msgstr ""
 
 #: client/src/components/EnrollmentSettingsTab.tsx:70
-#: client/src/components/Sidebar.tsx:335
+#: client/src/components/Sidebar.tsx:355
 #: client/src/pages/content-editors/ProIntegrationFields.tsx:599
 msgid "Pro"
 msgstr ""
@@ -669,59 +669,76 @@ msgstr ""
 msgid "Site notices"
 msgstr ""
 
-#: client/src/components/Sidebar.tsx:18
+#: client/src/components/Sidebar.tsx:314
+msgid "%1$s (free) %2$s"
+msgstr ""
+
+#: client/src/components/Sidebar.tsx:322
+#: client/src/pages/EnrollmentDetailsPage.tsx:191
+msgid "Free"
+msgstr ""
+
+#: client/src/components/Sidebar.tsx:340
+msgid "%1$s Pro %2$s (licensed)"
+msgstr ""
+
+#: client/src/components/Sidebar.tsx:342
+msgid "%1$s Pro %2$s — activate your license for updates and paid modules"
+msgstr ""
+
+#: client/src/components/Sidebar.tsx:38
 msgid "Addon is turned off in Addons"
 msgstr ""
 
-#: client/src/components/Sidebar.tsx:18
+#: client/src/components/Sidebar.tsx:38
 msgid "Pro feature — upgrade to unlock"
 msgstr ""
 
-#: client/src/components/Sidebar.tsx:20
+#: client/src/components/Sidebar.tsx:398
+#: client/src/components/notices/InlineNotices.tsx:134
+msgid "Upgrade to Pro"
+msgstr ""
+
+#: client/src/components/Sidebar.tsx:40
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:502
 #: client/src/pages/EmailMarketingPage.tsx:705
 msgid "Off"
 msgstr ""
 
-#: client/src/components/Sidebar.tsx:294
-msgid "%1$s (free) %2$s"
+#: client/src/components/Sidebar.tsx:401
+msgid "Premium features & integrations — view plans."
 msgstr ""
 
-#: client/src/components/Sidebar.tsx:302
-#: client/src/pages/EnrollmentDetailsPage.tsx:191
-msgid "Free"
-msgstr ""
-
-#: client/src/components/Sidebar.tsx:320
-msgid "%1$s Pro %2$s (licensed)"
-msgstr ""
-
-#: client/src/components/Sidebar.tsx:322
-msgid "%1$s Pro %2$s — activate your license for updates and paid modules"
-msgstr ""
-
-#: client/src/components/Sidebar.tsx:376
-#: client/src/components/TopBar.tsx:182
+#: client/src/components/Sidebar.tsx:422
+#: client/src/components/TopBar.tsx:234
 msgid "Back to WordPress"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:105
+#: client/src/components/TopBar.tsx:124
+msgid "Spin up a free Pro trial site in one click — no credit card required."
+msgstr ""
+
+#: client/src/components/TopBar.tsx:128
+msgid "Try Sikshya Pro for free"
+msgstr ""
+
+#: client/src/components/TopBar.tsx:157
 msgid "Join Community"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:120
+#: client/src/components/TopBar.tsx:172
 msgid "Light mode"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:120
+#: client/src/components/TopBar.tsx:172
 msgid "Dark mode"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:177
+#: client/src/components/TopBar.tsx:229
 msgid "Edit profile"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:192
+#: client/src/components/TopBar.tsx:244
 msgid "Log out"
 msgstr ""
 
@@ -759,7 +776,7 @@ msgstr ""
 #: client/src/pages/EmailPage.tsx:113
 #: client/src/pages/IntegrationsPage.tsx:270
 #: client/src/pages/PrerequisitesPage.tsx:600
-#: client/src/pages/SettingsPage.tsx:671
+#: client/src/pages/SettingsPage.tsx:729
 #: client/src/pages/SocialLoginPage.tsx:67
 #: client/src/pages/WhiteLabelPage.tsx:132
 msgid "Save failed"
@@ -968,10 +985,6 @@ msgid ""
 "manual use."
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:134
-msgid "Upgrade to Pro"
-msgstr ""
-
 #: client/src/components/notices/InlineNotices.tsx:140
 msgid "⚡ Limited time"
 msgstr ""
@@ -1066,17 +1079,17 @@ msgstr ""
 #: client/src/pages/AddonsPage.tsx:339
 #: client/src/pages/ContentDripPage.tsx:948
 #: client/src/pages/LicensePage.tsx:77
-#: client/src/pages/SettingsPage.tsx:240
+#: client/src/pages/SettingsPage.tsx:262
 msgid "Disabled"
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:474
-#: client/src/pages/SettingsPage.tsx:210
+#: client/src/pages/SettingsPage.tsx:232
 msgid "Move up"
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:487
-#: client/src/pages/SettingsPage.tsx:220
+#: client/src/pages/SettingsPage.tsx:242
 msgid "Move down"
 msgstr ""
 
@@ -1668,7 +1681,7 @@ msgstr ""
 #: client/src/pages/PrerequisitesPage.tsx:788
 #: client/src/pages/QuizAdvancedWorkspacePage.tsx:304
 #: client/src/pages/ReportsPage.tsx:990
-#: client/src/pages/SettingsPage.tsx:975
+#: client/src/pages/SettingsPage.tsx:1033
 #: client/src/pages/SocialLoginPage.tsx:310
 #: client/src/pages/SubscriptionsProPage.tsx:617
 #: client/src/pages/WhiteLabelPage.tsx:625
@@ -1689,7 +1702,7 @@ msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:775
 #: client/src/pages/ContentDripPage.tsx:593
-#: client/src/pages/SettingsPage.tsx:975
+#: client/src/pages/SettingsPage.tsx:1033
 #: client/src/pages/SubscriptionsProPage.tsx:617
 msgid "Save changes"
 msgstr ""
@@ -2614,7 +2627,7 @@ msgstr ""
 #: client/src/pages/InstructorApplicationsPage.tsx:77
 #: client/src/pages/IntegrationsPage.tsx:267
 #: client/src/pages/PrerequisitesPage.tsx:594
-#: client/src/pages/SettingsPage.tsx:668
+#: client/src/pages/SettingsPage.tsx:726
 #: client/src/pages/SocialLoginPage.tsx:64
 #: client/src/pages/WhiteLabelPage.tsx:130
 #: client/src/pages/content-editors/editors.tsx:3000
@@ -4179,183 +4192,183 @@ msgstr ""
 msgid "Course health, learners, and shortcuts in one place"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:198
+#: client/src/pages/DashboardPage.tsx:197
 msgid "Track catalog growth, learner sign-ups, and revenue from this overview."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:207
+#: client/src/pages/DashboardPage.tsx:205
 msgid "Advanced LMS capabilities"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:211
+#: client/src/pages/DashboardPage.tsx:209
 msgid "Scale your course business"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:213
+#: client/src/pages/DashboardPage.tsx:211
 msgid ""
 "Scheduled lesson access, subscriptions, gradebook, shared course staff, "
 "richer certificates, and more. Your admin layout stays familiar; upgraded "
 "plans unlock the behaviour behind each screen."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:234
+#: client/src/pages/DashboardPage.tsx:232
 msgid "Published courses"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:236
+#: client/src/pages/DashboardPage.tsx:234
 msgid "Live in your catalog"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:241
+#: client/src/pages/DashboardPage.tsx:239
 msgid "Students"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:243
+#: client/src/pages/DashboardPage.tsx:241
 msgid "Users with the Sikshya student role"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:248
+#: client/src/pages/DashboardPage.tsx:246
 msgid "Total revenue"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:252
+#: client/src/pages/DashboardPage.tsx:250
 msgid "Sum of completed payments in Sikshya"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:253
+#: client/src/pages/DashboardPage.tsx:251
 msgid "Payments table not found — revenue may stay at zero"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:259
+#: client/src/pages/DashboardPage.tsx:257
 msgid "Active enrollments"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:276
+#: client/src/pages/DashboardPage.tsx:274
 msgid "Draft courses"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:285
+#: client/src/pages/DashboardPage.tsx:283
 msgid "Published lesson posts"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:292
+#: client/src/pages/DashboardPage.tsx:290
 msgid "Published quiz posts"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:297
+#: client/src/pages/DashboardPage.tsx:295
 #: client/src/pages/GradebookPage.tsx:1192
 #: client/src/pages/ToolsPage.tsx:270
 msgid "Assignments"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:299
+#: client/src/pages/DashboardPage.tsx:297
 msgid "Published assignment posts"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:306
+#: client/src/pages/DashboardPage.tsx:304
 msgid "Instructors"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:308
+#: client/src/pages/DashboardPage.tsx:306
 msgid "Users with the instructor role"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:315
+#: client/src/pages/DashboardPage.tsx:313
 msgid "Published certificate designs"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:322
+#: client/src/pages/DashboardPage.tsx:320
 msgid "Published question bank items"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:329
+#: client/src/pages/DashboardPage.tsx:327
 msgid "Published chapter posts"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:352
+#: client/src/pages/DashboardPage.tsx:350
 msgid "No courses yet"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:353
+#: client/src/pages/DashboardPage.tsx:351
 msgid "Create your first course to see recent activity and status here."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:354
+#: client/src/pages/DashboardPage.tsx:352
 msgid "Create a course"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:371
+#: client/src/pages/DashboardPage.tsx:369
 msgid "Open"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:400
+#: client/src/pages/DashboardPage.tsx:398
 msgid "Open in course builder"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:420
+#: client/src/pages/DashboardPage.tsx:418
 msgid "Jump to the screens you use most when running your LMS."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:426
+#: client/src/pages/DashboardPage.tsx:424
 msgid "New course"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:427
+#: client/src/pages/DashboardPage.tsx:425
 msgid "Name your course, we save a draft and open the builder."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:432
+#: client/src/pages/DashboardPage.tsx:430
 msgid "Browse courses"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:433
+#: client/src/pages/DashboardPage.tsx:431
 msgid "Search, filter, and bulk-manage your catalog."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:438
+#: client/src/pages/DashboardPage.tsx:436
 #: client/src/pages/ToolsPage.tsx:268
 msgid "Lessons"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:439
+#: client/src/pages/DashboardPage.tsx:437
 msgid "Review and edit lesson content across your site."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:444
+#: client/src/pages/DashboardPage.tsx:442
 #: client/src/pages/GradebookPage.tsx:1165
 #: client/src/pages/ToolsPage.tsx:269
 msgid "Quizzes"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:445
+#: client/src/pages/DashboardPage.tsx:443
 msgid "Manage assessments tied to your courses."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:451
+#: client/src/pages/DashboardPage.tsx:449
 msgid "Enrollments"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:452
+#: client/src/pages/DashboardPage.tsx:450
 msgid "See who is enrolled and in which courses."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:460
+#: client/src/pages/DashboardPage.tsx:458
 msgid "Review transactions and reconciliation."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:467
+#: client/src/pages/DashboardPage.tsx:465
 msgid "Grow your course business"
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:471
+#: client/src/pages/DashboardPage.tsx:469
 msgid "Invite instructors and assign content ownership from Users."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:475
+#: client/src/pages/DashboardPage.tsx:473
 msgid "Use Reports to spot completion trends once learners are active."
 msgstr ""
 
-#: client/src/pages/DashboardPage.tsx:479
+#: client/src/pages/DashboardPage.tsx:477
 msgid "Tune certificates, emails, and branding under Settings."
 msgstr ""
 
@@ -4809,12 +4822,12 @@ msgid "Reset email settings to their default values?"
 msgstr ""
 
 #: client/src/pages/EmailPage.tsx:143
-#: client/src/pages/SettingsPage.tsx:713
+#: client/src/pages/SettingsPage.tsx:771
 msgid "Reset"
 msgstr ""
 
 #: client/src/pages/EmailPage.tsx:146
-#: client/src/pages/SettingsPage.tsx:716
+#: client/src/pages/SettingsPage.tsx:774
 msgid "Reset failed"
 msgstr ""
 
@@ -4835,7 +4848,7 @@ msgid "Save email settings"
 msgstr ""
 
 #: client/src/pages/EmailPage.tsx:209
-#: client/src/pages/SettingsPage.tsx:844
+#: client/src/pages/SettingsPage.tsx:902
 msgid "Settings request failed"
 msgstr ""
 
@@ -4844,12 +4857,12 @@ msgid "No email settings defined."
 msgstr ""
 
 #: client/src/pages/EmailPage.tsx:51
-#: client/src/pages/SettingsPage.tsx:570
+#: client/src/pages/SettingsPage.tsx:628
 msgid "Could not load settings schema."
 msgstr ""
 
 #: client/src/pages/EmailPage.tsx:61
-#: client/src/pages/SettingsPage.tsx:593
+#: client/src/pages/SettingsPage.tsx:651
 msgid "Could not load settings values."
 msgstr ""
 
@@ -7296,70 +7309,74 @@ msgstr ""
 msgid "SCORM / H5P"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:178
+#: client/src/pages/SettingsPage.tsx:1009
+msgid "No settings defined for this tab."
+msgstr ""
+
+#: client/src/pages/SettingsPage.tsx:1021
+msgid "You have unsaved changes."
+msgstr ""
+
+#: client/src/pages/SettingsPage.tsx:1021
+msgid "All changes saved."
+msgstr ""
+
+#: client/src/pages/SettingsPage.tsx:192
 msgid "users"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:178
+#: client/src/pages/SettingsPage.tsx:192
 msgid "badge"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:230
+#: client/src/pages/SettingsPage.tsx:252
 msgid "opacity-60"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:230
+#: client/src/pages/SettingsPage.tsx:252
 msgid "text-slate-700 dark:text-slate-200"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:264
+#: client/src/pages/SettingsPage.tsx:283
+msgid "This gateway is available on Sikshya Pro — view plans."
+msgstr ""
+
+#: client/src/pages/SettingsPage.tsx:313
 msgid "Payment gateways"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:265
+#: client/src/pages/SettingsPage.tsx:314
 msgid ""
 "Enable and configure payment gateways. Expand a gateway to edit its "
 "settings."
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:336
+#: client/src/pages/SettingsPage.tsx:394
 msgid "Upgrade to configure this gateway."
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:336
+#: client/src/pages/SettingsPage.tsx:394
 msgid "No additional settings for this gateway."
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:679
+#: client/src/pages/SettingsPage.tsx:737
 msgid "Reset settings?"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:738
+#: client/src/pages/SettingsPage.tsx:796
 msgid "Sent"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:740
+#: client/src/pages/SettingsPage.tsx:798
 msgid "Send failed"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:762
+#: client/src/pages/SettingsPage.tsx:820
 msgid "Settings sections"
 msgstr ""
 
-#: client/src/pages/SettingsPage.tsx:929
+#: client/src/pages/SettingsPage.tsx:987
 msgid "Send now"
-msgstr ""
-
-#: client/src/pages/SettingsPage.tsx:951
-msgid "No settings defined for this tab."
-msgstr ""
-
-#: client/src/pages/SettingsPage.tsx:963
-msgid "You have unsaved changes."
-msgstr ""
-
-#: client/src/pages/SettingsPage.tsx:963
-msgid "All changes saved."
 msgstr ""
 
 #: client/src/pages/SocialLoginPage.tsx:103

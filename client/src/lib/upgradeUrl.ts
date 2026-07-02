@@ -22,7 +22,9 @@ export type UpgradeCtaContent =
   /** Primary "Upgrade to unlock" CTA on inline addon-enable cards */
   | 'addon-enable-upgrade'
   /** Sidebar "Pro" badge / generic in-product link */
-  | 'sidebar-pro';
+  | 'sidebar-pro'
+  /** Locked payment gateway row on Settings → Payment (Pro-only gateways) */
+  | 'payment-gateway';
 
 /**
  * Build a pricing-page URL with the standard UTM tags. Pass a feature id when

@@ -9,6 +9,8 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAdminRouting } from '../lib/adminRouting';
+import { sikshyaPricingUrl } from '../lib/upgradeUrl';
+import { getConfig } from '../config/env';
 import type { SikshyaReactConfig } from '../types';
 import type { SettingsField, SettingsSection } from '../types/settingsSchema';
 import { CourseSettingsTab } from '../components/CourseSettingsTab';
@@ -81,6 +83,14 @@ function PaymentSettingsTab(props: {
     Array.isArray(schemaMeta.payment_gateways) ? schemaMeta.payment_gateways : []
   ) as PaymentGatewayMeta[];
 
+  /**
+   * Free-plugin operators can't configure Pro-only gateways — the previous
+   * behaviour opened an opacity-60 field grid that was purely aspirational.
+   * When Pro isn't licensed we now redirect the whole row to the pricing
+   * page on click, so the click has an outcome the operator can act on.
+   */
+  const isProActive = Boolean(getConfig().licensing?.isProActive);
+
   const [open, setOpen] = useState<string | null>(gateways[0]?.id || 'offline');
 
   const byTitle = (t: string) =>
@@ -140,6 +150,7 @@ function PaymentSettingsTab(props: {
     canReorder,
     onMoveUp,
     onMoveDown,
+    redirectHref,
   }: {
     id: string;
     title: string;
@@ -150,101 +161,139 @@ function PaymentSettingsTab(props: {
     canReorder?: boolean;
     onMoveUp?: () => void;
     onMoveDown?: () => void;
+    /**
+     * When set, render the row as an outbound link to the pricing page
+     * instead of a button that opens the (unusable) locked configuration
+     * accordion. Reorder controls + enable checkbox are hidden in this
+     * mode — the whole row becomes a "click to see pricing" affordance.
+     */
+    redirectHref?: string;
   }) => {
     const selected = open === id;
     const enabled = enabledKey ? isTruthyCheckboxValue(draft[enabledKey]) : true;
+    const commonClass = `block w-full rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
+      selected
+        ? 'border-brand-200 bg-white shadow-sm dark:border-brand-900/60 dark:bg-slate-900'
+        : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-900'
+    }`;
+    const inner = (
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 p-1.5 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+            {(gateways.find((g) => g.id === id)?.icon_url || '') ? (
+              <img
+                src={gateways.find((g) => g.id === id)?.icon_url}
+                alt=""
+                className="h-6 w-6 object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <NavIcon name={id === 'offline' ? 'tag' : id === 'paypal' ? __('users', 'sikshya') : __('badge', 'sikshya')} className="h-5 w-5" />
+            )}
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <div className="truncate text-sm font-semibold text-slate-900 dark:text-white">{title}</div>
+              {badge ? (
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
+                    badge === 'PRO'
+                      ? 'bg-accent-100 text-accent-700 dark:bg-accent-950/40 dark:text-accent-200'
+                      : badge === 'TEST'
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200'
+                        : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200'
+                  }`}
+                >
+                  {badge}
+                </span>
+              ) : null}
+            </div>
+            <div className="truncate text-xs text-slate-400/90 dark:text-slate-500/80">{subtitle}</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/*
+           * Redirect rows are one-click links to the pricing page; hide the
+           * per-row interactive controls (reorder, enable checkbox) since
+           * (a) nesting <button>/<input> inside an <a> is invalid HTML and
+           * (b) reordering / toggling a gateway the operator can't configure
+           * anyway is meaningless. The chevron is replaced with an external
+           * arrow so the affordance is unambiguous.
+           */}
+          {!redirectHref && canReorder ? (
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 dark:hover:bg-slate-900"
+                onClick={onMoveUp}
+                aria-label={__('Move up', 'sikshya')}
+                title={__('Move up', 'sikshya')}
+                disabled={!onMoveUp}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 dark:hover:bg-slate-900"
+                onClick={onMoveDown}
+                aria-label={__('Move down', 'sikshya')}
+                title={__('Move down', 'sikshya')}
+                disabled={!onMoveDown}
+              >
+                ↓
+              </button>
+            </div>
+          ) : null}
+          {!redirectHref && enabledKey ? (
+            <label
+              className={`flex items-center gap-2 text-xs font-semibold ${
+                locked ? __('opacity-60', 'sikshya') : __('text-slate-700 dark:text-slate-200', 'sikshya')
+              }`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="checkbox"
+                disabled={!!locked}
+                checked={!!enabled}
+                onChange={(e) => setDraft((p) => ({ ...p, [enabledKey]: e.target.checked ? '1' : '0' }))}
+              />
+              {enabled ? __('Enabled', 'sikshya') : __('Disabled', 'sikshya')}
+            </label>
+          ) : null}
+          {redirectHref ? (
+            <span className="text-slate-400" aria-hidden>
+              ↗
+            </span>
+          ) : (
+            <span className={`text-slate-400 transition ${selected ? 'rotate-180' : ''}`} aria-hidden>
+              ▾
+            </span>
+          )}
+        </div>
+      </div>
+    );
+    if (redirectHref) {
+      return (
+        <a
+          href={redirectHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={__('This gateway is available on Sikshya Pro — view plans.', 'sikshya')}
+          className={commonClass}
+        >
+          {inner}
+        </a>
+      );
+    }
     return (
       <button
         type="button"
         onClick={() => setOpen((o) => (o === id ? null : id))}
-        className={`w-full rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
-          selected
-            ? 'border-brand-200 bg-white shadow-sm dark:border-brand-900/60 dark:bg-slate-900'
-            : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-900'
-        }`}
+        className={commonClass}
       >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 p-1.5 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-              {(gateways.find((g) => g.id === id)?.icon_url || '') ? (
-                <img
-                  src={gateways.find((g) => g.id === id)?.icon_url}
-                  alt=""
-                  className="h-6 w-6 object-contain"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <NavIcon name={id === 'offline' ? 'tag' : id === 'paypal' ? __('users', 'sikshya') : __('badge', 'sikshya')} className="h-5 w-5" />
-              )}
-            </span>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <div className="truncate text-sm font-semibold text-slate-900 dark:text-white">{title}</div>
-                {badge ? (
-                  <span
-                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
-                      badge === 'PRO'
-                        ? 'bg-accent-100 text-accent-700 dark:bg-accent-950/40 dark:text-accent-200'
-                        : badge === 'TEST'
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200'
-                          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200'
-                    }`}
-                  >
-                    {badge}
-                  </span>
-                ) : null}
-              </div>
-              <div className="truncate text-xs text-slate-400/90 dark:text-slate-500/80">{subtitle}</div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {canReorder ? (
-              <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 dark:hover:bg-slate-900"
-                  onClick={onMoveUp}
-                  aria-label={__('Move up', 'sikshya')}
-                  title={__('Move up', 'sikshya')}
-                  disabled={!onMoveUp}
-                >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 dark:hover:bg-slate-900"
-                  onClick={onMoveDown}
-                  aria-label={__('Move down', 'sikshya')}
-                  title={__('Move down', 'sikshya')}
-                  disabled={!onMoveDown}
-                >
-                  ↓
-                </button>
-              </div>
-            ) : null}
-            {enabledKey ? (
-              <label
-                className={`flex items-center gap-2 text-xs font-semibold ${
-                  locked ? __('opacity-60', 'sikshya') : __('text-slate-700 dark:text-slate-200', 'sikshya')
-                }`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <input
-                  type="checkbox"
-                  disabled={!!locked}
-                  checked={!!enabled}
-                  onChange={(e) => setDraft((p) => ({ ...p, [enabledKey]: e.target.checked ? '1' : '0' }))}
-                />
-                {enabled ? __('Enabled', 'sikshya') : __('Disabled', 'sikshya')}
-              </label>
-            ) : null}
-            <span className={`text-slate-400 transition ${selected ? 'rotate-180' : ''}`} aria-hidden>
-              ▾
-            </span>
-          </div>
-        </div>
+        {inner}
       </button>
     );
   };
@@ -307,6 +356,14 @@ function PaymentSettingsTab(props: {
                   }
                 : undefined;
 
+            // Redirect only when the tier truly doesn't include the gateway.
+            // If Pro IS active but the gateway addon is turned off, keep the
+            // in-place accordion so the operator can see the "turn it on"
+            // affordance via Addons (handled elsewhere in the schema).
+            const redirectHref = locked && !isProActive
+              ? sikshyaPricingUrl('payment-gateway', g.id)
+              : undefined;
+
             return (
               <div key={g.id}>
                 <GatewayRow
@@ -319,8 +376,9 @@ function PaymentSettingsTab(props: {
                   canReorder={canReorder}
                   onMoveUp={onMoveUp}
                   onMoveDown={onMoveDown}
+                  redirectHref={redirectHref}
                 />
-                {open === g.id ? (
+                {open === g.id && !redirectHref ? (
                   <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     {locked ? (
                       <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">

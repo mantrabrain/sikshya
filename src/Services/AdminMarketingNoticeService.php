@@ -4,6 +4,7 @@ namespace Sikshya\Services;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\OrderRepository;
+use Sikshya\Licensing\PricingUrl;
 use WP_Error;
 
 /**
@@ -508,7 +509,7 @@ final class AdminMarketingNoticeService
 
     private static function defaultUpgradeUrl(): string
     {
-        $default = 'https://mantrabrain.com/plugins/sikshya-lms/#pricing';
+        $default = PricingUrl::withUtm('marketing-notice');
         $url = apply_filters('sikshya_commercial_upgrade_url', $default);
 
         return is_string($url) && $url !== '' ? esc_url_raw($url) : esc_url_raw($default);

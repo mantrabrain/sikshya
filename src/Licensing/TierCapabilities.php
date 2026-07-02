@@ -201,9 +201,10 @@ final class TierCapabilities
      */
     public static function getClientPayload(): array
     {
+        $defaultUpgradeUrl = PricingUrl::withUtm('licensing-payload');
         $upgradeUrl = apply_filters(
             'sikshya_commercial_upgrade_url',
-            'https://mantrabrain.com/plugins/sikshya-lms/#pricing'
+            $defaultUpgradeUrl
         );
 
         /**
@@ -218,7 +219,7 @@ final class TierCapabilities
             'proPluginInstalled' => $extensionInstalled,
             'siteTier' => self::siteTier(),
             'siteTierLabel' => self::siteTierLabel(),
-            'upgradeUrl' => is_string($upgradeUrl) ? $upgradeUrl : 'https://mantrabrain.com/plugins/sikshya-lms/#pricing',
+            'upgradeUrl' => is_string($upgradeUrl) ? $upgradeUrl : $defaultUpgradeUrl,
             'featureStates' => self::featureStates(),
             'catalog' => FeatureRegistry::catalogForClient(),
         ];
