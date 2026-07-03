@@ -348,14 +348,28 @@ class AuthRestRoutes
             );
         }
 
+        /*
+         * SECURITY: record the rate-limit attempt UP FRONT — before we
+         * branch on `email_exists`, `wp_create_user` succeeded, etc. —
+         * so a successful bulk-registration attack can't burn through
+         * the limit ONE ATTEMPT AT A TIME: the previous shape recorded
+         * the attempt AFTER `wp_create_user` returned, meaning the
+         * first attacker got a full free registration + auth cookie
+         * even though a later attempt from the same IP would be
+         * blocked. Recording on entry makes the limiter symmetric with
+         * respect to success and failure and closes the "burn N free
+         * accounts before the bucket fills" gap. Staff callers (already
+         * logged in with `manage_options`) are exempt from the limiter.
+         */
+        if (!$isStaff) {
+            RegistrationRateLimiter::recordAttempt($ip);
+        }
+
         $email = sanitize_email($params['email'] ?? '');
         $password = (string) ($params['password'] ?? '');
         $display_name = sanitize_text_field($params['display_name'] ?? '');
 
         if ($email === '' || !is_email($email) || $password === '') {
-            if (!$isStaff) {
-                RegistrationRateLimiter::recordAttempt($ip);
-            }
             return new WP_REST_Response(
                 ['success' => false, 'message' => __('Valid email and password required.', 'sikshya')],
                 400
@@ -363,9 +377,6 @@ class AuthRestRoutes
         }
 
         if (email_exists($email)) {
-            if (!$isStaff) {
-                RegistrationRateLimiter::recordAttempt($ip);
-            }
             return new WP_REST_Response(
                 ['success' => false, 'message' => __('An account with this email already exists. Please sign in.', 'sikshya')],
                 409
@@ -389,18 +400,12 @@ class AuthRestRoutes
 
         $user_id = wp_create_user($username, $password, $email);
         if (is_wp_error($user_id)) {
-            if (!$isStaff) {
-                RegistrationRateLimiter::recordAttempt($ip);
-            }
             return new WP_REST_Response(
                 ['success' => false, 'message' => $user_id->get_error_message()],
                 400
             );
         }
-
-        if (!$isStaff) {
-            RegistrationRateLimiter::recordAttempt($ip);
-        }
+        // Rate-limit attempt was already recorded at entry — no duplicate charge here.
 
         if ($display_name !== '') {
             wp_update_user(['ID' => (int) $user_id, 'display_name' => $display_name]);

@@ -122,6 +122,27 @@ final class InstructorApplicationView
             exit;
         }
 
+        /*
+         * SECURITY: guard terminal application states from silent re-open.
+         * An admin who explicitly `rejected` or `suspended` an instructor
+         * application should NOT have that decision quietly reversed by
+         * the applicant re-submitting the same form — otherwise a
+         * denied applicant can just keep re-applying until an approver
+         * mistakenly clicks approve on the resurrected `pending` row.
+         *
+         * `active` is also treated as terminal so that an approved
+         * instructor doesn't accidentally revert themselves to pending
+         * (which the moderation flow reads as "not yet approved") and
+         * lose access. Admins can still explicitly move a user back to
+         * `pending` from the admin screen if a re-review is warranted.
+         */
+        $current_status = (string) get_user_meta($uid, '_sikshya_instructor_status', true);
+        $terminal = ['rejected', 'suspended', 'active'];
+        if (in_array($current_status, $terminal, true)) {
+            wp_safe_redirect(home_url('/'));
+            exit;
+        }
+
         $headline = isset($_POST['headline']) ? sanitize_text_field((string) $_POST['headline']) : '';
         $bio      = isset($_POST['bio']) ? wp_kses_post((string) $_POST['bio']) : '';
         $website  = isset($_POST['website']) ? esc_url_raw((string) $_POST['website']) : '';

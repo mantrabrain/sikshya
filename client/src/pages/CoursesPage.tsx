@@ -12,6 +12,7 @@ import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { embeddedTermNames } from '../lib/wpPostTerms';
 import { formatPostDate } from '../lib/formatPostDate';
 import { term, termLower } from '../lib/terminology';
+import { decodeWpTitle } from '../lib/wpTitle';
 import type { SikshyaReactConfig, WpPost } from '../types';
 import { FeaturedThumb } from '../components/shared/list/FeaturedThumb';
 import { __ } from '../lib/i18n';
@@ -106,7 +107,15 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
                 })}
                 className="min-w-0 truncate font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
               >
-                <span dangerouslySetInnerHTML={{ __html: r.title.rendered }} />
+                {/*
+                 * SECURITY: `title.rendered` is HTML from WP REST — never
+                 * feed it to dangerouslySetInnerHTML. Any Author-level
+                 * user can put script-triggering tags in a course title,
+                 * which then execute in the admin's session on list-page
+                 * view. `decodeWpTitle` parses via DOMParser and returns
+                 * plain text.
+                 */}
+                <span>{decodeWpTitle(r.title.rendered)}</span>
               </a>
               {isBundleRow(r) ? (
                 <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-accent-300 bg-accent-100 px-2 text-xs font-semibold leading-none text-accent-900 dark:border-accent-600/80 dark:bg-accent-950/55 dark:text-accent-100">

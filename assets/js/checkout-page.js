@@ -9,6 +9,23 @@
     return;
   }
 
+  /*
+   * SECURITY: full-entity HTML escaper. dfSchema field labels / help
+   * / option labels are admin-configured strings that we template into
+   * `innerHTML`. If an admin gets phished, or a lower-privileged role
+   * gains access to the "Checkout fields" settings, unescaped labels
+   * become stored XSS on every checkout page load. Route any admin-
+   * derived string through this before concatenating into HTML.
+   */
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   var isLoggedIn = cfgBoot.isLoggedIn === true || cfgBoot.isLoggedIn === 1 || cfgBoot.isLoggedIn === '1';
   var guestEnabled = cfgBoot.guestEnabled === true || cfgBoot.guestEnabled === 1 || cfgBoot.guestEnabled === '1';
   var guestNonce = String(cfgBoot.guestNonce || '');
@@ -227,12 +244,12 @@
           '" ' +
           (val === '1' ? 'checked' : '') +
           ' />';
-        html += '<span class="sikshya-checkout-df__checkbox-text">' + label + reqStar + '</span>';
+        html += '<span class="sikshya-checkout-df__checkbox-text">' + esc(label) + reqStar + '</span>';
         html += '</label>';
       } else {
         html +=
           '<label class="sikshya-checkout-field__label" for="sikshya-df-' + id + '">' +
-          label +
+          esc(label) +
           reqStar +
           '</label>';
         if (type === 'textarea') {
@@ -242,7 +259,7 @@
             '" data-df-input="' +
             id +
             '" rows="4" class="sikshya-input sikshya-checkout-field__control sikshya-checkout-field__control--textarea">' +
-            (val || '') +
+            esc(val || '') +
             '</textarea>';
         } else if (type === 'country') {
           html +=
@@ -258,7 +275,7 @@
               if (!code || !name) return;
               var c = String(code);
               var n = String(name);
-              html += '<option value="' + c.replace(/"/g, '&quot;') + '" ' + (val === c ? 'selected' : '') + '>' + n + '</option>';
+              html += '<option value="' + esc(c) + '" ' + (val === c ? 'selected' : '') + '>' + esc(n) + '</option>';
             });
           } catch (e) {
             /* ignore */
@@ -277,7 +294,7 @@
             opts.forEach(function (o) {
               var ov = o && o.value !== undefined ? String(o.value) : '';
               var ol = o && o.label !== undefined ? String(o.label) : ov;
-              html += '<option value="' + ov.replace(/"/g, '&quot;') + '" ' + (val === ov ? 'selected' : '') + '>' + ol + '</option>';
+              html += '<option value="' + esc(ov) + '" ' + (val === ov ? 'selected' : '') + '>' + esc(ol) + '</option>';
             });
             html += '</select>';
           } else {
@@ -297,12 +314,12 @@
                 '" data-df-input="' +
                 id +
                 '" value="' +
-                ov.replace(/"/g, '&quot;') +
+                esc(ov) +
                 '" ' +
                 (val === ov ? 'checked' : '') +
                 ' />' +
                 '<span>' +
-                ol +
+                esc(ol) +
                 '</span>' +
                 '</label>';
             });
@@ -318,14 +335,14 @@
             '" type="' +
             inputType +
             '" class="sikshya-input sikshya-checkout-field__control" placeholder="' +
-            (ph || '').replace(/"/g, '&quot;') +
+            esc(ph || '') +
             '" value="' +
-            (val || '').replace(/"/g, '&quot;') +
+            esc(val || '') +
             '" />';
         }
       }
       if (help) {
-        html += '<p class="sikshya-checkout-df__help">' + help + '</p>';
+        html += '<p class="sikshya-checkout-df__help">' + esc(help) + '</p>';
       }
       html += '</div>';
     });

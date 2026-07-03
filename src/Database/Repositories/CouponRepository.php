@@ -97,6 +97,107 @@ class CouponRepository
         );
     }
 
+    /**
+     * Atomically enforce a per-user redemption cap and insert the row.
+     *
+     * SECURITY: {@see recordRedemption} is an unconditional INSERT — pairing
+     * it with a preceding SELECT (`countRedemptionsByUser`) is a classic
+     * TOCTOU: a user who kicks off two parallel checkouts of a
+     * `per_user_limit = 1` "first-order 100% off" coupon can pass the
+     * count check twice and land two redemption rows before either
+     * checkout commits, so both orders get discounted for a coupon they
+     * were allowed to use once.
+     *
+     * This method wraps the count-then-insert in a transaction with
+     * `SELECT ... FOR UPDATE`, taking a row lock on the user's existing
+     * redemption rows for this coupon. Any concurrent transaction hits
+     * the same lock and serialises behind us — one of the parallel
+     * checkouts sees `count >= limit` after the winner commits and
+     * returns false. The caller (see `CheckoutService::createOrder`)
+     * treats a false return as a hard failure and rolls back the
+     * `incrementUsedCount` bump.
+     *
+     * `$per_user_limit <= 0` means unlimited — plain insert, no lock.
+     */
+    public function tryRecordRedemption(int $coupon_id, int $user_id, int $order_id, int $per_user_limit): bool
+    {
+        global $wpdb;
+
+        if ($coupon_id <= 0 || $user_id <= 0) {
+            return false;
+        }
+
+        if ($per_user_limit <= 0) {
+            // No per-user cap — fall back to the plain insert.
+            $ok = $wpdb->insert(
+                $this->redemptions,
+                [
+                    'coupon_id' => $coupon_id,
+                    'user_id' => $user_id,
+                    'order_id' => $order_id,
+                    'redeemed_at' => current_time('mysql'),
+                ]
+            );
+            return $ok !== false;
+        }
+
+        $wpdb->query('START TRANSACTION');
+
+        $count = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->redemptions}
+                 WHERE coupon_id = %d AND user_id = %d FOR UPDATE",
+                $coupon_id,
+                $user_id
+            )
+        );
+
+        if ($count >= $per_user_limit) {
+            $wpdb->query('ROLLBACK');
+            return false;
+        }
+
+        $ok = $wpdb->insert(
+            $this->redemptions,
+            [
+                'coupon_id' => $coupon_id,
+                'user_id' => $user_id,
+                'order_id' => $order_id,
+                'redeemed_at' => current_time('mysql'),
+            ]
+        );
+
+        if ($ok === false) {
+            $wpdb->query('ROLLBACK');
+            return false;
+        }
+
+        $wpdb->query('COMMIT');
+        return true;
+    }
+
+    /**
+     * Rollback of {@see incrementUsedCount}. Used when a downstream step
+     * (e.g. per-user redemption cap enforcement) fails after we already
+     * bumped the global used_count. `GREATEST(0, ...)` prevents any drift
+     * from decrementing below zero on repeated rollback attempts.
+     */
+    public function decrementUsedCount(int $coupon_id): void
+    {
+        global $wpdb;
+
+        if ($coupon_id <= 0) {
+            return;
+        }
+
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE {$this->coupons} SET used_count = GREATEST(0, used_count - 1) WHERE id = %d",
+                $coupon_id
+            )
+        );
+    }
+
     public function countRedemptionsByUser(int $coupon_id, int $user_id): int
     {
         global $wpdb;

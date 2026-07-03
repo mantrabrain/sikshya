@@ -4148,25 +4148,25 @@ msgstr ""
 msgid "No earnings rows for this query yet."
 msgstr ""
 
-#: client/src/pages/CoursesPage.tsx:209
+#: client/src/pages/CoursesPage.tsx:218
 msgid ""
 "Live data from your site. Create a draft, then finish details in the "
 "builder."
 msgstr ""
 
-#: client/src/pages/CoursesPage.tsx:248
+#: client/src/pages/CoursesPage.tsx:257
 msgid "All types"
 msgstr ""
 
-#: client/src/pages/CoursesPage.tsx:249
+#: client/src/pages/CoursesPage.tsx:258
 msgid "Regular {coursesLower}"
 msgstr ""
 
-#: client/src/pages/CoursesPage.tsx:250
+#: client/src/pages/CoursesPage.tsx:259
 msgid "Subscription {coursesLower}"
 msgstr ""
 
-#: client/src/pages/CoursesPage.tsx:251
+#: client/src/pages/CoursesPage.tsx:260
 msgid "Bundle {coursesLower}"
 msgstr ""
 
@@ -7886,19 +7886,19 @@ msgstr ""
 msgid "Saved. Applying…"
 msgstr ""
 
-#: client/src/pages/WpEntityListPage.tsx:118
+#: client/src/pages/WpEntityListPage.tsx:119
 msgid "Could not create item."
 msgstr ""
 
-#: client/src/pages/WpEntityListPage.tsx:522
+#: client/src/pages/WpEntityListPage.tsx:525
 msgid "No items match your filters."
 msgstr ""
 
-#: client/src/pages/WpEntityListPage.tsx:523
+#: client/src/pages/WpEntityListPage.tsx:526
 msgid "No items found"
 msgstr ""
 
-#: client/src/pages/WpEntityListPage.tsx:524
+#: client/src/pages/WpEntityListPage.tsx:527
 msgid "Try another status or search term, or add a new item."
 msgstr ""
 

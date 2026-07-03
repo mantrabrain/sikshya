@@ -18,6 +18,7 @@ import {
 } from '../components/shared/AddContentTypePickerModal';
 import { CreateCertificateModal } from '../components/shared/CreateCertificateModal';
 import { term } from '../lib/terminology';
+import { decodeWpTitle } from '../lib/wpTitle';
 import { navIconForCurriculumRow } from '../lib/curriculumIcons';
 import {
   contentLibraryChapterLearnFallback,
@@ -191,7 +192,9 @@ export function WpEntityListPage(props: {
                       />
                     </span>
                   ) : null}
-                  <span dangerouslySetInnerHTML={{ __html: r.title.rendered }} />
+                  {/* SECURITY: never dangerouslySetInnerHTML on `title.rendered` —
+                      see wpTitle.ts for the XSS chain. */}
+                  <span>{decodeWpTitle(r.title.rendered)}</span>
                 </span>
               </a>
               {isCertificateList && orient ? (

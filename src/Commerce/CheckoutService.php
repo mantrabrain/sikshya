@@ -302,7 +302,38 @@ final class CheckoutService
                     __('This coupon has just hit its usage limit. Please remove it and try again.', 'sikshya')
                 );
             }
-            $this->coupons->recordRedemption($coupon_id, $user_id, $order_id);
+
+            /*
+             * SECURITY: enforce per-user redemption cap atomically with
+             * the redemption row insert. Pro's `coupons_advanced` addon
+             * exposes rules like `per_user_limit = 1` for first-order
+             * coupons; without an atomic gate, two parallel checkouts
+             * from the same user both pass the earlier
+             * `countRedemptionsByUser` check and both discount their
+             * orders. `sikshya_coupon_per_user_limit` lets the Pro
+             * addon supply the cap (0 = unlimited); the transaction
+             * inside `tryRecordRedemption` serialises concurrent
+             * inserts. On failure we roll back the global used_count
+             * bump above so the coupon isn't burned by a losing race.
+             */
+            $per_user_limit = (int) apply_filters(
+                'sikshya_coupon_per_user_limit',
+                0,
+                $coupon_id,
+                $user_id
+            );
+            $recorded = $this->coupons->tryRecordRedemption(
+                $coupon_id,
+                $user_id,
+                $order_id,
+                $per_user_limit
+            );
+            if (!$recorded) {
+                $this->coupons->decrementUsedCount($coupon_id);
+                throw new \RuntimeException(
+                    __('You have already used this coupon the maximum number of times.', 'sikshya')
+                );
+            }
         }
 
         $public_token = $this->orders->ensurePublicToken($order_id);
