@@ -2518,6 +2518,19 @@
   margin-top: 18px;
 }
 
+/* Single-card exception: the `auto-fit` + `1fr` shape above stretches a
+ * lone card across the entire container width, which reads as an
+ * awkward oversized banner instead of a card. Cap the column at a
+ * card-sized width and let the natural grid alignment (start-aligned)
+ * place it at the left, so the layout previews what the multi-card
+ * grid will look like once the learner enrols in more courses.
+ * `:has()` support is solid across Chrome / Safari / Firefox by 2024
+ * so no fallback needed; older browsers just see the pre-existing
+ * stretched-card behavior. */
+.sikshya-learnHubGrid:has(> .sikshya-learnHubCard:only-child) {
+  grid-template-columns: minmax(280px, 380px);
+}
+
 .sikshya-learnHubSection {
   margin-top: 22px;
 }
