@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "title": "Sikshya Courses",
   "category": "sikshya",
+  "icon": "grid-view",
   "description": "Grid or list of published courses (same card UI as the catalog).",
   "keywords": ["sikshya", "courses", "catalog", "lms"],
   "textdomain": "sikshya",

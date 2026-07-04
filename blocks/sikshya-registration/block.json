@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "title": "Sikshya Registration",
   "category": "sikshya",
+  "icon": "id-alt",
   "description": "Create a Sikshya student account; instructor intent submits a pending teaching application.",
   "keywords": ["sikshya", "register", "sign up", "auth", "instructor"],
   "textdomain": "sikshya",

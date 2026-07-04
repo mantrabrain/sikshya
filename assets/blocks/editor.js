@@ -24,6 +24,11 @@
   var __ = wp.i18n.__;
   var ServerSideRender = wp.serverSideRender;
 
+  /**
+   * Shared graduation-cap icon for editor placeholders (loading, error,
+   * empty-response states) — these represent the Sikshya block system as
+   * a whole, not any single block, so they keep the family mark.
+   */
   var SIKSHYA_ICON = el(
     'svg',
     {
@@ -36,6 +41,63 @@
     el( 'path', {
       fill: 'currentColor',
       d: 'M12 3L1 9l11 6 9-4.91V17h2V9L12 3zm0 13.5L4.5 12.5 12 8.5l7.5 4-7.5 4zM5 18v2h14v-2H5z',
+    } )
+  );
+
+  /*
+   * Per-block icons. Previously every block was registered with the
+   * shared SIKSHYA_ICON (graduation cap), so the block picker showed
+   * three identical entries and users couldn't tell them apart at a
+   * glance. Each block now gets a purpose-shaped mark that matches the
+   * dashicon set on its block.json (which is what wordpress.org's
+   * Block Directory scans for the plugin listing).
+   */
+
+  /** Grid of course cards — matches `grid-view` dashicon in block.json. */
+  var COURSES_ICON = el(
+    'svg',
+    {
+      xmlns: 'http://www.w3.org/2000/svg',
+      viewBox: '0 0 24 24',
+      width: 24,
+      height: 24,
+      'aria-hidden': true,
+    },
+    el( 'path', {
+      fill: 'currentColor',
+      d: 'M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z',
+    } )
+  );
+
+  /** Open padlock / sign-in — matches `unlock` dashicon in block.json. */
+  var LOGIN_ICON = el(
+    'svg',
+    {
+      xmlns: 'http://www.w3.org/2000/svg',
+      viewBox: '0 0 24 24',
+      width: 24,
+      height: 24,
+      'aria-hidden': true,
+    },
+    el( 'path', {
+      fill: 'currentColor',
+      d: 'M12 2a5 5 0 00-5 5v3H4a1 1 0 00-1 1v10a1 1 0 001 1h16a1 1 0 001-1V11a1 1 0 00-1-1H9V7a3 3 0 016 0h2a5 5 0 00-5-5zm0 12a2 2 0 012 2 2 2 0 01-1 1.72V19h-2v-1.28A2 2 0 0110 16a2 2 0 012-2z',
+    } )
+  );
+
+  /** Person + plus badge — matches `id-alt` dashicon in block.json. */
+  var REGISTRATION_ICON = el(
+    'svg',
+    {
+      xmlns: 'http://www.w3.org/2000/svg',
+      viewBox: '0 0 24 24',
+      width: 24,
+      height: 24,
+      'aria-hidden': true,
+    },
+    el( 'path', {
+      fill: 'currentColor',
+      d: 'M15 12a4 4 0 100-8 4 4 0 000 8zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
     } )
   );
 
@@ -263,7 +325,7 @@
   };
 
   registerBlockType( 'sikshya/courses', {
-    icon: SIKSHYA_ICON,
+    icon: COURSES_ICON,
     edit: function ( props ) {
       var attributes = props.attributes;
       var setAttributes = props.setAttributes;
@@ -285,7 +347,7 @@
   } );
 
   registerBlockType( 'sikshya/login', {
-    icon: SIKSHYA_ICON,
+    icon: LOGIN_ICON,
     edit: function ( props ) {
       var attributes = props.attributes;
       var setAttributes = props.setAttributes;
@@ -324,7 +386,7 @@
   } );
 
   registerBlockType( 'sikshya/registration', {
-    icon: SIKSHYA_ICON,
+    icon: REGISTRATION_ICON,
     edit: function ( props ) {
       var attributes = props.attributes;
       var setAttributes = props.setAttributes;
