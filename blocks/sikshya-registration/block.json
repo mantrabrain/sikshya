@@ -6,6 +6,8 @@
   "title": "Sikshya Registration",
   "category": "sikshya",
   "icon": "id-alt",
+  "editorScript": "sikshya-blocks-editor",
+  "editorStyle": "sikshya-blocks-editor",
   "description": "Create a Sikshya student account; instructor intent submits a pending teaching application.",
   "keywords": ["sikshya", "register", "sign up", "auth", "instructor"],
   "textdomain": "sikshya",

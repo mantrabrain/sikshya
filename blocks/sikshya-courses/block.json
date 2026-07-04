@@ -6,6 +6,8 @@
   "title": "Sikshya Courses",
   "category": "sikshya",
   "icon": "grid-view",
+  "editorScript": "sikshya-blocks-editor",
+  "editorStyle": "sikshya-blocks-editor",
   "description": "Grid or list of published courses (same card UI as the catalog).",
   "keywords": ["sikshya", "courses", "catalog", "lms"],
   "textdomain": "sikshya",
