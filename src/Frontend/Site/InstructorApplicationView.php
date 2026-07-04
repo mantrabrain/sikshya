@@ -124,20 +124,24 @@ final class InstructorApplicationView
 
         /*
          * SECURITY: guard terminal application states from silent re-open.
-         * An admin who explicitly `rejected` or `suspended` an instructor
-         * application should NOT have that decision quietly reversed by
-         * the applicant re-submitting the same form — otherwise a
-         * denied applicant can just keep re-applying until an approver
-         * mistakenly clicks approve on the resurrected `pending` row.
          *
-         * `active` is also treated as terminal so that an approved
-         * instructor doesn't accidentally revert themselves to pending
-         * (which the moderation flow reads as "not yet approved") and
-         * lose access. Admins can still explicitly move a user back to
-         * `pending` from the admin screen if a re-review is warranted.
+         * `suspended` = admin action against the operator, must not be
+         *   silently reversed by a re-submit (an operator would use a
+         *   support channel to appeal).
+         * `active` = already-approved instructor. Re-submitting the form
+         *   would revert them to `pending`, which the moderation flow
+         *   reads as "not yet approved" and revoke instructor access.
+         *
+         * `rejected` was previously here too, but the render side of this
+         * screen (see `renderFormHtml`, `$status === 'rejected'` branch)
+         * explicitly tells the applicant they may update their details
+         * and submit again — refusing the re-submit would silently break
+         * that documented UX. A rejected applicant re-submitting flips
+         * back to `pending` for admin re-review, which matches the
+         * on-page copy and is the intended flow.
          */
         $current_status = (string) get_user_meta($uid, '_sikshya_instructor_status', true);
-        $terminal = ['rejected', 'suspended', 'active'];
+        $terminal = ['suspended', 'active'];
         if (in_array($current_status, $terminal, true)) {
             wp_safe_redirect(home_url('/'));
             exit;

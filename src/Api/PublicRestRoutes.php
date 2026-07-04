@@ -82,18 +82,27 @@ class PublicRestRoutes
         }
 
         /*
-         * SECURITY: only published courses can be enrolled through the
-         * self-serve endpoint. The `effective_price > 0` gate below is
-         * meant to force paid buyers through checkout, but it does NOT
-         * check `post_status`, so an attacker who enumerates course IDs
-         * could POST the ID of a `draft` / `pending` / `private` course
-         * whose price meta is zero (or has been cleared) and read its
-         * gated content — including unpublished staff-only previews of
-         * paid courses. Enforce status here before any pricing / addon
-         * logic runs.
+         * SECURITY: gate enrollment on a real post-status allowlist so
+         * the `effective_price > 0` check below can't be bypassed by
+         * an attacker who enumerates IDs and POSTs a `draft` / `pending`
+         * / `future` / `trash` course whose price meta happens to be
+         * zero (or was cleared for staff previews of paid content).
+         *
+         * `publish` — the normal case.
+         * `private` — cohort courses. WP's `private` visibility is a
+         *   legitimate pattern for approved-users-only rollouts; those
+         *   users need `/me/enroll` to work. Read access to the course
+         *   post itself is still gated by WP's own `read_private_posts`
+         *   check, so this doesn't broaden visibility — just doesn't
+         *   silently break a documented cohort flow.
          */
         $course_post = get_post($course_id);
-        if (!$course_post || $course_post->post_type !== 'sikshya_course' || $course_post->post_status !== 'publish') {
+        $allowed_statuses = ['publish', 'private'];
+        if (
+            !$course_post
+            || $course_post->post_type !== 'sikshya_course'
+            || !in_array($course_post->post_status, $allowed_statuses, true)
+        ) {
             return new WP_REST_Response(['success' => false, 'message' => __('Invalid course.', 'sikshya')], 404);
         }
 

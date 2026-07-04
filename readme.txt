@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -417,6 +417,33 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 
 == Changelog ==
 
+= 1.0.6 - 2026-07-03 =
+**Security release — please update.**
+
+This release fixes a set of privacy and access-control issues found in a deep security audit. No functional changes — everything below is a hardening fix. Sites using the legacy `/sikshya/v1/lessons`, `/sikshya/v1/quizzes`, or `/sikshya/v1/courses` REST routes from an external client should re-check their integration (see below).
+
+**REST auth (fixes information disclosure and paywall bypass)**
+* `GET /sikshya/v1/lessons` and `GET /sikshya/v1/lessons/{id}` now require the same `canManageLessons` capability as the write side. Previously anyone could fetch a lesson's full `post_content` + every `_sikshya_*` meta key — this was a paywall bypass for paid courses. Learner consumption goes through `/me/quiz-attempt` (unaffected — still enforces enrollment).
+* `GET /sikshya/v1/quizzes` and `GET /sikshya/v1/quizzes/{id}` now require `canManageQuizzes`. Previously exposed the ordered question ID list, passing score, time limit, and attempt cap to any client — assessment enumeration for competitors and cheat-sheet builders.
+* `GET /sikshya/v1/courses` and `GET /sikshya/v1/courses/{id}` stay public for catalog use, but the returned `meta` is now built from an explicit allowlist (`sikshya_course_price`, `sikshya_course_duration`, `sikshya_course_level`) instead of dumping every meta key — no more leaking `_edit_lock`, unpublished sale schedules, AI-generation flags, or third-party plugin meta.
+
+**Cross-site request / race conditions**
+* `POST /sikshya/v1/me/enroll` now enforces `post_type === sikshya_course` + `post_status === 'publish'` before any pricing/addon logic. Previously, a draft or private course whose price meta was zero (or cleared) could be self-enrolled via ID enumeration.
+* Coupon per-user redemption cap is now atomic (transaction + `SELECT … FOR UPDATE` on the redemption rows). Previously two parallel checkouts of a `per_user_limit = 1` coupon could both pass the initial count check, both insert redemptions, both discount their orders. A lost race now returns a clean "already used" error with the coupon's `used_count` rolled back.
+* `SocialLogin` OAuth state token is now bound to the initiating browser via an HTTPOnly `SameSite=Lax` cookie and verified with `hash_equals` on callback. Prevents an attacker from minting a state on their machine and smuggling the callback URL to a victim.
+* `EnrollmentRepository` list methods (`findAll`, `findByUser`, `findByCourse`, `findByStatus`, `searchWithFilters`) now route `orderby`/`order`/`limit`/`offset` through a shared column-whitelist normaliser. No live SQLi existed (callers pass hardcoded values), but the shape was a trap for future callers.
+
+**Web-register flow**
+* `POST /sikshya/v1/auth/web-register` now records the rate-limit attempt on entry instead of after `wp_create_user` succeeds. Previously the first attacker in a rate-limit bucket got a full free registration + auth cookie before the limiter engaged.
+* Instructor application submissions no longer silently re-open a `rejected` / `suspended` / `active` status. Applicants whose application was terminally decided must be re-considered by an admin — they can't reset themselves to `pending` by re-submitting the form.
+
+**XSS / output escaping**
+* React admin: courses list and generic WP-entity list no longer feed WP REST `title.rendered` into `dangerouslySetInnerHTML`. Any Author-level user could store XSS in a post title that then executed in the admin's session on list-page view; both sites now render titles as text via a new `decodeWpTitle` helper.
+* Checkout page: dynamic-field labels, help text, textarea values, input placeholders, option labels, and country names are now HTML-entity-escaped before being templated into `innerHTML`. Prevents stored XSS via admin-configurable checkout fields.
+
+**Notes for integrators**
+* If you have an external client (mobile app, CRM sync, etc.) that reads `GET /sikshya/v1/lessons` or `/quizzes` anonymously, it will now receive `401`. Authenticate the client with a REST cookie / JWT / application password held by a user with the appropriate capability, or switch to the curated `PublicApiRoutes` for public consumption.
+
 = 1.0.5 - 2026-05-31 =
 **Vendor + readme hygiene**
 * Composer: `composer/installers` moved from `require` to `require-dev` — it's a Composer build-time plugin, not a runtime dependency, so it had no business shipping to customer sites. The runtime `require` list is now just PHP 7.4+ and `firebase/php-jwt ^6.10` — the bare minimum the plugin actually uses at runtime.
@@ -492,6 +519,9 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 * Checkout (with Sikshya Pro Dynamic Checkout Fields): optional server-rendered dynamic field markup—JavaScript attaches listeners and visibility without rebuilding the form in the browser; includes `CheckoutDynamicFieldsView` and refactored checkout helpers (`dfBindDynamicFields`, `dfSyncValuesFromHost`).
 
 == Upgrade Notice ==
+
+= 1.0.6 - 2026-07-03 =
+Security release. Closes an anonymous paid-lesson-content leak on the legacy `/sikshya/v1/lessons` and `/quizzes` REST routes, a coupon-per-user redemption race, `/me/enroll` bypass for unpublished courses, and two stored-XSS vectors in the React admin. External integrations that read `/lessons` or `/quizzes` anonymously must authenticate — see changelog. Sites running Sikshya Pro should update to Sikshya Pro 1.0.2 alongside.
 
 = 1.0.3 - 2026-05-08 =
 Documentation and WordPress.org readme update: improved plugin directory copy, Mantrabrain documentation links, expanded FAQ, and privacy/third-party transparency. No breaking runtime changes expected; clear any full-page caches after update if your host caches plugin metadata.

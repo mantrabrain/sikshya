@@ -128,7 +128,19 @@ class CourseService
     }
 
     /**
-     * @return array<string, string>
+     * Return public course meta as an allowlisted subset in the same
+     * `array<string, array<int, string>>` shape as WordPress's own
+     * `get_post_meta($id)` (with no key) — each key maps to an array of
+     * one string.
+     *
+     * SECURITY: the previous shape here was a flat `array<string, string>`
+     * which is safer but broke the public REST contract for third-party
+     * catalog consumers that read `meta.sikshya_course_price[0]`.
+     * Preserving WP's shape means those consumers keep working; the
+     * allowlist is what actually prevents the leak — no `_edit_lock`,
+     * no unpublished sale schedules, no third-party plugin meta.
+     *
+     * @return array<string, array<int, string>>
      */
     private static function publicCourseMeta(int $post_id): array
     {
@@ -143,7 +155,7 @@ class CourseService
             if ($value === '' || $value === null || $value === false) {
                 continue;
             }
-            $out[$key] = is_scalar($value) ? (string) $value : '';
+            $out[$key] = [is_scalar($value) ? (string) $value : ''];
         }
         return $out;
     }

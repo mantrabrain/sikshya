@@ -945,11 +945,18 @@
         text = t('gatewayHint', 'Continue to the secure payment step for this gateway.');
       }
 
+      // SECURITY: `title` comes from i18n, `text` may originate in an
+      // admin-configured `data-sikshya-gateway-disabled-reason` attr
+      // (Pro gateway addons render per-gateway status copy through it).
+      // Route both through the shared `esc()` helper — the earlier fix
+      // wired escaping through dfSchema but this second innerHTML site
+      // was missed. Untrusted HTML in either string would otherwise
+      // execute at every checkout page load.
       gatewayDetailsEl.innerHTML =
         '<div class="sikshya-checkout-gateway-details__title">' +
-        title +
+        esc(title) +
         '</div><p class="sikshya-checkout-gateway-details__text">' +
-        String(text || '') +
+        esc(text || '') +
         '</p>';
       gatewayDetailsEl.hidden = false;
     }
