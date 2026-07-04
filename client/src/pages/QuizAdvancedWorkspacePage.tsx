@@ -6,6 +6,7 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary, ButtonSecondary, LinkButtonSecondary } from '../components/shared/buttons';
 import { DataTable, type Column } from '../components/shared/DataTable';
+import { SkeletonCard } from '../components/shared/Skeleton';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
 import { TermEntityListView } from '../components/shared/list/TermEntityListView';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -198,7 +199,7 @@ export function QuizAdvancedWorkspacePage(props: {
                   </ButtonSecondary>
                 </div>
                 {termsState.loading ? (
-                  <p className="mt-4 text-sm text-slate-500">{__('Loading banks…', 'sikshya')}</p>
+                  <div className="mt-4"><SkeletonCard rows={4} /></div>
                 ) : termsState.error ? (
                   <div className="mt-4">
                     <ApiErrorPanel error={termsState.error} title={__('Could not load banks', 'sikshya')} onRetry={() => termsState.refetch()} />

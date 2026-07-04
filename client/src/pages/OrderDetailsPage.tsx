@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { DetailPageSkeleton } from '../components/shared/Skeleton';
 import { Modal } from '../components/shared/Modal';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAdminRouting } from '../lib/adminRouting';
@@ -119,9 +120,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
       ) : null}
 
       {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-          Loading order…
-        </div>
+        <DetailPageSkeleton />
       ) : !order ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
           Order not found.

@@ -3,6 +3,7 @@ import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { ListPanelSkeleton } from '../components/shared/Skeleton';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
@@ -342,9 +343,14 @@ export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReac
 
       <ListPanel>
         {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            Loading {enrollmentsLower}…
-          </div>
+          /*
+           * Skeleton mirrors the 5-column shape rendered below (learner,
+           * course, status, enrolled, actions) so the layout doesn't
+           * jump when data arrives. Previously this branch was a plain
+           * "Loading {enrollmentsLower}…" text panel — same anti-pattern
+           * we're fixing across every list page.
+           */
+          <ListPanelSkeleton columns={5} rows={8} />
         ) : rows.length === 0 ? (
           <ListEmptyState
             title={`No ${enrollmentsLower}`}

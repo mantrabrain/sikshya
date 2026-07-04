@@ -10,7 +10,7 @@ import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { CourseFilterSelect } from '../components/shared/CourseFilterSelect';
 import { FieldHint } from '../components/shared/FieldHint';
 import { DataTable, type Column } from '../components/shared/DataTable';
-import { DataTableSkeleton } from '../components/shared/Skeleton';
+import { DataTableSkeleton, SkeletonCard } from '../components/shared/Skeleton';
 import { DateTimePickerField } from '../components/shared/DateTimePickerField';
 import { Modal } from '../components/shared/Modal';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
@@ -929,7 +929,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                     <ApiErrorPanel error={notifyQ.error} title={__('Could not load status', 'sikshya')} onRetry={() => notifyQ.refetch()} />
                   </div>
                 ) : notifyQ.loading ? (
-                  <p className="mt-3 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+                  <div className="mt-3"><SkeletonCard rows={4} /></div>
                 ) : (
                   <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">

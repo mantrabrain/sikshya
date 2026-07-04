@@ -5,6 +5,7 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { ListPanelSkeleton, SkeletonCard } from '../components/shared/Skeleton';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
@@ -434,7 +435,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
+            <ListPanelSkeleton columns={6} rows={8} />
           ) : visibleRows.length === 0 ? (
             <ListEmptyState
               title={rows.length === 0 ? __('No coupons', 'sikshya') : __('No matches', 'sikshya')}
@@ -593,7 +594,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                         Leave fields empty or zero to disable that rule. Course exclude list blocks the code if any
                         excluded course is in the cart.
                       </p>
-                      {editorMode === 'manage' && advLoading ? <p className="mt-2 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p> : null}
+                      {editorMode === 'manage' && advLoading ? <div className="mt-2"><SkeletonCard rows={3} /></div> : null}
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="block text-sm">

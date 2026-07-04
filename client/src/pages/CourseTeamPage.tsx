@@ -5,6 +5,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { ListPanelSkeleton } from '../components/shared/Skeleton';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
@@ -650,7 +651,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
 
           <ListPanel className="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
             {loading ? (
-              <div className="p-10 text-center text-sm text-slate-500">{__('Loading team…', 'sikshya')}</div>
+              <ListPanelSkeleton columns={5} rows={6} />
             ) : rowsBase.length === 0 ? (
               <ListEmptyState
                 title={isGlobal ? __('No staff rows yet', 'sikshya') : __('No staff yet', 'sikshya')}

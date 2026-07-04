@@ -8,7 +8,7 @@ import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListSearchToolbar } from '../components/shared/list/ListSearchToolbar';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { DataTable, type Column } from '../components/shared/DataTable';
-import { DataTableSkeleton } from '../components/shared/Skeleton';
+import { DataTableSkeleton, SkeletonCard } from '../components/shared/Skeleton';
 import { Modal } from '../components/shared/Modal';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPaginationBar } from '../components/shared/list/ListPaginationBar';
@@ -820,7 +820,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                   {modalLessonId <= 0 ? (
                     <div className="p-3 text-sm text-slate-500 dark:text-slate-400">{__('Pick a lesson to edit prerequisites.', 'sikshya')}</div>
                   ) : modalLessonQ.loading ? (
-                    <div className="p-3 text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
+                    <div className="p-2"><SkeletonCard rows={5} /></div>
                   ) : (
                     <>
                       {modalLessons

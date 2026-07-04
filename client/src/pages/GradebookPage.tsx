@@ -8,6 +8,7 @@ import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPaginationBar } from '../components/shared/list/ListPaginationBar';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { ListPanelSkeleton, SkeletonCard } from '../components/shared/Skeleton';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
@@ -678,7 +679,7 @@ export function GradebookPage(props: {
                     onRetry={() => void submissionsState.refetch()}
                   />
                 ) : submissionsState.loading ? (
-                  <div className="py-10 text-center text-sm text-slate-500">{__('Loading submissions…', 'sikshya')}</div>
+                  <ListPanelSkeleton columns={7} rows={6} />
                 ) : submissionRows.length === 0 ? (
                   <ListEmptyState
                     title={__('No submissions to show', 'sikshya')}
@@ -914,7 +915,7 @@ export function GradebookPage(props: {
             {view === 'summary' ? (
               <ListPanel>
                 {loading ? (
-                  <div className="p-8 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
+                  <ListPanelSkeleton columns={10} rows={8} />
                 ) : rows.length === 0 ? (
                   <ListEmptyState
                     title={__('No gradebook rows yet', 'sikshya')}
@@ -1008,7 +1009,7 @@ export function GradebookPage(props: {
                 {courseId <= 0 ? (
                   <ListEmptyState title={__('Pick a course first', 'sikshya')} description={__('Course grid view is per-course so we can build columns for quizzes and assignments.', 'sikshya')} />
                 ) : gridState.loading ? (
-                  <div className="p-8 text-center text-sm text-slate-500">{__('Loading grid…', 'sikshya')}</div>
+                  <ListPanelSkeleton columns={6} rows={8} />
                 ) : gridState.error ? (
                   <div className="p-5">
                     <ApiErrorPanel error={gridState.error} title={__('Could not load grid', 'sikshya')} onRetry={() => gridState.refetch()} />
@@ -1125,7 +1126,7 @@ export function GradebookPage(props: {
               }
             >
               {detailLoading ? (
-                <p className="text-sm text-slate-500">{__('Loading detail…', 'sikshya')}</p>
+                <SkeletonCard rows={5} />
               ) : detailError ? (
                 <ApiErrorPanel
                   error={detailError}
@@ -1283,7 +1284,7 @@ export function GradebookPage(props: {
               }
             >
               {drillBusy ? (
-                <p className="text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+                <SkeletonCard rows={4} />
               ) : drillErr ? (
                 <ApiErrorPanel
                   error={drillErr}

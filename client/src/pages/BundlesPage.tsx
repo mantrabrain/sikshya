@@ -7,6 +7,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { ListPanelSkeleton } from '../components/shared/Skeleton';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -284,7 +285,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
           </div>
 
           {list.loading ? (
-            <div className="p-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
+            <ListPanelSkeleton columns={3} rows={6} />
           ) : bundleRows.length === 0 ? (
             <ListEmptyState
               title={__('No bundles yet', 'sikshya')}

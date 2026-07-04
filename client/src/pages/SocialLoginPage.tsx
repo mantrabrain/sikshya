@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
+import { SkeletonCard } from '../components/shared/Skeleton';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -96,7 +97,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
 
         <ListPanel className="p-6">
           {loading ? (
-            <p className="text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+            <SkeletonCard rows={6} />
           ) : (
             <form onSubmit={onSave} className="space-y-5">
               <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm dark:border-slate-800 dark:bg-slate-950">

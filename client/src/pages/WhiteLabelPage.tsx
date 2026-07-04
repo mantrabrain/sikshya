@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
+import { SkeletonCard } from '../components/shared/Skeleton';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -161,7 +162,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
 
         <ListPanel className="p-6">
           {loading ? (
-            <p className="text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+            <SkeletonCard rows={6} />
           ) : (
             <form onSubmit={onSave} className="space-y-5">
               <div className="grid gap-6 lg:grid-cols-2">

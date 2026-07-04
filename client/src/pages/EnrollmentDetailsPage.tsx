@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { DetailPageSkeleton } from '../components/shared/Skeleton';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAdminRouting } from '../lib/adminRouting';
 import { appViewHref } from '../lib/appUrl';
@@ -84,9 +85,14 @@ export function EnrollmentDetailsPage(props: { config: SikshyaReactConfig; title
       ) : null}
 
       {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-          {__('Loading enrollment…', 'sikshya')}
-        </div>
+        /*
+         * Hero card + two summary panels shaped to match the real
+         * detail layout below, so the page doesn't jump when the
+         * enrollment record loads. Replaces the plain "Loading
+         * enrollment…" text card the user called out — same
+         * anti-pattern we're fixing across every detail page.
+         */
+        <DetailPageSkeleton />
       ) : !e ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
           {__('Enrollment not found.', 'sikshya')}

@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { ListPanelSkeleton } from '../components/shared/Skeleton';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { Modal } from '../components/shared/Modal';
@@ -498,7 +499,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
 
       <ListPanel>
         {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading orders…', 'sikshya')}</div>
+          <ListPanelSkeleton columns={6} rows={8} />
         ) : rows.length === 0 ? (
           <ListEmptyState
             title={__('No orders', 'sikshya')}

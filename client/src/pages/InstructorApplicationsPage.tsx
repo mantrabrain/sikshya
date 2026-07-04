@@ -5,6 +5,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import { ListPanelSkeleton } from '../components/shared/Skeleton';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { formatPostDate } from '../lib/formatPostDate';
@@ -136,7 +137,7 @@ export function InstructorApplicationsPage(props: {
             <ApiErrorPanel error={error} title={__('Could not load applications', 'sikshya')} onRetry={() => void refetch()} />
           </div>
         ) : loading ? (
-          <p className="mt-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+          <div className="mt-4"><ListPanelSkeleton columns={5} rows={6} /></div>
         ) : rows.length === 0 ? (
           <div className="mt-6">
             <ListEmptyState

@@ -3,6 +3,7 @@ import { getSikshyaApi } from '../../api';
 import { SIKSHYA_ENDPOINTS } from '../../api/endpoints';
 import { useAddonEnabled } from '../../hooks/useAddons';
 import { DateTimePickerField } from '../../components/shared/DateTimePickerField';
+import { SkeletonCard } from '../../components/shared/Skeleton';
 import { __ } from '../../lib/i18n';
 
 const FIELD =
@@ -460,7 +461,7 @@ export function ProLessonScormBlock(props: {
           />
           <div className="max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white text-sm dark:border-slate-700 dark:bg-slate-900">
             {loading ? (
-              <p className="p-3 text-slate-500 dark:text-slate-400">{__('Loading library…', 'sikshya')}</p>
+              <div className="p-3"><SkeletonCard rows={4} /></div>
             ) : error ? (
               <p className="p-3 text-rose-600 dark:text-rose-300">{error}</p>
             ) : packages.length === 0 ? (
@@ -633,7 +634,7 @@ export function ProLessonH5pBlock(props: {
             />
             <div className="max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white text-sm dark:border-slate-700 dark:bg-slate-900">
               {loading ? (
-                <p className="p-3 text-slate-500 dark:text-slate-400">{__('Loading content…', 'sikshya')}</p>
+                <div className="p-3"><SkeletonCard rows={4} /></div>
               ) : error ? (
                 <p className="p-3 text-rose-600 dark:text-rose-300">{error}</p>
               ) : contents.length === 0 ? (

@@ -6,6 +6,7 @@ import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { ListPanelSkeleton, SkeletonStatGrid } from '../components/shared/Skeleton';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -274,7 +275,12 @@ function OverviewPanel(props: {
     return <ApiErrorPanel error={error} title={__('Could not load marketplace overview', 'sikshya')} onRetry={onRefresh} />;
   }
   if (loading) {
-    return <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">{__('Loading overview…', 'sikshya')}</div>;
+    return (
+      <div className="grid gap-4">
+        <SkeletonStatGrid count={4} />
+        <SkeletonStatGrid count={4} />
+      </div>
+    );
   }
   if (!data) {
     return null;
@@ -393,7 +399,7 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
           <ApiErrorPanel error={v.error} title={__('Could not load vendors', 'sikshya')} onRetry={() => void v.refetch()} />
         </div>
       ) : v.loading ? (
-        <p className="mt-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+        <div className="mt-4"><ListPanelSkeleton columns={6} rows={6} /></div>
       ) : rows.length === 0 ? (
         <div className="mt-6">
           <ListEmptyState
@@ -533,7 +539,7 @@ function CommissionsPanel(props: { enabled: boolean }) {
           <ApiErrorPanel error={c.error} title={__('Could not load commissions', 'sikshya')} onRetry={() => void c.refetch()} />
         </div>
       ) : c.loading ? (
-        <p className="mt-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+        <div className="mt-4"><ListPanelSkeleton columns={9} rows={6} /></div>
       ) : rows.length === 0 ? (
         <div className="mt-6">
           <ListEmptyState
@@ -686,7 +692,7 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
             <ApiErrorPanel error={w.error} title={__('Could not load withdrawals', 'sikshya')} onRetry={() => void w.refetch()} />
           </div>
         ) : w.loading ? (
-          <p className="mt-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+          <div className="mt-4"><ListPanelSkeleton columns={6} rows={6} /></div>
         ) : rows.length === 0 ? (
           <div className="mt-6">
             <ListEmptyState title={__('No withdrawal requests', 'sikshya')} description={__('Vendors can request a payout from their account once their balance is above the minimum withdrawal.', 'sikshya')} />

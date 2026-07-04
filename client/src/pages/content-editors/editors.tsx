@@ -14,6 +14,7 @@ import { WPMediaPickerField } from '../../components/shared/WPMediaPickerField';
 import { DateTimePickerField } from '../../components/shared/DateTimePickerField';
 import { QuillField } from '../../components/shared/QuillField';
 import { NumberWithUnitField } from '../../components/shared/NumberWithUnitField';
+import { SkeletonCard } from '../../components/shared/Skeleton';
 import type { SikshyaReactConfig } from '../../types';
 import { GatedFeatureWorkspace } from '../../components/GatedFeatureWorkspace';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../../lib/licensing';
@@ -239,8 +240,8 @@ function EditorFormShell({ loading, saving: _saving, error, onRetry, saveMsg, fl
         </div>
       ) : null}
       {loading ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
-          Loading…
+        <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+          <SkeletonCard rows={6} />
         </div>
       ) : flush ? (
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
@@ -1210,7 +1211,7 @@ export function QuizEditor(props: ContentEditorProps) {
                   </div>
                 ) : null}
                 {questionLoading ? (
-                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{__('Loading questions…', 'sikshya')}</p>
+                  <div className="mt-3"><SkeletonCard rows={4} /></div>
                 ) : (
                   <div className="mt-3 grid gap-3 lg:grid-cols-2">
                     <div className="min-w-0">

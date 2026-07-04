@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../../api';
+import { SkeletonLine } from './Skeleton';
 
 type CourseRow = { id: number; title: string; status?: string };
 
@@ -175,7 +176,11 @@ export function PrerequisiteLockDetailPopover(props: {
                 : 'No lessons in this course use prerequisite locks yet.'}
             </p>
           ) : loading ? (
-            <p className="text-slate-500 dark:text-slate-400">Loading…</p>
+            <div className="space-y-2 py-1">
+              <SkeletonLine className="h-4 w-3/4" />
+              <SkeletonLine className="h-4 w-2/3" />
+              <SkeletonLine className="h-4 w-1/2" />
+            </div>
           ) : error ? (
             <p className="text-rose-700 dark:text-rose-300">{error}</p>
           ) : kind === 'enrollment' ? (

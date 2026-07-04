@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { ListPanelSkeleton } from '../components/shared/Skeleton';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
@@ -81,7 +82,7 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
 
       <ListPanel>
         {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
+          <ListPanelSkeleton columns={7} rows={8} />
         ) : rows.length === 0 ? (
           <ListEmptyState
             title={__('No issued certificates yet', 'sikshya')}

@@ -3,6 +3,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { EmailPreviewModal } from '../components/email/EmailPreviewModal';
 import { LinkButtonSecondary } from '../components/shared/buttons';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { DetailPageSkeleton } from '../components/shared/Skeleton';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
 import { useAdminRouting } from '../lib/adminRouting';
@@ -113,9 +114,7 @@ export function EmailTemplateEditPage(props: { embedded?: boolean; config: Siksh
         ) : null}
 
         {loading ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
-            Loading template…
-          </div>
+          <DetailPageSkeleton />
         ) : isNew ? (
           <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/35">
             <div className="px-6 py-6">

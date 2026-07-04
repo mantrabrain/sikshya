@@ -3,6 +3,7 @@ import { useShellState } from '../context/ShellStateContext';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonSecondary } from '../components/shared/buttons';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { SkeletonCard } from '../components/shared/Skeleton';
 import { getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
@@ -644,8 +645,12 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
       </div>
 
       {loading && !data ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
-          {t('Loading add-ons…')}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <SkeletonCard rows={4} />
+            </div>
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">

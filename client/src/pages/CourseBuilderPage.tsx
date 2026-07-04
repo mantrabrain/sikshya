@@ -689,7 +689,7 @@ function FieldInput(props: {
           ))}
         </select>
         {gradeScales.loading ? (
-          <p className={FIELD_HINT}>{__('Loading grade scales…', 'sikshya')}</p>
+          <SkeletonLine className="my-2 h-4 w-40" />
         ) : scales.length === 0 ? (
           <p className={FIELD_HINT}>{__('No grade scales yet. Create one from the Grading page.', 'sikshya')}</p>
         ) : null}
@@ -705,7 +705,7 @@ function FieldInput(props: {
       return `${c} ${n.toFixed(2)}`;
     };
     if (subscriptionPlans.loading) {
-      return <p className={FIELD_HINT}>{__('Loading subscription plans…', 'sikshya')}</p>;
+      return <SkeletonLine className="my-2 h-4 w-48" />;
     }
     if (plans.length === 0) {
       return (

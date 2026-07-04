@@ -3,6 +3,7 @@ import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
+import { SkeletonCard } from '../components/shared/Skeleton';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
@@ -239,7 +240,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
               <div className="lg:col-span-1">
                 <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
                   {scaleListLoading ? (
-                    <div className="p-3 text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
+                    <SkeletonCard rows={3} />
                   ) : scales.length === 0 ? (
                     <div className="p-3 text-sm text-slate-500">{__('No grade scales yet.', 'sikshya')}</div>
                   ) : (

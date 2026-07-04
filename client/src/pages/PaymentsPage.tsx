@@ -5,6 +5,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { SkeletonLine } from '../components/shared/Skeleton';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { Modal } from '../components/shared/Modal';
@@ -306,11 +307,15 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {loading ? (
-                    <tr>
-                      <td colSpan={7} className="px-5 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
-                        Loading payments…
-                      </td>
-                    </tr>
+                    Array.from({ length: 8 }).map((_, ri) => (
+                      <tr key={`sk-${ri}`} className="bg-white dark:bg-slate-900" aria-busy="true">
+                        {Array.from({ length: 7 }).map((_, ci) => (
+                          <td key={ci} className="px-5 py-3.5">
+                            <SkeletonLine className={ci === 0 ? 'h-4 w-3/4 max-w-xs' : 'h-4 w-24'} />
+                          </td>
+                        ))}
+                      </tr>
+                    ))
                   ) : rows.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-5 py-12 text-center text-sm text-slate-600 dark:text-slate-400">

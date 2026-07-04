@@ -10,7 +10,7 @@ import { InlineRowActions } from '../components/shared/list/InlineRowActions';
 import type { RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from '../components/shared/list/ListPaginationBar';
 import { ButtonPrimary } from '../components/shared/buttons';
-import { DataTableSkeleton } from '../components/shared/Skeleton';
+import { DataTableSkeleton, SkeletonCard } from '../components/shared/Skeleton';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
@@ -385,7 +385,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
             </div>
 
             {loadingCategory ? (
-              <p className="mt-4 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
+              <div className="mt-4"><SkeletonCard rows={5} /></div>
             ) : (
               <form id="sikshya-category-side-form" className="mt-4 space-y-4" onSubmit={(e) => void onSubmit(e)}>
                 <div>

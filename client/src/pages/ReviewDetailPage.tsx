@@ -3,6 +3,7 @@ import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { DetailPageSkeleton } from '../components/shared/Skeleton';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
@@ -186,7 +187,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
         {!gateOpen ? null : error ? (
           <ApiErrorPanel error={error} title={__('Could not load review', 'sikshya')} onRetry={() => refetch()} />
         ) : loading ? (
-          <div className="p-8 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
+          <DetailPageSkeleton />
         ) : !reviewId ? (
           <p className="text-sm text-slate-600 dark:text-slate-400">{__('Missing review id.', 'sikshya')}</p>
         ) : row ? (

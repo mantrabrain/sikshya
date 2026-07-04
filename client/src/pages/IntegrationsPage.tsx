@@ -10,6 +10,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPanel } from '../components/shared/list/ListPanel';
+import { ListPanelSkeleton } from '../components/shared/Skeleton';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -587,7 +588,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                   ) : (
                     <ListPanel className="mt-3">
                       {wh.loading ? (
-                        <div className="p-6 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
+                        <ListPanelSkeleton columns={2} rows={4} />
                       ) : (wh.data?.items?.length ?? 0) === 0 ? (
                         <ListEmptyState
                           title={__('No webhooks yet', 'sikshya')}
@@ -650,7 +651,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                   ) : (
                     <ListPanel className="mt-3">
                       {deliveries.loading ? (
-                        <div className="p-6 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
+                        <ListPanelSkeleton columns={5} rows={5} />
                       ) : (deliveries.data?.items?.length ?? 0) === 0 ? (
                         <ListEmptyState title={__('No deliveries yet', 'sikshya')} description={__('Once events trigger, deliveries will appear here.', 'sikshya')} />
                       ) : (
@@ -842,7 +843,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                   ) : (
                     <ListPanel className="mt-3">
                       {keys.loading ? (
-                        <div className="p-6 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
+                        <ListPanelSkeleton columns={2} rows={4} />
                       ) : (keys.data?.rows?.length ?? 0) === 0 ? (
                         <ListEmptyState
                           title={__('No keys yet', 'sikshya')}
@@ -977,7 +978,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                       </form>
 
                       {apps.loading ? (
-                        <div className="p-6 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
+                        <ListPanelSkeleton columns={2} rows={4} />
                       ) : (apps.data?.rows?.length ?? 0) === 0 ? (
                         <ListEmptyState
                           title={__('No OAuth apps yet', 'sikshya')}

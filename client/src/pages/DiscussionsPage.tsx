@@ -9,6 +9,7 @@ import { ListPaginationBar, DEFAULT_LIST_PER_PAGE } from '../components/shared/l
 import { BulkActionsBar } from '../components/shared/list/BulkActionsBar';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { ListPanelSkeleton, SkeletonCard } from '../components/shared/Skeleton';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
@@ -815,7 +816,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
           </div>
 
           {list.loading ? (
-            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
+            <ListPanelSkeleton columns={9} rows={8} />
           ) : rows.length === 0 ? (
             <ListEmptyState
               title={__('No threads match', 'sikshya')}
@@ -1288,7 +1289,7 @@ function ModerationThreadPanel(props: {
         }}
       >
         {detailLoading ? (
-          <div className="py-16 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading thread…', 'sikshya')}</div>
+          <div className="py-8"><SkeletonCard rows={5} /></div>
         ) : detailError ? (
           <ApiErrorPanel
             error={detailError}

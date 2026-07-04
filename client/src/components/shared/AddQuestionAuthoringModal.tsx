@@ -6,6 +6,7 @@ import { ButtonPrimary } from './buttons';
 import { HorizontalEditorTabs } from './HorizontalEditorTabs';
 import { Modal } from './Modal';
 import { WPMediaPickerField } from './WPMediaPickerField';
+import { SkeletonCard } from './Skeleton';
 import type { SikshyaReactConfig } from '../../types';
 import { appViewHref } from '../../lib/appUrl';
 import { isFeatureEnabled } from '../../lib/licensing';
@@ -800,7 +801,7 @@ export function AddQuestionAuthoringModal(props: Props) {
           ) : null}
 
           {postLoading && isEditMode && !loadError ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">{__('Loading question…', 'sikshya')}</p>
+            <SkeletonCard rows={5} />
           ) : null}
 
           {!(isEditMode && (postLoading || loadError)) ? (
@@ -1380,9 +1381,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                         />
                       </div>
                     ) : libraryLoading ? (
-                      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                        {__('Loading questions…', 'sikshya')}
-                      </p>
+                      <div className="mt-3"><SkeletonCard rows={4} /></div>
                     ) : libraryRows.length ? (
                       <div className="mt-3 rounded-xl border border-slate-100 dark:border-slate-800">
                         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
