@@ -101,6 +101,10 @@ DEVELOPMENT.md
 .vscode
 .editorconfig
 .DS_Store
+
+# Intermediate babel-makepot fragment — merged into `sikshya.pot` and
+# deleted by `makepot.sh`. Should never ship to wordpress.org SVN.
+languages/sikshya-js.pot
 Thumbs.db
 desktop.ini
 *.log

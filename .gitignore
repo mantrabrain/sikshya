@@ -13,6 +13,14 @@
 # Vite may emit this into outDir; production build removes it (see scripts/rm-admin-spa-html.mjs).
 assets/admin/react/index.html
 
+# Intermediate babel-makepot fragment for admin JS/TS strings. Every
+# consumer that needs it (`npm run makepot`, `i18n:check`, and the
+# standalone `extract-js-pot`) regenerates it explicitly; `makepot.sh`
+# then merges it into `languages/sikshya.pot` and deletes it. Nothing
+# benefits from tracking the fragment — it just dirtied the tree on
+# every ad-hoc run before the `build` script stopped emitting it.
+/languages/sikshya-js.pot
+
 # Playwright artifacts and local env (never commit credentials or HTML reports).
 /e2e/.auth/
 /e2e/.env

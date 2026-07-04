@@ -5,7 +5,7 @@
   "description": "Sikshya LMS — single root package.json (admin React/Vite + Babel i18n tooling)",
   "scripts": {
     "clean:admin-react": "node scripts/clean-admin-assets.mjs",
-    "build": "node scripts/clean-admin-assets.mjs && vite build && node scripts/rm-admin-spa-html.mjs && node scripts/extract-admin-js-pot.mjs",
+    "build": "node scripts/clean-admin-assets.mjs && vite build && node scripts/rm-admin-spa-html.mjs",
     "extract-js-pot": "node scripts/extract-admin-js-pot.mjs",
     "dev": "vite",
     "preview": "vite preview",
