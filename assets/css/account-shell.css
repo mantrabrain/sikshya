@@ -2410,3 +2410,59 @@ a.sik-acc-cal__title:hover {
 .sikshya-learnExport__actions .sikshya-learner-export {
   margin: 0;
 }
+
+/*
+ * Skeleton primitives for the learner account shell (Free + Pro).
+ *
+ * Used by templates that render an initial table shell before the
+ * fetch resolves (marketplace withdrawals, subscription history,
+ * etc.). Previously those templates showed a single `<td>Loading…</td>`
+ * row, which caused a layout jump when data arrived. `sik-acc-skel`
+ * gives them a shimmering placeholder line of a fixed height and a
+ * caller-controlled width, and `sik-acc-skel-row` marks a whole `<tr>`
+ * as skeleton for a11y (screen readers announce a loading state).
+ *
+ * Pulse animation is `prefers-reduced-motion`-aware — users who ask
+ * their OS not to animate see a static muted bar instead of a
+ * pulsing one.
+ */
+.sik-acc-skel {
+  display: block;
+  height: 0.75rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg,
+    rgba(148, 163, 184, 0.22) 0%,
+    rgba(148, 163, 184, 0.35) 50%,
+    rgba(148, 163, 184, 0.22) 100%);
+  background-size: 200% 100%;
+  animation: sik-acc-skel-pulse 1.4s ease-in-out infinite;
+}
+
+.sik-acc-skel--wide {
+  width: 80%;
+}
+
+.sik-acc-skel--md {
+  width: 60%;
+}
+
+.sik-acc-skel--sm {
+  width: 35%;
+}
+
+@keyframes sik-acc-skel-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sik-acc-skel {
+    animation: none;
+    background: rgba(148, 163, 184, 0.28);
+  }
+}
+
+/* Table-row skeleton: pass `aria-busy="true"` on the `<tr>` for a11y. */
+.sik-acc-skel-row td {
+  padding: 0.75rem 1rem;
+}
