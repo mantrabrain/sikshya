@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { AddonEnablePanel } from './AddonEnablePanel';
 import { FeaturePreviewSkeleton } from './FeaturePreviewSkeleton';
+import { SkeletonCard } from './shared/Skeleton';
 import { PlanUpgradeOverlay } from './PlanUpgradeOverlay';
 import { PREMIUM_GATE_VIEWPORT_MIN_H, PremiumGatedSurface } from './PremiumGatedSurface';
 import { __ } from '../lib/i18n';
@@ -92,9 +93,13 @@ export function GatedFeatureWorkspace(props: Props) {
       ) : null}
 
       {mode === 'pending-addon' ? (
-        <div className="absolute inset-0 z-20 flex min-h-full w-full flex-col items-center justify-center bg-white/85 p-6 backdrop-blur-sm dark:bg-slate-950/85">
-          <div className="rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm font-medium text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-            {__('Loading add-on status…', 'sikshya')}
+        <div
+          className="absolute inset-0 z-20 flex min-h-full w-full flex-col items-center justify-center bg-white/85 p-6 backdrop-blur-sm dark:bg-slate-950/85"
+          aria-busy="true"
+          aria-label={__('Loading add-on status', 'sikshya')}
+        >
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <SkeletonCard rows={4} />
           </div>
         </div>
       ) : null}
