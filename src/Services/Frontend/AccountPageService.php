@@ -86,12 +86,32 @@ final class AccountPageService
          *
          */
         $partialPath = apply_filters('sikshya_account_view_template', $defaultPartial, $view, $legacy);
-        if (!is_string($partialPath) || !is_readable($partialPath)) {
+		if (!is_string($partialPath) || !self::isSafeTemplatePath($partialPath)) {
             $partialPath = $plugin->getTemplatePath('partials/account-view-dashboard.php');
         }
 
         return (string) $partialPath;
     }
+
+	/**
+	 * Whether a filter-supplied template path is readable AND resolves inside
+	 * wp-content (themes/plugins) rather than an arbitrary filesystem location
+	 * a compromised/misbehaving addon could point `sikshya_account_view_template` at.
+	 */
+	private static function isSafeTemplatePath(string $path): bool
+	{
+		$real = realpath($path);
+		if ($real === false || !is_readable($real)) {
+			return false;
+		}
+
+		$content_dir = realpath(WP_CONTENT_DIR);
+		if ($content_dir === false) {
+			return false;
+		}
+
+		return strpos($real, $content_dir . DIRECTORY_SEPARATOR) === 0;
+	}
 
     private static function handleProfilePost(): void
     {

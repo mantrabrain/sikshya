@@ -8,6 +8,11 @@ use Sikshya\Database\Repositories\ProgressRepository;
 use Sikshya\Services\Enrollment\EnrollmentValidator;
 use WP_Query;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class CourseService
 {
     private CourseRepository $courseRepository;

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Sikshya\Certificates;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Default seeded certificate templates: visual-builder layout JSON + rendered HTML body.
  *

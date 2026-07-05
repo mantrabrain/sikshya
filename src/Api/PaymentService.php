@@ -6,6 +6,11 @@ use Sikshya\Database\Repositories\PaymentRepository;
 use WP_REST_Request;
 use WP_REST_Response;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class PaymentService
 {
     private PaymentRepository $payments;

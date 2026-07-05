@@ -2,6 +2,11 @@
 
 namespace Sikshya\Privacy;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * GDPR personal-data exporter for Sikshya.
  *

@@ -2,6 +2,11 @@
 
 namespace Sikshya\Database\Tables;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 final class AssignmentSubmissionsTable extends AbstractTable
 {
     public static function baseName(): string

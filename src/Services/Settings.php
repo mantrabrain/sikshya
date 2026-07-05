@@ -2,6 +2,11 @@
 
 namespace Sikshya\Services;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Centralized settings read/write helper.
  *

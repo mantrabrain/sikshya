@@ -5,6 +5,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 use Sikshya\Services\Frontend\OrderPageService;
 use Sikshya\Presentation\Models\OrderPageModel;
 use Sikshya\Core\Plugin;

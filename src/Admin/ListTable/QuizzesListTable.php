@@ -6,6 +6,11 @@ use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Services\LessonCourseLink;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Quizzes List Table
  *

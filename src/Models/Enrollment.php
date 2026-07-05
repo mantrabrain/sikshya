@@ -5,6 +5,11 @@ namespace Sikshya\Models;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Legacy enrollment facade — all persistence goes through {@see EnrollmentRepository}.
  *

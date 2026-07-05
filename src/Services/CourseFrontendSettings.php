@@ -2,6 +2,11 @@
 
 namespace Sikshya\Services;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Reads course catalog / archive settings stored via {@see Settings}.
  *

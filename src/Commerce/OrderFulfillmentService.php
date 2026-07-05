@@ -7,6 +7,11 @@ use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\Settings;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Marks orders paid, enrolls learners, writes legacy payment rows.
  *

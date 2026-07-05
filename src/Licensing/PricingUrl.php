@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Sikshya\Licensing;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Canonical pricing-page URLs with UTM tagging.
  *

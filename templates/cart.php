@@ -5,6 +5,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 use Sikshya\Services\Frontend\CartPageService;
 use Sikshya\Presentation\Models\CartPageModel;
 use Sikshya\Services\Settings;

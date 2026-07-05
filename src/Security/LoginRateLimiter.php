@@ -2,6 +2,11 @@
 
 namespace Sikshya\Security;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Transient-based brute-force protection for the Sikshya auth endpoints.
  *

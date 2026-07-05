@@ -266,7 +266,7 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
                 ?>
                 <<?php echo esc_attr($tag); ?>
                     class="sikshya-setup__rail-step <?php echo esc_attr($state_class); ?>"
-                    <?php if ($tag === 'a') : ?>href="<?php echo $url; ?>"<?php endif; ?>
+					<?php if ($tag === 'a') : ?>href="<?php echo esc_url($url); ?>"<?php endif; ?>
                     <?php if ($is_current) : ?>aria-current="step"<?php endif; ?>
                 >
                     <span class="sikshya-setup__rail-dot" aria-hidden="true">
@@ -306,7 +306,7 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
 
         <p class="sikshya-setup__toast" data-setup-toast hidden role="status"></p>
 
-        <form class="sikshya-setup__form" method="post" action="<?php echo $action_url; ?>" data-setup-form novalidate>
+		<form class="sikshya-setup__form" method="post" action="<?php echo esc_url($action_url); ?>" data-setup-form novalidate>
             <?php wp_nonce_field('sikshya_setup_wizard', 'sikshya_setup_nonce'); ?>
             <input type="hidden" name="return_step" value="<?php echo esc_attr((string) $initial_step); ?>" />
 

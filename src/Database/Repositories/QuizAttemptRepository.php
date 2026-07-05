@@ -5,6 +5,11 @@ namespace Sikshya\Database\Repositories;
 use Sikshya\Database\Tables\QuizAttemptsTable;
 use Sikshya\Database\Tables\QuizAttemptItemsTable;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Table-backed quiz attempts + per-question rows.
  *

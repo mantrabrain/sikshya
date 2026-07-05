@@ -7,6 +7,11 @@ namespace Sikshya\Database\Repositories;
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use Sikshya\Database\Tables\AchievementsTable;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Reads + writes against the {@see AchievementsTable} (`sikshya_achievements`).
  *

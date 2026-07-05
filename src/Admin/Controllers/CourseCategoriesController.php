@@ -8,6 +8,11 @@ use Sikshya\Constants\Taxonomies;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Utils\RichText;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Course Categories Controller
  *

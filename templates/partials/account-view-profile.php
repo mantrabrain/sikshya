@@ -8,6 +8,10 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel  $page_model
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 $uid = $page_model->getUserId();
 $user = $uid > 0 ? get_userdata($uid) : false;
 $first_name = $user ? (string) $user->first_name : '';

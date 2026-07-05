@@ -6,6 +6,11 @@ use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Taxonomy Management Service
  *

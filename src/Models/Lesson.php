@@ -5,6 +5,11 @@ namespace Sikshya\Models;
 use Sikshya\Services\LessonCourseLink;
 use WP_Post;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Lesson Model
  *

@@ -2,6 +2,11 @@
 
 namespace Sikshya\Constants;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Admin Page Constants
  *

@@ -4,6 +4,11 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\AssignmentSubmissionsTable;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Assignment submissions (custom table).
  *

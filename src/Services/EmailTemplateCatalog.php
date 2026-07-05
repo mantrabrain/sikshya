@@ -2,6 +2,11 @@
 
 namespace Sikshya\Services;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Built-in transactional email definitions (merge with per-site overrides in EmailTemplateStore).
  *

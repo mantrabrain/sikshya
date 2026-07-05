@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Sikshya\Security;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Transient-based throttling for the `/auth/web-register` and
  * `/auth/register` endpoints.

@@ -2,6 +2,11 @@
 
 namespace Sikshya\Security;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Shared capability checks for Sikshya's wp-admin React shell and staff-only REST endpoints.
  *

@@ -5,6 +5,11 @@ namespace Sikshya\Database\Repositories;
 use Sikshya\Database\Tables\CouponsTable;
 use Sikshya\Database\Tables\CouponRedemptionsTable;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Coupons + redemptions.
  *

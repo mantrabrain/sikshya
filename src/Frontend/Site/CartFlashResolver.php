@@ -2,6 +2,11 @@
 
 namespace Sikshya\Frontend\Site;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Resolves cart / enrollment flash messages from the request (query args + short-lived transients).
  *

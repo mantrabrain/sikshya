@@ -4,6 +4,11 @@ namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Cache Management Service
  *

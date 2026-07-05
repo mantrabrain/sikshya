@@ -10,6 +10,11 @@ use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Shortcodes\AuthShortcodes;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Frontend Asset Management Service
  *

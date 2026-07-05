@@ -2,6 +2,11 @@
 
 namespace Sikshya\Services;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Placeholder until activity module is wired.
  *

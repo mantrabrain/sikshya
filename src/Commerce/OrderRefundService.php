@@ -6,6 +6,11 @@ use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Services\CourseService;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Reverses a paid Sikshya order in response to a payment refund.
  *

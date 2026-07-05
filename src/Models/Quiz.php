@@ -4,6 +4,11 @@ namespace Sikshya\Models;
 
 use WP_Post;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Quiz Model
  *

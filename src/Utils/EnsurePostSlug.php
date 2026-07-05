@@ -4,6 +4,11 @@ namespace Sikshya\Utils;
 
 use Sikshya\Constants\PostTypes;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Some posts can end up with an empty slug (post_name), commonly when the title
  * contains only characters that sanitize_title() strips. That results in 404s on

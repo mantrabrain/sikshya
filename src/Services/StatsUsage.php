@@ -6,6 +6,11 @@ namespace Sikshya\Services;
 
 use WP_Error;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Sikshya usage telemetry (opt-in, privacy-safe).
  *

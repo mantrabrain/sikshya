@@ -5,6 +5,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Frontend\Site\PublicPageUrls;

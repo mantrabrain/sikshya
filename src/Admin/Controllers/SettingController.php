@@ -7,6 +7,11 @@ use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Core\Plugin;
 use Sikshya\Admin\Views\BaseView;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Setting Controller Class
  *

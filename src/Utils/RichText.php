@@ -2,6 +2,11 @@
 
 namespace Sikshya\Utils;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Central rich text sanitization + rendering helpers.
  *

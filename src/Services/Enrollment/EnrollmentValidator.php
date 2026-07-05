@@ -8,6 +8,11 @@ use Sikshya\Database\Repositories\CourseRepository;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Services\Settings;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Centralized policy gate for "is this user allowed to enroll in this course right now?".
  *

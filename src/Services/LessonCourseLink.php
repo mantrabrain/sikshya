@@ -6,6 +6,11 @@ namespace Sikshya\Services;
 
 use Sikshya\Constants\PostTypes;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Canonical read/write helpers for linking lesson/quiz/assignment posts to a parent course.
  *

@@ -6,6 +6,11 @@ use Sikshya\Services\CertificateQueryService;
 use WP_REST_Request;
 use WP_REST_Response;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class CertificateService
 {
     private CertificateQueryService $svc;

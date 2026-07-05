@@ -8,6 +8,10 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 ?>
             <?php
             $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz', 'sikshya'), 'frontend') : __('Quiz', 'sikshya');

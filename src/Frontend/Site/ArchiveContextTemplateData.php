@@ -2,6 +2,11 @@
 
 namespace Sikshya\Frontend\Site;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Shared view-model for archive/taxonomy templates.
  *

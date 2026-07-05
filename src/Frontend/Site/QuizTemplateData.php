@@ -15,6 +15,11 @@ use Sikshya\Services\Frontend\QuizPageService;
 use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\Settings;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * @package Sikshya\Frontend\Site
  */
