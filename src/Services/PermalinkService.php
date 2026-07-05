@@ -2,6 +2,11 @@
 
 namespace Sikshya\Services;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Virtual frontend routes (cart, checkout, account, learn, order) and permalink option keys.
  *

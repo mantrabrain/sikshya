@@ -2,6 +2,11 @@
 
 namespace Sikshya\Helpers;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Shared SVG icon paths from {@see assets/admin/icons/icons.json} for PHP templates.
  */

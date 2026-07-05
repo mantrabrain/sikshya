@@ -4,6 +4,11 @@ namespace Sikshya\Admin\Controllers;
 
 use Sikshya\Core\Plugin;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Tools area shell. Maintenance actions (e.g. import sample data) are handled by REST and
  * {@see \Sikshya\Admin\Controllers\SampleDataController} → {@see \Sikshya\Services\SampleDataImportService}.

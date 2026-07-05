@@ -39,8 +39,8 @@ while (have_posts()) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo esc_html($page_title); ?></title>
-    <link rel="stylesheet" href="<?php echo $ds_href; ?>">
-    <link rel="stylesheet" href="<?php echo $learn_href; ?>">
+	<link rel="stylesheet" href="<?php echo esc_url($ds_href); ?>">
+	<link rel="stylesheet" href="<?php echo esc_url($learn_href); ?>">
 </head>
 <body class="sikshya-learning-shell sikshya-learning-shell--quiz">
 <a class="sikshya-skipLink" href="#sikshya-learn-content"><?php esc_html_e('Skip to quiz content', 'sikshya'); ?></a>
@@ -218,7 +218,7 @@ while (have_posts()) {
                   );
                   ?>;
                 </script>
-                <script src="<?php echo $quiz_js; ?>" defer></script>
+				<script src="<?php echo esc_url($quiz_js); ?>" defer></script>
             <?php endif; ?>
 
         <main class="sikshya-learnMain">

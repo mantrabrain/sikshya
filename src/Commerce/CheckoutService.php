@@ -10,6 +10,11 @@ use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * One-time checkout: offline (manual), Stripe Checkout Session, PayPal order creation, etc.
  *

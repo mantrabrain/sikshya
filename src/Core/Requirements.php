@@ -2,6 +2,11 @@
 
 namespace Sikshya\Core;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Plugin Requirements Checker
  *

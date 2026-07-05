@@ -5,6 +5,11 @@ namespace Sikshya\Services;
 use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\AnalyticsRepository;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Analytics Service
  *

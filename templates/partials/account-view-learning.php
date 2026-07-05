@@ -8,6 +8,10 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 use Sikshya\Frontend\Site\PublicPageUrls;
 
 $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');

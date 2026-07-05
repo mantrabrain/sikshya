@@ -7,6 +7,11 @@ namespace Sikshya\Services;
 use Sikshya\Database\Repositories\AchievementsRepository;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Learner achievement / badge service.
  *

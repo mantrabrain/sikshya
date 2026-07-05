@@ -5,6 +5,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 use Sikshya\Core\Plugin;
 use Sikshya\Helpers\Icons;
 use Sikshya\Services\Frontend\AccountPageService;
@@ -30,7 +34,7 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo esc_html($page_model->getPageTitle()); ?></title>
-    <link rel="stylesheet" href="<?php echo $sheet_href; ?>">
+	<link rel="stylesheet" href="<?php echo esc_url($sheet_href); ?>">
     <?php
     /*
      * Minimal extension point for account-shell pages.

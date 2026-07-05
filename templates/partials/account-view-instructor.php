@@ -10,6 +10,10 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 use Sikshya\Frontend\Site\PublicPageUrls;
 
 $inst = $page_model->getInstructorVm();

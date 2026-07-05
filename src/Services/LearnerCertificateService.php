@@ -4,6 +4,11 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\CertificateRepository;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Learner certificates (table-backed).
  *

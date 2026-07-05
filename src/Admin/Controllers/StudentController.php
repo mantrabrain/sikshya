@@ -5,6 +5,11 @@ namespace Sikshya\Admin\Controllers;
 use Sikshya\Admin\ReactAdminView;
 use Sikshya\Core\Plugin;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Students admin — React shell only.
  *

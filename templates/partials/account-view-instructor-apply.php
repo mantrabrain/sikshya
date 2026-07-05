@@ -8,6 +8,10 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 $uid = $page_model->getUserId();
 $app = is_array($acc['instructor_application'] ?? null) ? (array) $acc['instructor_application'] : [];
 $status = (string) ($app['status'] ?? '');

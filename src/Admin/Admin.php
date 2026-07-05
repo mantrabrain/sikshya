@@ -23,6 +23,11 @@ use Sikshya\Admin\ProUpgradeAdminNudge;
 use Sikshya\Admin\SetupWizardController;
 use Sikshya\Services\AdminMarketingNoticeService;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Admin Management Class
  *
@@ -30,15 +35,54 @@ use Sikshya\Services\AdminMarketingNoticeService;
  */
 class Admin
 {
+	/**
+	 * Registers the always-on Sikshya admin-chrome stylesheet and attaches the
+	 * menu-icon-sizing / setup-wizard-hiding rules (and, when relevant, the
+	 * React-shell chrome rules) as inline CSS instead of raw `echo`'d `<style>`
+	 * tags on `admin_head`.
+	 */
+	public static function enqueueSikshyaAdminInlineStyles(): void
+	{
+		wp_register_style('sikshya-admin-inline', false, [], SIKSHYA_VERSION);
+		wp_enqueue_style('sikshya-admin-inline');
+
+		wp_add_inline_style('sikshya-admin-inline', self::adminMenuIconCss());
+		wp_add_inline_style('sikshya-admin-inline', self::hideSetupWizardSubmenuCss());
+
+		if (self::isSikshyaReactAppRequest() || self::isSikshyaSetupWizardRequest()) {
+			wp_add_inline_style('sikshya-admin-inline', self::reactShellChromeCss());
+		}
+
+		if (self::isSikshyaAdminPage()) {
+			wp_add_inline_style('sikshya-admin-inline', self::dismissibleNoticeHidingCss());
+		}
+	}
+
+	/**
+	 * Hide dismissible WP core notices on Sikshya admin pages (they clutter the custom UI).
+	 */
+	private static function dismissibleNoticeHidingCss(): string
+	{
+		return '
+			.notice.is-dismissible,
+			.error.is-dismissible,
+			.updated.is-dismissible,
+			.update-nag,
+			.settings-error {
+				display: none !important;
+			}
+		';
+	}
+
     /**
      * Size the Sikshya top-level WP admin menu icon.
      *
      * When `add_menu_page()` receives an image URL, WordPress renders an `<img>` inside the menu icon slot.
      * Without a size override, custom logos can appear oversized/misaligned.
      */
-    public static function printSikshyaAdminMenuIconCss(): void
+	private static function adminMenuIconCss(): string
     {
-        echo '<style id="sikshya-admin-menu-icon">
+		return '
             #adminmenu #toplevel_page_sikshya .wp-menu-image img {
                 width: 20px;
                 height: 20px;
@@ -47,7 +91,7 @@ class Admin
                 display: block;
                 box-sizing: content-box;
             }
-        </style>';
+		';
     }
 
     /**
@@ -58,16 +102,13 @@ class Admin
      * {@see user_can_access_admin_page()} (wrong hook / empty parent) and shows
      * “Sorry, you are not allowed to access this page.” for direct wizard URLs.
      */
-    public static function hideSetupWizardSubmenuLink(): void
+	private static function hideSetupWizardSubmenuCss(): string
     {
-        if (!is_admin()) {
-            return;
-        }
-        echo '<style id="sikshya-hide-setup-wizard-menu-item">
+		return '
             #adminmenu #toplevel_page_sikshya .wp-submenu li:has(a[href*="page=sikshya-setup"]) {
                 display: none !important;
             }
-        </style>';
+		';
     }
 
     /**
@@ -139,12 +180,7 @@ class Admin
         add_action('admin_init', [self::class, 'redirectLegacySikshyaReactMenus'], 0);
         add_filter('show_admin_bar', [self::class, 'hideAdminBarOnSikshyaApp']);
         add_action('admin_enqueue_scripts', [self::class, 'dequeueWordPressUiOnSikshyaApp'], 10000);
-        add_action('admin_head', [self::class, 'printSikshyaReactShellHead'], 1);
-        add_action('admin_head', [self::class, 'printSikshyaAdminMenuIconCss'], 2);
-        add_action('admin_head', [self::class, 'hideSetupWizardSubmenuLink'], 3);
-
-        // Remove all other admin notices on Sikshya pages
-        add_action('admin_head', [$this, 'removeOtherNoticesOnSikshyaPages']);
+		add_action('admin_enqueue_scripts', [self::class, 'enqueueSikshyaAdminInlineStyles']);
 
         // Late strip: plugins often register `admin_notices` after `admin_init`.
         add_action('current_screen', [$this, 'stripAdminNoticesOnReactShell'], 0);
@@ -192,7 +228,7 @@ class Admin
          * Setup wizard: registered under Sikshya so `page=sikshya-setup` resolves and core access
          * checks see a parent (`get_admin_page_parent()` reads `$submenu`). Do not call
          * `remove_submenu_page()` — it drops the submenu row and breaks direct wizard URLs.
-         * The link is hidden via {@see hideSetupWizardSubmenuLink()}.
+		 * The link is hidden via {@see hideSetupWizardSubmenuCss()}.
          */
         add_submenu_page(
             AdminPages::DASHBOARD,
@@ -237,12 +273,9 @@ class Admin
     /**
      * Hide WP skip links and other chrome on the Sikshya full-screen shell.
      */
-    public static function printSikshyaReactShellHead(): void
+	private static function reactShellChromeCss(): string
     {
-        if (!self::isSikshyaReactAppRequest() && !self::isSikshyaSetupWizardRequest()) {
-            return;
-        }
-        echo '<style id="sikshya-react-wp-chrome-hide">
+		return '
             body.sikshya-react-shell .screen-reader-shortcut,
             body.sikshya-react-shell #wpbody-content > .screen-reader-text,
             body.sikshya-react-shell a[href="#wpbody-content"],
@@ -269,7 +302,7 @@ class Admin
             body.sikshya-react-shell #wpbody-content > p.notice {
                 display: none !important;
             }
-        </style>';
+		';
     }
 
     /**
@@ -730,7 +763,7 @@ class Admin
      *
      * @return bool
      */
-    private function isSikshyaAdminPage(): bool
+	private static function isSikshyaAdminPage(): bool
     {
         $screen = get_current_screen();
 
@@ -756,26 +789,6 @@ class Admin
         return $is_sikshya_post_screen
             || strpos($sid, 'sikshya') !== false
             || strpos($sbase, 'sikshya') !== false;
-    }
-
-    /**
-     * Remove WordPress notices on Sikshya pages using proper WordPress functions
-     */
-    public function removeOtherNoticesOnSikshyaPages(): void
-    {
-        if ($this->isSikshyaAdminPage()) {
-            // Simple CSS to hide only known WordPress notice classes
-            echo '<style>
-                /* Hide only specific WordPress admin notice classes */
-                .notice.is-dismissible,
-                .error.is-dismissible, 
-                .updated.is-dismissible,
-                .update-nag,
-                .settings-error {
-                    display: none !important;
-                }
-            </style>';
-        }
     }
 
     /**

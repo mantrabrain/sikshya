@@ -2,6 +2,11 @@
 
 namespace Sikshya\Frontend\Site;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Builds human-readable outline strings for sidebar curriculum rows.
  *

@@ -7,6 +7,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 if (!isset($outline_blocks) || !is_array($outline_blocks)) {
     return;
 }

@@ -4,6 +4,11 @@ namespace Sikshya\Services;
 
 use Sikshya\Constants\PostTypes;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Resolve lesson / quiz / assignment IDs from course curriculum meta
  * (chapters → contents).

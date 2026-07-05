@@ -4,6 +4,11 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\Tables;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Deactivation / uninstall maintenance (options table, custom table drops).
  *

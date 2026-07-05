@@ -2,6 +2,11 @@
 
 namespace Sikshya\Frontend\Site;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Server-rendered markup for checkout dynamic fields (matches assets/js/checkout-page.js structure).
  *

@@ -8,6 +8,10 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 $display_name = $page_model->getDisplayName();
 $today_line   = $page_model->getTodayLine();
 $greeting     = $page_model->getGreeting();

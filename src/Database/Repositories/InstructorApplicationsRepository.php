@@ -2,6 +2,11 @@
 
 namespace Sikshya\Database\Repositories;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * User-meta queries for instructor applications (pending / approved / rejected).
  *

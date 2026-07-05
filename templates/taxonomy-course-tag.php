@@ -5,6 +5,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 use Sikshya\Constants\PostTypes;
 
 sikshya_get_header();

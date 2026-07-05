@@ -5,6 +5,11 @@ namespace Sikshya\Core;
 use Sikshya\Database\Repositories\PluginLifecycleRepository;
 use Sikshya\Services\Settings;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Plugin Deactivator
  *

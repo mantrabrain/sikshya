@@ -7,6 +7,11 @@ use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\InstructorMetricsRepository;
 use Sikshya\Admin\ReactAdminConfig;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Wires the "Teaching" (instructor) account view + sidebar group on the learner
  * account page so signed-in instructors get a role-aware experience without a

@@ -6,6 +6,11 @@ use Sikshya\Services\PermalinkService;
 use Sikshya\Services\LearnPublicIdService;
 use Sikshya\Constants\PostTypes;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Resolves Sikshya frontend virtual page URLs (cart, checkout, learn, …).
  *

@@ -4,6 +4,11 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\LogsTable;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Write-only log store (custom table).
  *

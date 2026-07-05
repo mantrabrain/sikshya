@@ -8,6 +8,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 if (!function_exists('sikshya_learn_icon')) {
     /**
      * Return inline SVG markup for a named icon used in the learn shell.

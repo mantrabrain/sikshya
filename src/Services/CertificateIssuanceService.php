@@ -7,6 +7,11 @@ use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Certificates\CertificateRenderer;
 use Sikshya\Certificates\CertificateTemplateDefaults;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Creates rows in sikshya_certificates when a learner completes a course.
  *

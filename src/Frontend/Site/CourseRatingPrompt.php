@@ -2,6 +2,11 @@
 
 namespace Sikshya\Frontend\Site;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Prompts learners to rate a course after completion.
  *

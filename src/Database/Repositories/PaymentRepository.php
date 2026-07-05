@@ -4,6 +4,11 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\PaymentsTable;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Legacy payment rows (sikshya_payments).
  *

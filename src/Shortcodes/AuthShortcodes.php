@@ -6,6 +6,11 @@ use Sikshya\Frontend\Site\CartStorage;
 use Sikshya\Services\PermalinkService;
 use WP_Error;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Shortcodes:
  * - [sikshya_login]

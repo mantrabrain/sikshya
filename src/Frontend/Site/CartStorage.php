@@ -4,6 +4,11 @@ namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Persists course IDs for the storefront cart (user meta + guest cookie).
  * Optional {@see self::BUNDLE_META_KEY} when the cart matches a Pro course bundle.

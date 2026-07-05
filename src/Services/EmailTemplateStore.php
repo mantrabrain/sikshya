@@ -4,6 +4,11 @@ namespace Sikshya\Services;
 
 use Sikshya\Utils\RichText;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Per-site email template overrides and custom templates.
  *

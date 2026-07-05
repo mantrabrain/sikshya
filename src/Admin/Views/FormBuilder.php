@@ -2,6 +2,11 @@
 
 namespace Sikshya\Admin\Views;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Reusable FormBuilder Component
  *

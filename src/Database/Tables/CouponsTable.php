@@ -2,6 +2,11 @@
 
 namespace Sikshya\Database\Tables;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 final class CouponsTable extends AbstractTable
 {
     public static function baseName(): string

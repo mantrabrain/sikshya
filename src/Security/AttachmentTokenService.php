@@ -2,6 +2,11 @@
 
 namespace Sikshya\Security;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * HMAC-signed download tokens for course/lesson attachments.
  *

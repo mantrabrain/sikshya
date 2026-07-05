@@ -4,6 +4,11 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\ProgressRepository;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Read-only progress queries for REST.
  */

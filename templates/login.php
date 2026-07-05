@@ -5,6 +5,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Shortcodes\AuthShortcodes;
 

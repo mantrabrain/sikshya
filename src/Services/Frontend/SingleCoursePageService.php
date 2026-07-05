@@ -5,6 +5,11 @@ namespace Sikshya\Services\Frontend;
 use Sikshya\Frontend\Site\SingleCourseTemplateData;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Single-course landing page builder (service layer wrapper).
  *

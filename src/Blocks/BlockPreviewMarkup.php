@@ -2,6 +2,11 @@
 
 namespace Sikshya\Blocks;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Wraps dynamic block HTML for editor SSR previews.
  *

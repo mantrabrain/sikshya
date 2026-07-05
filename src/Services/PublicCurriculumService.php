@@ -4,6 +4,11 @@ namespace Sikshya\Services;
 
 use Sikshya\Constants\PostTypes;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Read-only curriculum tree for learner-facing templates.
  *

@@ -5,6 +5,11 @@ namespace Sikshya\Services;
 use Sikshya\Addons\Addons;
 use Sikshya\Licensing\TierCapabilities;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Optional SMTP transport for wp_mail (commercial tier when email_advanced_customization is licensed).
  *

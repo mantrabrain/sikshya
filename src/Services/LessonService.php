@@ -4,6 +4,11 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\LessonRepository;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 class LessonService
 {
     private LessonRepository $lessonRepository;

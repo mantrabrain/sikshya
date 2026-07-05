@@ -5,6 +5,11 @@ namespace Sikshya\Services;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Learner quiz runtime + stats (table-backed).
  *

@@ -5,6 +5,10 @@
  * @package Sikshya
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 sikshya_get_header();
 
 $f = sikshya_course_archive_get_filter_request();

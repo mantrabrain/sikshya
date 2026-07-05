@@ -6,6 +6,11 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Services\Settings;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * @package Sikshya\Frontend\Site
  */

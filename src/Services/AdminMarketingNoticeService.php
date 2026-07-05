@@ -7,6 +7,11 @@ use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Licensing\PricingUrl;
 use WP_Error;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * Admin marketing notices (classic WP admin + Sikshya React shell), modelled on Yatra’s {@see \Yatra\Services\NoticeService}.
  *

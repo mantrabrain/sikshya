@@ -6,6 +6,11 @@ use Sikshya\Commerce\PaymentGatewayRegistry;
 use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 
+// phpcs:ignore
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
  * @package Sikshya\Frontend\Site
  */
