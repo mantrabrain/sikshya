@@ -390,11 +390,17 @@ final class Plugin
      */
     private function loadTextdomain(): void
     {
-        load_plugin_textdomain(
-            'sikshya',
-            false,
-            dirname(plugin_basename(SIKSHYA_PLUGIN_FILE)) . '/languages/'
-        );
+        // The plugin file is included long before `init`, and WordPress 6.7+ expects
+        // translations to be loaded no earlier than that (loading sooner is what
+        // trips the `_load_textdomain_just_in_time` notice). Defer the call rather
+        // than running it during plugin load.
+        add_action('init', static function (): void {
+            load_plugin_textdomain(
+                'sikshya',
+                false,
+                dirname(plugin_basename(SIKSHYA_PLUGIN_FILE)) . '/languages/'
+            );
+        }, 0);
     }
 
     /**

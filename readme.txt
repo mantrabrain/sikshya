@@ -3,9 +3,9 @@ Contributors: mantrabrain
 Donate link: https://mantrabrain.com/
 Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,6 +416,12 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.7 - 2026-08-21 =
+**WordPress 7.1 compatibility**
+* Tested up to WordPress 7.1. `Requires at least: 6.0` and `Requires PHP: 7.4` are unchanged, so this update applies to every site already running 1.0.6.
+* `load_plugin_textdomain()` is now deferred to the `init` action instead of running while the plugin file is being included. WordPress 6.7+ expects translations to be loaded no earlier than `init`, and calling it from the bootstrap is the pattern that trips the `_load_textdomain_just_in_time` notice. Nothing in the load path translated that early, so this is a hardening change rather than a fix for a notice anyone was seeing.
+* Audited against WordPress 7.1 core: no deprecated or removed core functions are called, and all 108 REST routes still declare a `permission_callback`.
 
 = 1.0.6 - 2026-07-03 =
 **Security release — please update.**
