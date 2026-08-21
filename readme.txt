@@ -228,77 +228,6 @@ Below is the full commercial add-on line-up from the Sikshya feature registry. *
 * 👉 [LearnPress Vs Sikshya LMS](https://mantrabrain.com/plugins/sikshya-lms/learnpress-vs-sikshya-lms/?utm_source=wporg&utm_medium=readme&utm_campaign=vs_learnpress) — How **LearnPress** compares to Sikshya LMS on commerce, course builder UX, and the Pro feature ladder.
 * 👉 [MemberPress Vs Sikshya LMS](https://mantrabrain.com/plugins/sikshya-lms/memberpress-vs-sikshya-lms/?utm_source=wporg&utm_medium=readme&utm_campaign=vs_memberpress) — How **MemberPress** compares to Sikshya LMS as a course-first LMS vs a membership-first plugin.
 
-### Shortcodes
-
-Sikshya registers the shortcodes below. Paste them into any page, post, or widget that runs WordPress shortcodes (Shortcode block, Classic editor, or a theme template that calls `do_shortcode`). Attribute names are lowercase unless noted.
-
-**Quick reference**
-
-* **Sikshya Courses** block (or `[sikshya_courses]`) — Grid or list of published courses (same card UI as the catalog).
-* **Sikshya Login** block (or `[sikshya_login]`) — Sign-in form (Sikshya auth handler; errors stay on the same page).
-* **Sikshya Registration** block (or `[sikshya_registration]`) — Create a Sikshya student account; optional instructor intent submits a pending teaching application.
-
-In the block editor, open the **Sikshya** block category or search for “Sikshya”. Each block exposes the same settings as the matching shortcode attributes in the sidebar; front-end output is identical to the shortcode.
-
-**`[sikshya_courses]`**
-
-**What it does:** Queries published courses and renders them with the same course card partial used on archives and the catalog.
-
-**Attributes** (all optional except where a default is listed):
-
-* `per_page` — Number of courses per page. Default `9`. Minimum `1`, maximum `50`.
-* `columns` — Layout hint. `3` forces a three-column grid; other positive values (up to `6`) adjust the auto grid; `0` or omitted uses the default auto layout.
-* `view` — `grid` or `list`. Default `grid`.
-* `category` — Filter by **course category** taxonomy slug (not the numeric ID).
-* `tag` — Filter by **course tag** taxonomy slug.
-* `search` — Free-text search string (same idea as the catalog search).
-* `orderby` — `date`, `title`, or `price`. Default `date`.
-* `order` — `asc` or `desc`. Default `desc`.
-* `pagination` — `1` (show paging) or `0` (single page). Default `1`. When enabled, page links use the query argument **`sikshya_courses_page`** so paging does not clash with the main query.
-
-**Examples**
-
-`[sikshya_courses]`
-
-`[sikshya_courses per_page="12" view="grid" category="web-design" orderby="price" order="asc" pagination="1"]`
-
-`[sikshya_courses view="list" search="wordpress" pagination="0"]`
-
-**`[sikshya_login]`**
-
-**What it does:** Renders an email-or-username + password form that authenticates through Sikshya’s `admin-post` handler (`wp_signon`). Failed logins show a notice on the **same URL** (no redirect to `wp-login.php`). Used on the virtual login page and inside checkout.
-
-**Attributes:**
-
-* `redirect_to` — Absolute or relative URL after **successful** login. Validated with `wp_validate_redirect`. If empty, the handler falls back to the HTTP referer, then the site home URL.
-
-**Examples**
-
-`[sikshya_login]`
-
-`[sikshya_login redirect_to="/my-account/"]`
-
-`[sikshya_login redirect_to="https://example.com/checkout/"]`
-
-**`[sikshya_registration]`**
-
-**What it does:** Renders a registration form (display name optional, email, password). Creates a WordPress user with the **Sikshya student** role, then triggers the same **new-user email notifications WordPress sends after core registration** (`wp_send_new_user_notifications`, admin + user). Intended for checkout (“Create account”) and custom landing pages.
-
-**Attributes:**
-
-* `type` — `student` or `instructor`. Default `student`. **`instructor` does not assign the instructor role:** the account is a student and a **pending instructor application** is recorded (same meta as the account “Apply to teach” flow). An administrator approves applications in the dashboard; only then is the `sikshya_instructor` role added.
-* `redirect_to` — Same behavior as `[sikshya_login]` after successful registration.
-
-**Developers:** Filter `sikshya_send_new_user_notifications` (bool, user ID) to disable core emails if you replace them with your own.
-
-**Examples**
-
-`[sikshya_registration]`
-
-`[sikshya_registration type="student"]`
-
-`[sikshya_registration type="instructor" redirect_to="/courses/"]`
-
 ### Use of third-party services
 
 Features you enable may connect to services **you** configure. Examples:
@@ -406,6 +335,77 @@ Email  at mantrabrain@gmail.com with details (do not post exploit steps in publi
 
 Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerpts, and internal links from your homepage or blog—same good habits as any WordPress site. Pair with your preferred SEO plugin for meta titles and sitemaps.
 
+= What shortcodes and blocks does Sikshya provide? =
+
+Sikshya registers the shortcodes below. Paste them into any page, post, or widget that runs WordPress shortcodes (Shortcode block, Classic editor, or a theme template that calls `do_shortcode`). Attribute names are lowercase unless noted.
+
+**Quick reference**
+
+* **Sikshya Courses** block (or `[sikshya_courses]`) — Grid or list of published courses (same card UI as the catalog).
+* **Sikshya Login** block (or `[sikshya_login]`) — Sign-in form (Sikshya auth handler; errors stay on the same page).
+* **Sikshya Registration** block (or `[sikshya_registration]`) — Create a Sikshya student account; optional instructor intent submits a pending teaching application.
+
+In the block editor, open the **Sikshya** block category or search for “Sikshya”. Each block exposes the same settings as the matching shortcode attributes in the sidebar; front-end output is identical to the shortcode.
+
+**`[sikshya_courses]`**
+
+**What it does:** Queries published courses and renders them with the same course card partial used on archives and the catalog.
+
+**Attributes** (all optional except where a default is listed):
+
+* `per_page` — Number of courses per page. Default `9`. Minimum `1`, maximum `50`.
+* `columns` — Layout hint. `3` forces a three-column grid; other positive values (up to `6`) adjust the auto grid; `0` or omitted uses the default auto layout.
+* `view` — `grid` or `list`. Default `grid`.
+* `category` — Filter by **course category** taxonomy slug (not the numeric ID).
+* `tag` — Filter by **course tag** taxonomy slug.
+* `search` — Free-text search string (same idea as the catalog search).
+* `orderby` — `date`, `title`, or `price`. Default `date`.
+* `order` — `asc` or `desc`. Default `desc`.
+* `pagination` — `1` (show paging) or `0` (single page). Default `1`. When enabled, page links use the query argument **`sikshya_courses_page`** so paging does not clash with the main query.
+
+**Examples**
+
+`[sikshya_courses]`
+
+`[sikshya_courses per_page="12" view="grid" category="web-design" orderby="price" order="asc" pagination="1"]`
+
+`[sikshya_courses view="list" search="wordpress" pagination="0"]`
+
+**`[sikshya_login]`**
+
+**What it does:** Renders an email-or-username + password form that authenticates through Sikshya’s `admin-post` handler (`wp_signon`). Failed logins show a notice on the **same URL** (no redirect to `wp-login.php`). Used on the virtual login page and inside checkout.
+
+**Attributes:**
+
+* `redirect_to` — Absolute or relative URL after **successful** login. Validated with `wp_validate_redirect`. If empty, the handler falls back to the HTTP referer, then the site home URL.
+
+**Examples**
+
+`[sikshya_login]`
+
+`[sikshya_login redirect_to="/my-account/"]`
+
+`[sikshya_login redirect_to="https://example.com/checkout/"]`
+
+**`[sikshya_registration]`**
+
+**What it does:** Renders a registration form (display name optional, email, password). Creates a WordPress user with the **Sikshya student** role, then triggers the same **new-user email notifications WordPress sends after core registration** (`wp_send_new_user_notifications`, admin + user). Intended for checkout (“Create account”) and custom landing pages.
+
+**Attributes:**
+
+* `type` — `student` or `instructor`. Default `student`. **`instructor` does not assign the instructor role:** the account is a student and a **pending instructor application** is recorded (same meta as the account “Apply to teach” flow). An administrator approves applications in the dashboard; only then is the `sikshya_instructor` role added.
+* `redirect_to` — Same behavior as `[sikshya_login]` after successful registration.
+
+**Developers:** Filter `sikshya_send_new_user_notifications` (bool, user ID) to disable core emails if you replace them with your own.
+
+**Examples**
+
+`[sikshya_registration]`
+
+`[sikshya_registration type="student"]`
+
+`[sikshya_registration type="instructor" redirect_to="/courses/"]`
+
 == Screenshots ==
 
 1. LMS admin dashboard — Sikshya shell with quick access to courses, learners, and commerce (React-powered).
@@ -422,6 +422,7 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 * Tested up to WordPress 7.1. `Requires at least: 6.0` and `Requires PHP: 7.4` are unchanged, so this update applies to every site already running 1.0.6.
 * `load_plugin_textdomain()` is now deferred to the `init` action instead of running while the plugin file is being included. WordPress 6.7+ expects translations to be loaded no earlier than `init`, and calling it from the bootstrap is the pattern that trips the `_load_textdomain_just_in_time` notice. Nothing in the load path translated that early, so this is a hardening change rather than a fix for a notice anyone was seeing.
 * Audited against WordPress 7.1 core: no deprecated or removed core functions are called, and all 108 REST routes still declare a `permission_callback`.
+* Readme: the shortcode/block reference moved out of **Description** and into the FAQ as "What shortcodes and blocks does Sikshya provide?". WordPress.org caps the Description section at 2,500 words and was silently truncating ours (it measured ~2,748), so the tail of the section — including the third-party service disclosure — was being cut from the plugin directory listing. Description is now ~2,246 words with every line preserved; the FAQ section has a 5,000-word cap and sits well under it.
 
 = 1.0.6 - 2026-07-03 =
 **Security release — please update.**
