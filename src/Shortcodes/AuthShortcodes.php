@@ -5,6 +5,7 @@ namespace Sikshya\Shortcodes;
 use Sikshya\Frontend\Site\CartStorage;
 use Sikshya\Services\PermalinkService;
 use WP_Error;
+use WP_User;
 
 /**
  * Shortcodes:
@@ -288,7 +289,7 @@ final class AuthShortcodes
 
         wp_send_json_success(
             [
-                'redirect' => $redirect_to !== '' ? $redirect_to : home_url('/'),
+                'redirect' => self::resolveAuthenticatedRedirect($redirect_to, $user, 'login'),
                 'message' => __('Signed in successfully. Redirecting…', 'sikshya'),
             ]
         );
@@ -326,9 +327,13 @@ final class AuthShortcodes
         wp_set_auth_cookie($user_id, true, is_ssl());
         CartStorage::adoptGuestCartForUser($user_id);
 
+        $registered_user = get_userdata($user_id);
+
         wp_send_json_success(
             [
-                'redirect' => $redirect_to !== '' ? $redirect_to : home_url('/'),
+                'redirect' => $registered_user instanceof WP_User
+                    ? self::resolveAuthenticatedRedirect($redirect_to, $registered_user, 'register')
+                    : ($redirect_to !== '' ? $redirect_to : home_url('/')),
                 'message' => __('Account created. Redirecting…', 'sikshya'),
             ]
         );
@@ -358,7 +363,7 @@ final class AuthShortcodes
         wp_set_current_user((int) $user->ID);
         wp_set_auth_cookie((int) $user->ID, $remember, is_ssl());
 
-        wp_safe_redirect($redirect_to !== '' ? $redirect_to : home_url('/'));
+        wp_safe_redirect(self::resolveAuthenticatedRedirect($redirect_to, $user, 'login'));
         exit;
     }
 
@@ -388,6 +393,11 @@ final class AuthShortcodes
         wp_set_current_user($user_id);
         wp_set_auth_cookie($user_id, true, is_ssl());
         CartStorage::adoptGuestCartForUser($user_id);
+
+        $registered_user = get_userdata($user_id);
+        if ($registered_user instanceof WP_User) {
+            $redirect_to = self::resolveAuthenticatedRedirect($redirect_to, $registered_user, 'register');
+        }
 
         wp_safe_redirect($redirect_to !== '' ? $redirect_to : home_url('/'));
         exit;
@@ -528,6 +538,50 @@ final class AuthShortcodes
         }
 
         $url = $redirect_to !== '' ? $redirect_to : home_url('/');
+
+        return esc_url_raw(wp_validate_redirect($url, home_url('/')));
+    }
+
+    /**
+     * Resolve the destination once the account is known.
+     *
+     * `resolveRedirectTo()` necessarily runs *before* the credentials are
+     * checked, so it cannot take the account into consideration. This runs
+     * after sign-in / registration succeeds, which is the only point where a
+     * role-aware destination (send instructors to the teaching view, learners
+     * to their courses, ...) can be decided.
+     *
+     * @param string  $redirect_to Destination resolved before authentication.
+     * @param WP_User $user        The account that just signed in or registered.
+     * @param string  $context     Either `login` or `register`.
+     */
+    private static function resolveAuthenticatedRedirect(string $redirect_to, WP_User $user, string $context): string
+    {
+        $url = $redirect_to !== '' ? $redirect_to : home_url('/');
+
+        /**
+         * Filters where a visitor lands after signing in or registering
+         * through Sikshya's own auth forms.
+         *
+         * Runs after authentication, so `$user` is populated and its roles and
+         * capabilities can be inspected. The return value is still passed
+         * through `wp_validate_redirect()`, so an off-site URL falls back to
+         * the site home rather than being followed.
+         *
+         * @param string  $url     Destination decided so far (explicit
+         *                         `redirect_to`, else a same-origin referer,
+         *                         else the site home).
+         * @param WP_User $user    The account that just signed in or registered.
+         * @param string  $context `login` or `register` here. Sikshya Pro's
+         *                         social sign-in applies the same filter with
+         *                         `social-login`, so one filter can cover every
+         *                         way a visitor signs in.
+         */
+        $url = (string) apply_filters('sikshya_auth_redirect_to', $url, $user, $context);
+
+        if ($url === '') {
+            $url = home_url('/');
+        }
 
         return esc_url_raw(wp_validate_redirect($url, home_url('/')));
     }

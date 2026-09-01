@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,6 +416,13 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.8 - 2026-09-01 =
+**Role-aware login and registration redirects**
+* New filter `sikshya_auth_redirect_to` controls where a visitor lands after signing in or registering through Sikshya's own forms. It runs *after* authentication, so the `WP_User` is available and the destination can be chosen from the account's roles or capabilities — sending instructors to their teaching view, learners to their courses, and so on.
+* This was previously impossible to customise, even with code. The destination was resolved *before* the credentials were checked, so the account was still unknown at the moment it was decided, and nothing in the plugin filtered it. Reported by a site owner whose instructors were landing on the site home page after logging in.
+* Applies to all four auth paths: AJAX and non-AJAX sign-in, and AJAX and non-AJAX registration. `$context` is `login` or `register`. Sikshya Pro 1.0.3 applies the same filter to social sign-in with a `social-login` context, so a single filter covers every way a visitor can sign in.
+* Nothing changes by default. With no filter attached the destination is identical to 1.0.7 — an explicit `redirect_to`, else a same-origin referer, else the site home. The filtered value still passes through `wp_validate_redirect()`, so a filter cannot be used to send visitors off-site.
 
 = 1.0.7 - 2026-08-21 =
 **WordPress 7.1 compatibility**
