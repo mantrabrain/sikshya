@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -417,6 +417,26 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 
 == Changelog ==
 
+= 1.0.9 - 2026-10-01 =
+**Critical fixes — update immediately.**
+
+Two defects that disabled core functionality, plus a sweep of the underlying cause. Found and verified against a live WordPress 7.1 install; every item below was reproduced before the fix and re-tested after.
+
+**Free enrolment was completely broken (critical)**
+* `POST /sikshya/v1/me/enroll` rejected every course with `404 "Invalid course."`, so no learner could enrol in anything. The guard compared the course against the post type `sikshya_course`, but courses have been registered as `sik_course` since 1.0.0 — the comparison could never be true. Present in 1.0.6, 1.0.7 and 1.0.8.
+
+**Paid courses could be enrolled in for free (critical)**
+* Unmasked by the fix above. The paywall read the price from a single meta key while checkout reads it through the canonical resolver that checks every alias key, so a course priced through any other alias looked free. Both price accessors now use the same resolver as checkout, so the paywall cannot disagree with the code that takes the money.
+
+**The same stale post-type name, found everywhere else it was hiding**
+* Audited every identifier in the plugin against what WordPress actually has registered. 36 further occurrences across 12 files still used the pre-1.0.0 names. Consequences on a site with 1,855 courses: the admin dashboard reported **0 courses**, usage telemetry reported **0 courses and 0 lessons**, lesson and quiz REST endpoints returned nothing, the lesson data layer matched nothing, and the frontend course search returned no results.
+* **Uninstall did not erase course content.** The uninstaller targeted four post types that have never existed, and omitted questions, chapters and certificates entirely. If you enabled "erase data on uninstall", your course content was left behind. It now covers all seven registered post types and the five real taxonomies. Erasure is still strictly opt-in and still defaults to off.
+* All references now use shared constants so the names cannot drift from the registry again.
+
+**Also**
+* The admin dashboard's course count is now a prepared statement rather than an interpolated query.
+* A frontend AJAX handler no longer reads an undefined property when counting courses.
+
 = 1.0.8 - 2026-09-01 =
 **Role-aware login and registration redirects**
 * New filter `sikshya_auth_redirect_to` controls where a visitor lands after signing in or registering through Sikshya's own forms. It runs *after* authentication, so the `WP_User` is available and the destination can be chosen from the account's roles or capabilities — sending instructors to their teaching view, learners to their courses, and so on.
@@ -533,6 +553,9 @@ This release fixes a set of privacy and access-control issues found in a deep se
 * Checkout (with Sikshya Pro Dynamic Checkout Fields): optional server-rendered dynamic field markup—JavaScript attaches listeners and visibility without rebuilding the form in the browser; includes `CheckoutDynamicFieldsView` and refactored checkout helpers (`dfBindDynamicFields`, `dfSyncValuesFromHost`).
 
 == Upgrade Notice ==
+
+= 1.0.9 - 2026-10-01 =
+Critical. Free enrolment was broken in 1.0.6-1.0.8 (every enrolment returned "Invalid course"), paid courses could be enrolled in for free, and uninstall did not erase course content when that option was enabled. Update immediately.
 
 = 1.0.6 - 2026-07-03 =
 Security release. Closes an anonymous paid-lesson-content leak on the legacy `/sikshya/v1/lessons` and `/quizzes` REST routes, a coupon-per-user redemption race, `/me/enroll` bypass for unpublished courses, and two stored-XSS vectors in the React admin. External integrations that read `/lessons` or `/quizzes` anonymously must authenticate — see changelog. Sites running Sikshya Pro should update to Sikshya Pro 1.0.2 alongside.
