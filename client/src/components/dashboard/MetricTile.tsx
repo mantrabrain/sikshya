@@ -42,7 +42,7 @@ export function MetricTile({
           {value}
         </p>
         <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
-        {hint ? <p className="mt-2 text-xs leading-relaxed text-slate-400 dark:text-slate-500">{hint}</p> : null}
+        {hint ? <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-500">{hint}</p> : null}
       </div>
     </div>
   );

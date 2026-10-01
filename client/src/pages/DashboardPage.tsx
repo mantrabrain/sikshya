@@ -183,7 +183,7 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
          * doesn't feel neutrally-outlined against the coloured fill.
          */}
         <section className="rounded-2xl border border-blue-100 bg-blue-50 px-6 py-8 shadow-sm dark:border-blue-900/40 dark:bg-blue-950/30">
-          <p className="text-sm font-medium text-blue-700/80 dark:text-blue-300/80">{dateLine}</p>
+          <p className="text-sm font-medium text-blue-800 dark:text-blue-300/80">{dateLine}</p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
             {greetingLabel()}, {config.user.name}
           </h1>

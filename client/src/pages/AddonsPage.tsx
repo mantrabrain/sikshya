@@ -548,7 +548,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
                 {bundle.label}
               </div>
               <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{bundle.tagline}</div>
-              <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+              <div className="mt-2 text-xs text-slate-500 dark:text-slate-500">
                 {bundle.addonIds.length} {__('add-ons', 'sikshya')}
               </div>
             </button>

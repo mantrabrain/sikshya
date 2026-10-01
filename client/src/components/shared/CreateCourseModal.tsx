@@ -370,7 +370,7 @@ function PermalinkField({
             {__('Done', 'sikshya')}
           </button>
         </div>
-        <p className="mt-1.5 truncate font-mono text-xs text-slate-400 dark:text-slate-500" title={url}>
+        <p className="mt-1.5 truncate font-mono text-xs text-slate-500 dark:text-slate-500" title={url}>
           {sprintf(__('Preview: %s', 'sikshya'), url)}
         </p>
       </div>

@@ -1187,7 +1187,7 @@ function ModerationThreadPanel(props: {
         </button>
         <div className="flex flex-1 items-center justify-center px-1" aria-hidden>
           <span
-            className="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500"
+            className="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-500"
             style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
           >
             Thread
@@ -1359,7 +1359,7 @@ function ModerationThreadPanel(props: {
                         ) : null}
                         <span className="ml-auto inline-flex flex-wrap items-center gap-2">
                           <StatusPill status={reply.status} />
-                          <span className="tabular-nums text-slate-400 dark:text-slate-500">
+                          <span className="tabular-nums text-slate-500 dark:text-slate-500">
                             {formatPostDate(reply.created_at)}
                           </span>
                         </span>

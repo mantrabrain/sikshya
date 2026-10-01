@@ -73,7 +73,7 @@ function SectionShell(props: {
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
             {description ? (
-              <p className="mt-1 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{description}</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{description}</p>
             ) : null}
           </div>
         </div>

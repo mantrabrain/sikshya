@@ -154,7 +154,7 @@ export function renderSettingsField(
           {label}
         </label>
         {desc ? (
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{renderDescription(desc)}</p>
         ) : null}
         <div className="mt-2">
           <DynamicFieldsBuilder
@@ -184,7 +184,7 @@ export function renderSettingsField(
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-slate-900 dark:text-white">{label}</span>
             {desc ? (
-              <span className="mt-1 block text-xs text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</span>
+              <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{renderDescription(desc)}</span>
             ) : null}
           </span>
         </label>
@@ -202,7 +202,7 @@ export function renderSettingsField(
           {label}
         </label>
         {desc ? (
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{renderDescription(desc)}</p>
         ) : null}
         <select
           id={k}
@@ -245,7 +245,7 @@ export function renderSettingsField(
           {label}
         </label>
         {desc ? (
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{renderDescription(desc)}</p>
         ) : null}
 
         <select
@@ -290,7 +290,7 @@ export function renderSettingsField(
             ))}
           </div>
         ) : (
-          <p className="mt-2 text-xs text-slate-400/90 dark:text-slate-500/80">
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
             Select one or more methods. The value is stored as a comma-separated list.
           </p>
         )}
@@ -307,7 +307,7 @@ export function renderSettingsField(
           {label}
         </label>
         {desc ? (
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{renderDescription(desc)}</p>
         ) : null}
         <div className="mt-1.5 flex flex-wrap items-center gap-3">
           <input
@@ -330,7 +330,7 @@ export function renderSettingsField(
           {label}
         </label>
         {desc ? (
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{renderDescription(desc)}</p>
         ) : null}
         <textarea
           id={k}
@@ -376,7 +376,7 @@ export function renderSettingsField(
           ) : null}
         </div>
         {desc ? (
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{renderDescription(desc)}</p>
         ) : null}
         <input
           id={k}

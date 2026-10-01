@@ -124,7 +124,7 @@ export function RowActionsMenu({ items, ariaLabel }: { items: RowActionItem[]; a
             disabled={Boolean(item.disabled)}
             className={`block w-full px-3 py-2 text-left text-sm ${
               item.disabled
-                ? 'cursor-not-allowed text-slate-400 dark:text-slate-500'
+                ? 'cursor-not-allowed text-slate-500 dark:text-slate-500'
                 : `hover:bg-slate-50 dark:hover:bg-slate-800 ${
                     item.danger ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'
                   }`

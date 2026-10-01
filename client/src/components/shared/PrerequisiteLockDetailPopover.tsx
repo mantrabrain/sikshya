@@ -194,7 +194,7 @@ export function PrerequisiteLockDetailPopover(props: {
                     {c.status && c.status !== 'publish' ? (
                       <span className="ml-1 text-xs text-slate-500 dark:text-slate-400">({c.status})</span>
                     ) : null}
-                    <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">#{c.id}</span>
+                    <span className="ml-1 text-xs text-slate-500 dark:text-slate-500">#{c.id}</span>
                   </li>
                 ))}
               </ul>
@@ -207,14 +207,14 @@ export function PrerequisiteLockDetailPopover(props: {
                 <li key={row.lesson_id} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0 dark:border-slate-800">
                   <p className="font-medium text-slate-900 dark:text-white">
                     {row.title || `Lesson #${row.lesson_id}`}
-                    <span className="ml-1 text-xs font-normal text-slate-400 dark:text-slate-500">#{row.lesson_id}</span>
+                    <span className="ml-1 text-xs font-normal text-slate-500 dark:text-slate-500">#{row.lesson_id}</span>
                   </p>
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Requires completing first:</p>
                   <ul className="mt-1 space-y-0.5 pl-2">
                     {(row.prerequisite_lessons ?? []).map((p) => (
                       <li key={p.id} className="text-slate-700 dark:text-slate-200">
                         · {p.title || `Lesson #${p.id}`}
-                        <span className="text-xs text-slate-400 dark:text-slate-500"> #{p.id}</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-500"> #{p.id}</span>
                       </li>
                     ))}
                   </ul>

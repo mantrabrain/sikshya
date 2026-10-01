@@ -1503,7 +1503,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                       active
                         ? 'bg-brand-50 text-brand-900 dark:bg-brand-950/40 dark:text-brand-100'
                         : locked
-                          ? 'cursor-not-allowed text-slate-500 opacity-75 dark:text-slate-400'
+                          ? 'cursor-not-allowed text-slate-600 dark:text-slate-400'
                           : 'text-slate-800 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                     onClick={() => {

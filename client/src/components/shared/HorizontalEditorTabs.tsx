@@ -57,7 +57,7 @@ export function HorizontalEditorTabs({
             {t.icon ? (
               <NavIcon
                 name={t.icon}
-                className={`h-4 w-4 ${selected ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500'}`}
+                className={`h-4 w-4 ${selected ? 'text-brand-600 dark:text-brand-400' : 'text-slate-500 dark:text-slate-500'}`}
               />
             ) : null}
             <span>{t.label}</span>

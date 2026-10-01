@@ -110,7 +110,7 @@ function ChildLink({
               ? 'text-brand-600 dark:text-brand-400'
               : brandedChrome
                 ? 'text-inherit/60'
-                : 'text-slate-400 dark:text-slate-500'
+                : 'text-slate-500 dark:text-slate-500'
           }`}
         />
       </IconSlot>
@@ -321,8 +321,10 @@ export function Sidebar({
             />
             <span className={brandedChrome ? 'text-inherit/90' : ''}>{__('Free', 'sikshya')}</span>
             <span
-              className={`tabular-nums opacity-75 ${
-                brandedChrome ? 'text-inherit/80' : 'text-slate-500 dark:text-slate-400'
+              /* opacity-75 on slate-500 fell to ~3.5:1 on white — below WCAG AA for
+                 this text size, so the version is dimmed by colour alone. */
+              className={`tabular-nums ${
+                brandedChrome ? 'text-inherit/80' : 'text-slate-600 dark:text-slate-400'
               }`}
             >
               v{version}
@@ -356,7 +358,7 @@ export function Sidebar({
               </span>
               <span
                 className={`tabular-nums ${
-                  proLicensed ? 'text-emerald-700/85 dark:text-emerald-200/90' : 'text-slate-500 dark:text-slate-400'
+                  proLicensed ? 'text-emerald-800 dark:text-emerald-200/90' : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 v{proPluginVersion}

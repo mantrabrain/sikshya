@@ -141,7 +141,7 @@ export function WPMediaPickerField(props: Props) {
               <img src={value} alt="" className="h-full w-full object-cover" loading="lazy" />
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 bg-slate-50 px-1 dark:bg-slate-800/80">
-                <NavIcon name="clipboard" className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                <NavIcon name="clipboard" className="h-5 w-5 text-slate-500 dark:text-slate-500" />
                 <span className="max-w-full truncate px-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                   {__('File', 'sikshya')}
                 </span>
