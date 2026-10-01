@@ -2,6 +2,8 @@
 
 namespace Sikshya\Frontend\Controllers;
 
+use Sikshya\Constants\PostTypes;
+
 use Sikshya\Core\Plugin;
 
 /**
@@ -36,7 +38,7 @@ class QuizController
         $quiz_id = get_the_ID();
         $quiz = get_post($quiz_id);
 
-        if (!$quiz || $quiz->post_type !== 'sikshya_quiz') {
+        if (!$quiz || $quiz->post_type !== PostTypes::QUIZ) {
             return;
         }
 

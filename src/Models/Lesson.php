@@ -2,6 +2,8 @@
 
 namespace Sikshya\Models;
 
+use Sikshya\Constants\PostTypes;
+
 use Sikshya\Services\LessonCourseLink;
 use WP_Post;
 
@@ -31,7 +33,7 @@ class Lesson
     public function getAll(array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'menu_order',
@@ -55,7 +57,7 @@ class Lesson
     {
         $lesson = get_post($lesson_id);
 
-        if (!$lesson || $lesson->post_type !== 'sikshya_lesson') {
+        if (!$lesson || $lesson->post_type !== PostTypes::LESSON) {
             return null;
         }
 
@@ -82,7 +84,7 @@ class Lesson
         $data = wp_parse_args($data, $defaults);
 
         // Set post type
-        $data['post_type'] = 'sikshya_lesson';
+        $data['post_type'] = PostTypes::LESSON;
 
         // Create the lesson
         $lesson_id = wp_insert_post($data);
@@ -107,7 +109,7 @@ class Lesson
     public function update(int $lesson_id, array $data)
     {
         $data['ID'] = $lesson_id;
-        $data['post_type'] = 'sikshya_lesson';
+        $data['post_type'] = PostTypes::LESSON;
 
         return wp_update_post($data);
     }
@@ -303,7 +305,7 @@ class Lesson
     public function getByCourse(int $course_id): array
     {
         $args = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'meta_value_num',

@@ -2,6 +2,8 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Constants\PostTypes;
+
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -10,7 +12,7 @@ class LessonService
     public function getLessons(WP_REST_Request $request): WP_REST_Response
     {
         $args = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => $request->get_param('per_page') ?: 10,
             'paged' => $request->get_param('page') ?: 1,
@@ -31,7 +33,7 @@ class LessonService
     {
         $data = $request->get_json_params();
         $post_id = wp_insert_post([
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_title' => sanitize_text_field($data['title'] ?? ''),
             'post_content' => wp_kses_post($data['content'] ?? ''),
             'post_status' => 'publish',
@@ -46,7 +48,7 @@ class LessonService
     {
         $id = $request->get_param('id');
         $post = get_post($id);
-        if (!$post || $post->post_type !== 'sikshya_lesson') {
+        if (!$post || $post->post_type !== PostTypes::LESSON) {
             return new WP_REST_Response(['error' => __('Lesson not found', 'sikshya')], 404);
         }
         return new WP_REST_Response($this->formatLesson($post));

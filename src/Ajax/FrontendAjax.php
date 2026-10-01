@@ -96,7 +96,7 @@ class FrontendAjax extends AjaxAbstract
         }
 
         $courses = get_posts($args);
-        $total = wp_count_posts('sikshya_course')->publish;
+        $total = (int) (wp_count_posts(PostTypes::COURSE)->publish ?? 0);
 
         $this->sendSuccess([
             'courses' => $courses,
