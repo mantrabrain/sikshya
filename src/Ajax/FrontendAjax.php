@@ -9,6 +9,8 @@
 
 namespace Sikshya\Ajax;
 
+use Sikshya\Constants\PostTypes;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
@@ -73,7 +75,7 @@ class FrontendAjax extends AjaxAbstract
         $page = intval($this->getPostData('page', 1));
 
         $args = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
             'posts_per_page' => 12,
             'paged' => $page,
