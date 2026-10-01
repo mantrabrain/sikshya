@@ -28,6 +28,8 @@ final class SiteHealthNotices
     private const NONCE_ENABLE_REGISTRATION = 'sikshya_enable_registration_nonce';
     private const DISMISS_META_PREFIX = 'sikshya_dismissed_notice_';
     private const PAID_COURSE_CACHE = 'sikshya_has_paid_courses';
+    private const ACTION_FLUSH_REWRITES = 'sikshya_flush_rewrites';
+    private const NONCE_FLUSH_REWRITES = 'sikshya_flush_rewrites_nonce';
 
     private static bool $registered = false;
 
@@ -41,6 +43,7 @@ final class SiteHealthNotices
         add_action('admin_notices', [self::class, 'render']);
         add_action('admin_post_' . self::ACTION_ENABLE_REGISTRATION, [self::class, 'handleEnableRegistration']);
         add_action('admin_post_sikshya_dismiss_health_notice', [self::class, 'handleDismiss']);
+        add_action('admin_post_' . self::ACTION_FLUSH_REWRITES, [self::class, 'handleFlushRewrites']);
 
         // A new or re-priced course can flip the "can you take money?" answer.
         add_action('save_post_' . PostTypes::COURSE, static function (): void {
@@ -81,7 +84,26 @@ final class SiteHealthNotices
             ];
         }
 
-        // 2. Learners cannot create an account at all.
+        // 2. The virtual routes exist only as rewrite rules. Another plugin
+        //    flushing them in a request where Sikshya was not loaded silently
+        //    404s every Sikshya page, and nothing else reports it.
+        if (!PermalinkService::isPlainPermalinks() && !self::virtualRoutesRegistered()) {
+            $out[] = [
+                'id' => 'missing_rewrite_rules',
+                'severity' => 'error',
+                'title' => __('Sikshya page URLs are returning 404', 'sikshya'),
+                'body' => __('Sikshya registers its cart, checkout, login, learner dashboard and course player as URL rules rather than as WordPress pages, and those rules are currently missing. Every one of those pages will return "Not Found" for your learners. This usually happens when another plugin rewrites the URL rules without Sikshya active. Refreshing them restores all of the pages at once.', 'sikshya'),
+                'settings_label' => __('Settings → Permalinks', 'sikshya'),
+                'settings_url' => admin_url('options-permalink.php'),
+                'action_label' => __('Refresh URL rules', 'sikshya'),
+                'action_url' => wp_nonce_url(
+                    admin_url('admin-post.php?action=' . self::ACTION_FLUSH_REWRITES),
+                    self::NONCE_FLUSH_REWRITES
+                ),
+            ];
+        }
+
+        // 3. Learners cannot create an account at all.
         if (!get_option('users_can_register')) {
             $out[] = [
                 'id' => 'registration_disabled',
@@ -98,7 +120,7 @@ final class SiteHealthNotices
             ];
         }
 
-        // 3. Paid courses exist but there is no way to pay for them.
+        // 4. Paid courses exist but there is no way to pay for them.
         if (self::hasPaidCourses() && !self::hasAnyGatewayEnabled()) {
             $out[] = [
                 'id' => 'no_payment_gateway',
@@ -165,6 +187,46 @@ final class SiteHealthNotices
         if ($notice !== '') {
             update_user_meta(get_current_user_id(), self::DISMISS_META_PREFIX . $notice, 1);
         }
+
+        wp_safe_redirect(wp_get_referer() ?: admin_url());
+        exit;
+    }
+
+    /**
+     * True when at least one `sikshya_page` rule is present in the rewrite table.
+     *
+     * Only meaningful with pretty permalinks; PermalinkService registers no rules
+     * at all on plain permalinks, which the dedicated check above reports.
+     */
+    private static function virtualRoutesRegistered(): bool
+    {
+        $rules = get_option('rewrite_rules');
+        if (!is_array($rules) || $rules === []) {
+            // No rules at all usually means they have never been generated;
+            // the permalink screen will build them on next save.
+            return false;
+        }
+
+        foreach ($rules as $target) {
+            if (is_string($target) && strpos($target, PermalinkService::QUERY_VAR . '=') !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function handleFlushRewrites(): void
+    {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('You do not have permission to do that.', 'sikshya'), '', ['response' => 403]);
+        }
+        check_admin_referer(self::NONCE_FLUSH_REWRITES);
+
+        // Register in this request before flushing, otherwise the rebuilt table
+        // would again be written without Sikshya's rules.
+        PermalinkService::registerRewriteRules();
+        flush_rewrite_rules(true);
 
         wp_safe_redirect(wp_get_referer() ?: admin_url());
         exit;

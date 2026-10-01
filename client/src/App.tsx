@@ -13,6 +13,7 @@ const ActivityLogPage = lazy(() =>
   import('./pages/ActivityLogPage').then((m) => ({ default: m.ActivityLogPage }))
 );
 const AddonsPage = lazy(() => import('./pages/AddonsPage').then((m) => ({ default: m.AddonsPage })));
+const DocsPage = lazy(() => import('./pages/DocsPage').then((m) => ({ default: m.DocsPage })));
 const BundlesPage = lazy(() => import('./pages/BundlesPage').then((m) => ({ default: m.BundlesPage })));
 const CalendarPage = lazy(() => import('./pages/CalendarPage').then((m) => ({ default: m.CalendarPage })));
 const ContentDripPage = lazy(() =>
@@ -399,6 +400,8 @@ function RoutedApp() {
       return <EmailTemplateEditPage embedded config={config} title={__('Email template', 'sikshya')} />;
     case 'tools':
       return <ToolsHubPage embedded config={config} title={__('Tools', 'sikshya')} />;
+    case 'docs':
+      return <DocsPage embedded config={config} title={__('Docs', 'sikshya')} />;
     case 'addons':
       return <AddonsPage embedded config={config} title={__('Addons', 'sikshya')} />;
     case 'integrations':
@@ -439,6 +442,7 @@ function RoutedApp() {
     if (navTitle) return navTitle;
     if (page === 'dashboard') return __('Dashboard', 'sikshya');
     if (page === 'settings') return __('Settings', 'sikshya');
+    if (page === 'docs') return __('Docs', 'sikshya');
     if (page === 'courses') return T.courses;
     if (page === 'add-course') return sprintf(__('%s builder', 'sikshya'), T.course);
     if (page === 'bundle-builder') return __('Bundle builder', 'sikshya');
