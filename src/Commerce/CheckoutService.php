@@ -380,9 +380,20 @@ final class CheckoutService
         return $this->isTruthySetting($this->settings()->getSetting('enable_paypal_payment', '0'));
     }
 
+    /**
+     * Stripe is part of the free core.
+     *
+     * It was previously gated on `TierCapabilities::isActive()`, which made
+     * card payments a paid capability. That contradicted the feature catalog,
+     * where `checkout_native` is labelled "Native checkout (Stripe / PayPal)"
+     * at tier `free`, and it also contradicted the published pricing, which
+     * sells Stripe from the Growth plan while `isActive()` is true on Starter.
+     * Both leading free competitors ship Stripe at no cost, so gating the
+     * ability to get paid was the single biggest barrier to adoption.
+     */
     public function isStripeEnabled(): bool
     {
-        return TierCapabilities::isActive() && $this->isTruthySetting($this->settings()->getSetting('enable_stripe_payment', '0'));
+        return $this->isTruthySetting($this->settings()->getSetting('enable_stripe_payment', '0'));
     }
 
     public function isBankTransferEnabled(): bool
