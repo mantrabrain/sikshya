@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
+  learnUrl,
   createAssignmentViaRest,
   createCourseViaRest,
   createUserViaRest,
@@ -49,7 +50,7 @@ test.describe('learner: assignment submission UI', () => {
     });
     expect(enrollRes.status()).toBeLessThan(400);
 
-    await session.page.goto(assignment.link, { waitUntil: 'domcontentloaded' });
+    await session.page.goto(learnUrl('assignment', assignment.slug), { waitUntil: 'domcontentloaded' });
 
     const form = session.page.locator('[data-sikshya-assignment-form]').first();
     await expect(form, 'assignment form should render for enrolled student').toBeVisible({

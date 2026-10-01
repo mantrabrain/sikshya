@@ -111,13 +111,42 @@ export async function createCourseViaRest(
  * `LearnerCurriculumHelper::lessonIdsForCourse()` — required for
  * `/sikshya/v1/me/lesson-complete` to accept it.
  */
+/**
+ * URL of a curriculum item inside the learn player.
+ *
+ * `sik_lesson`, `sik_quiz` and `sik_assignment` are registered with
+ * `publicly_queryable => false` and `rewrite => false`, so the `link` returned
+ * by wp/v2 is a `?post_type=...&p=...` permalink that correctly 404s. Learners
+ * only ever reach this content through the learn player. This builds the
+ * legacy `/learn/{type}/{slug}/` route, which 301s to the canonical
+ * `/learn/{base}/{public_id}/{slug}/` form that `PublicPageUrls::learnContentForPost()`
+ * generates — Playwright follows that redirect automatically.
+ */
+/**
+ * Thrown when the REST API refuses an action because the site's Sikshya plan
+ * does not include the required feature. Specs should skip rather than fail:
+ * the gate returning 403 is correct behaviour.
+ */
+export class PlanFeatureRequiredError extends Error {
+  readonly feature: string;
+  constructor(feature: string) {
+    super(`Sikshya plan feature required: ${feature}`);
+    this.name = 'PlanFeatureRequiredError';
+    this.feature = feature;
+  }
+}
+
+export function learnUrl(type: 'lesson' | 'quiz' | 'assignment', itemSlug: string): string {
+  return `/learn/${type}/${itemSlug}/`;
+}
+
 export async function createLessonViaRest(
   page: Page,
   request: APIRequestContext,
   courseId: number,
   title?: string,
   linkToCurriculum: boolean = true,
-): Promise<{ id: number; title: string; chapterId?: number }> {
+): Promise<{ id: number; title: string; chapterId?: number; slug: string; link: string }> {
   const nonce = await getAdminNonce(page);
   const lessonTitle = title ?? `E2E Lesson ${slug('l')}`;
   const res = await request.post('/wp-json/wp/v2/sik_lesson', {
@@ -136,7 +165,7 @@ export async function createLessonViaRest(
   const lessonId = Number(body.id);
 
   if (!linkToCurriculum) {
-    return { id: lessonId, title: lessonTitle, link: (body.link as string) ?? '' };
+    return { id: lessonId, title: lessonTitle, slug: (body.slug as string) ?? '', link: (body.link as string) ?? '' };
   }
 
   // 1) Create a chapter for the course.
@@ -161,7 +190,7 @@ export async function createLessonViaRest(
     throw new Error(`linkContent failed ${linkRes.status()}: ${JSON.stringify(linkBody)}`);
   }
 
-  return { id: lessonId, title: lessonTitle, chapterId, link: (body.link as string) ?? '' };
+  return { id: lessonId, title: lessonTitle, chapterId, slug: (body.slug as string) ?? '', link: (body.link as string) ?? '' };
 }
 
 /**
@@ -174,7 +203,7 @@ export async function createQuizViaRest(
   request: APIRequestContext,
   courseId: number,
   title?: string,
-): Promise<{ id: number; title: string; chapterId: number; link: string }> {
+): Promise<{ id: number; title: string; chapterId: number; slug: string; link: string }> {
   const nonce = await getAdminNonce(page);
   const quizTitle = title ?? `E2E Quiz ${slug('q')}`;
   const res = await request.post('/wp-json/wp/v2/sik_quiz', {
@@ -210,7 +239,7 @@ export async function createQuizViaRest(
     throw new Error(`linkContent (quiz) failed ${linkRes.status()}: ${JSON.stringify(linkBody)}`);
   }
 
-  return { id: quizId, title: quizTitle, chapterId, link: (body.link as string) ?? '' };
+  return { id: quizId, title: quizTitle, chapterId, slug: (body.slug as string) ?? '', link: (body.link as string) ?? '' };
 }
 
 export type QuestionType =
@@ -297,6 +326,13 @@ export async function createQuestionViaRest(
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok()) {
+    // Advanced question types sit behind the `quiz_advanced` entitlement. On a
+    // site without that plan the REST layer correctly answers 403 — that is the
+    // feature gate working, not a defect, so surface it as a recognisable
+    // condition the caller can skip on rather than an opaque failure.
+    if (res.status() === 403 && body?.code === 'sikshya_plan_feature_required') {
+      throw new PlanFeatureRequiredError(String(body?.data?.feature ?? 'unknown'));
+    }
     throw new Error(`createQuestionViaRest failed ${res.status()}: ${JSON.stringify(body)}`);
   }
   return { id: Number(body.id), title, type };
@@ -312,7 +348,7 @@ export async function createAssignmentViaRest(
   request: APIRequestContext,
   courseId: number,
   opts: { title?: string; type?: 'essay' | 'url' | 'file_upload'; points?: number } = {},
-): Promise<{ id: number; title: string; chapterId: number; link: string }> {
+): Promise<{ id: number; title: string; chapterId: number; slug: string; link: string }> {
   const nonce = await getAdminNonce(page);
   const title = opts.title ?? `E2E Assignment ${slug('a')}`;
   const res = await request.post('/wp-json/wp/v2/sik_assignment', {
@@ -352,7 +388,7 @@ export async function createAssignmentViaRest(
     throw new Error(`linkContent (assignment) failed ${linkRes.status()}: ${JSON.stringify(linkBody)}`);
   }
 
-  return { id, title, chapterId, link: (body.link as string) ?? '' };
+  return { id, title, chapterId, slug: (body.slug as string) ?? '', link: (body.link as string) ?? '' };
 }
 
 /**

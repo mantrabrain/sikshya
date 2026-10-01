@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
+  learnUrl,
   createCourseViaRest,
   createLessonViaRest,
   createUserViaRest,
@@ -49,7 +50,7 @@ test.describe('learner: lesson player UI Mark-as-complete', () => {
     expect(enrollRes.status()).toBeLessThan(400);
 
     // Open the lesson permalink and click the UI button.
-    await session.page.goto(lesson.link, { waitUntil: 'domcontentloaded' });
+    await session.page.goto(learnUrl('lesson', lesson.slug), { waitUntil: 'domcontentloaded' });
     const completeBtn = session.page.locator('[data-sikshya-mark-complete]').first();
     await expect(completeBtn, 'Mark complete button should render for enrolled student').toBeVisible({
       timeout: 20_000,
