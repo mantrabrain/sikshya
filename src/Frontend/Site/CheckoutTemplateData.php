@@ -61,8 +61,8 @@ final class CheckoutTemplateData
         $enable_paypal = Settings::get('enable_paypal_payment', '0');
         $enable_stripe = Settings::get('enable_stripe_payment', '0');
 
-        $stripe = TierCapabilities::isActive()
-            && $isWired('stripe', true)
+        // Stripe ships in the free core — see CheckoutService::isStripeEnabled().
+        $stripe = $isWired('stripe', true)
             && self::isTruthyGatewayOption($enable_stripe)
             && (string) Settings::get('stripe_secret_key', '') !== '';
 

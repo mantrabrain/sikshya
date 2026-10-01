@@ -35,7 +35,10 @@ export function StatusCountPills({ pills, value, onChange, counts, countsLoading
             }`}
           >
             {p.label}{' '}
-            <span className={active ? 'opacity-90' : 'opacity-70'}>({countLabel})</span>
+            {/* The inactive pill is already slate-600 on slate-100 (~4.6:1); dimming it
+                further with opacity-70 dropped it to ~3.1:1, under WCAG AA. Keep the
+                count visually secondary through weight rather than opacity. */}
+            <span className={active ? 'opacity-90' : 'font-normal'}>({countLabel})</span>
           </button>
         );
       })}

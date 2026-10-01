@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type APIRequestContext } from '@playwright/test';
 import { createCourseViaRest, createLessonViaRest, getAdminNonce } from '../../utils/factories';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
@@ -10,6 +10,26 @@ test.beforeAll(async ({ request }) => {
   test.skip(!routes.some((r) => /\/pro\//.test(r)), 'Sikshya Pro not active');
 });
 
+/**
+ * Per-addon entitlement, read from the admin addons endpoint (`licenseOk`).
+ * Live-session lesson meta is only registered when the plan includes the
+ * add-on, so without it the PATCH silently drops the fields.
+ */
+async function addonLicensed(
+  request: APIRequestContext,
+  nonce: string,
+  addonId: string,
+): Promise<boolean> {
+  const res = await request.get('/wp-json/sikshya/v1/admin/addons', {
+    headers: { 'X-WP-Nonce': nonce },
+  });
+  const body = await res.json().catch(() => null);
+  const items = body?.data?.addons ?? body?.data ?? body?.addons ?? [];
+  if (!Array.isArray(items)) return true;
+  const row = items.find((a: { id?: string }) => a?.id === addonId);
+  return row ? Boolean(row.licenseOk) : true;
+}
+
 test.describe('addon: live_classes lesson meta round-trip', () => {
   test('admin can configure a lesson as a live session via wp/v2 meta + it persists', async ({
     page,
@@ -20,6 +40,10 @@ test.describe('addon: live_classes lesson meta round-trip', () => {
     await request.post('/wp-json/sikshya/v1/admin/addons/live_classes/enable', {
       headers: { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' },
     });
+
+    if (!(await addonLicensed(request, nonce, 'live_classes'))) {
+      test.skip(true, 'site plan does not include "live_classes"');
+    }
 
     const course = await createCourseViaRest(page, request, {
       title: `E2E live course ${Date.now()}`,

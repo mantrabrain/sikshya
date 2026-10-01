@@ -512,6 +512,30 @@ while (have_posts()) {
                                     </p>
                                 </div>
                             </div>
+                        <?php elseif ($question_count < 1) : ?>
+                            <?php
+                            /*
+                             * A quiz with no questions previously rendered nothing at all for an
+                             * enrolled learner: no intro, no start button and no explanation, just
+                             * the quiz title above an empty panel. Say what is going on instead of
+                             * leaving a blank screen.
+                             */
+                            ?>
+                            <div class="sikshya-contentPanel sikshya-contentPanel--quizIntro" data-sikshya-quiz-empty>
+                                <div class="sikshya-quizIntro">
+                                    <h2 class="sikshya-quizIntro__title"><?php esc_html_e('This quiz has no questions yet', 'sikshya'); ?></h2>
+                                    <p class="sikshya-quizIntro__lead">
+                                        <?php esc_html_e('Your instructor has not added any questions to this quiz, so there is nothing to answer right now. Continue with the rest of the course and check back later.', 'sikshya'); ?>
+                                    </p>
+                                    <?php if (current_user_can('edit_post', get_the_ID())) : ?>
+                                        <p class="sikshya-quizIntro__lead">
+                                            <a class="sikshya-btn sikshya-btn--secondary" href="<?php echo esc_url(get_edit_post_link(get_the_ID())); ?>">
+                                                <?php esc_html_e('Add questions to this quiz', 'sikshya'); ?>
+                                            </a>
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         <?php endif; ?>
 
                         <div class="sikshya-contentPanel sikshya-contentPanel--plain">

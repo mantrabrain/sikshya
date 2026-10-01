@@ -1,8 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
 import {
+  learnUrl,
   attachQuestionsToQuiz,
   createCourseViaRest,
   createQuestionViaRest,
+  PlanFeatureRequiredError,
   createQuizViaRest,
   createUserViaRest,
   slug,
@@ -130,12 +132,23 @@ for (const s of SCENARIOS) {
       type: 'free',
     });
     const quiz = await createQuizViaRest(page, request, course.id);
-    const question = await createQuestionViaRest(page, request, {
-      type: s.type,
-      options: s.options,
-      correct: s.correct,
-      points: 1,
-    });
+    let question;
+    try {
+      question = await createQuestionViaRest(page, request, {
+        type: s.type,
+        options: s.options,
+        correct: s.correct,
+        points: 1,
+      });
+    } catch (e) {
+      if (e instanceof PlanFeatureRequiredError) {
+        // The site's plan does not include advanced question types. The 403 is
+        // the entitlement gate behaving correctly, so this scenario is simply
+        // not applicable here.
+        test.skip(true, `requires the "${e.feature}" entitlement (Growth plan or higher)`);
+      }
+      throw e;
+    }
     await attachQuestionsToQuiz(page, request, quiz.id, [question.id]);
 
     const username = slug('stud');
@@ -160,7 +173,7 @@ for (const s of SCENARIOS) {
     });
     expect(enrollRes.status()).toBeLessThan(400);
 
-    await session.page.goto(quiz.link, { waitUntil: 'domcontentloaded' });
+    await session.page.goto(learnUrl('quiz', quiz.slug), { waitUntil: 'domcontentloaded' });
 
     const startBtn = session.page.locator('[data-sikshya-quiz-start]').first();
     await expect(startBtn).toBeEnabled({ timeout: 20_000 });

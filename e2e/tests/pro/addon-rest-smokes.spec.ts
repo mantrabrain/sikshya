@@ -84,6 +84,43 @@ test.beforeAll(async ({ request }) => {
   test.skip(!routes.some((r) => /\/pro\//.test(r)), 'Sikshya Pro not active');
 });
 
+/**
+ * True when the REST layer refused because the site's plan does not include
+ * the feature. A 403 `sikshya_plan_feature_required` is the entitlement gate
+ * behaving correctly, so specs skip rather than fail — otherwise the suite is
+ * permanently red on any plan below Scale and stops being a useful gate.
+ */
+function isPlanGated(status: number, body: unknown): boolean {
+  if (status !== 403) return false;
+  const s = JSON.stringify(body ?? '');
+  return /sikshya_plan_feature_required|sikshya_pro_required/i.test(s);
+}
+
+/**
+ * Per-addon entitlement, read from the admin addons endpoint (`licenseOk`).
+ *
+ * Pro addons do not register their REST routes at all unless the addon is
+ * enabled AND the site's plan includes it, so an unentitled addon answers
+ * `rest_no_route` rather than a 403. Skipping on the 404 alone would also
+ * hide a genuine regression where an *entitled* addon fails to register, so
+ * the entitlement is checked explicitly instead.
+ */
+async function addonLicensed(
+  request: APIRequestContext,
+  nonce: string,
+  addonId: string,
+): Promise<boolean> {
+  const res = await request.get('/wp-json/sikshya/v1/admin/addons', {
+    headers: { 'X-WP-Nonce': nonce },
+  });
+  const body = await res.json().catch(() => null);
+  const items = body?.data?.addons ?? body?.data ?? body?.addons ?? [];
+  if (!Array.isArray(items)) return true;
+  const row = items.find((a: { id?: string }) => a?.id === addonId);
+  // Unknown addon: do not mask it behind a skip.
+  return row ? Boolean(row.licenseOk) : true;
+}
+
 const enableAddon = async (request: APIRequestContext, page: Page, addonId: string) => {
   const nonce = await getAdminNonce(page);
   await request.post(`/wp-json/sikshya/v1/admin/addons/${addonId}/enable`, {
@@ -99,6 +136,10 @@ for (const probe of PROBES) {
     await enableAddon(request, page, probe.addon);
     const nonce = await getAdminNonce(page);
 
+    if (!(await addonLicensed(request, nonce, probe.addon))) {
+      test.skip(true, `site plan does not include "${probe.addon}"`);
+    }
+
     const res = await request.get(probe.path, { headers: { 'X-WP-Nonce': nonce } });
     const status = res.status();
     const body = await res.json().catch(() => null);
@@ -107,6 +148,14 @@ for (const probe of PROBES) {
       type: 'response-meta',
       description: `status=${status} bodyType=${typeof body}`,
     });
+
+    if (isPlanGated(status, body)) {
+      test.info().annotations.push({
+        type: 'entitlement',
+        description: `${probe.addon} is not included in this site's plan — gate returned 403`,
+      });
+      test.skip(true, `requires a plan that includes "${probe.addon}"`);
+    }
 
     expect(probe.okWhen(body, status), `body: ${JSON.stringify(body).slice(0, 200)}`).toBe(true);
   });

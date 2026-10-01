@@ -90,7 +90,7 @@ class LessonRepository implements RepositoryInterface
     public function findByCourse(int $course_id, array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'menu_order',
@@ -113,7 +113,7 @@ class LessonRepository implements RepositoryInterface
     public function findByType(string $type, array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'menu_order',
@@ -136,7 +136,7 @@ class LessonRepository implements RepositoryInterface
     public function findByStatus(string $status, array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => $status,
             'posts_per_page' => -1,
             'orderby' => 'menu_order',
@@ -152,7 +152,7 @@ class LessonRepository implements RepositoryInterface
     public function search(string $search_term, array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'menu_order',
@@ -169,7 +169,7 @@ class LessonRepository implements RepositoryInterface
     public function findNextByCourse(int $course_id, int $current_order): ?object
     {
         $args = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => 1,
             'orderby' => 'menu_order',
@@ -203,7 +203,7 @@ class LessonRepository implements RepositoryInterface
     public function findPreviousByCourse(int $course_id, int $current_order): ?object
     {
         $args = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => 1,
             'orderby' => 'menu_order',

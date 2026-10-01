@@ -2,6 +2,8 @@
 
 namespace Sikshya\Frontend\Controllers;
 
+use Sikshya\Constants\PostTypes;
+
 use Sikshya\Core\Plugin;
 
 // phpcs:ignore
@@ -41,7 +43,7 @@ class LessonController
         $lesson_id = get_the_ID();
         $lesson = get_post($lesson_id);
 
-        if (!$lesson || $lesson->post_type !== 'sikshya_lesson') {
+        if (!$lesson || $lesson->post_type !== PostTypes::LESSON) {
             return;
         }
 
@@ -283,7 +285,7 @@ class LessonController
 
         // Get previous lesson
         $prev_lesson = get_posts([
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => 1,
             'meta_query' => [
@@ -305,7 +307,7 @@ class LessonController
 
         // Get next lesson
         $next_lesson = get_posts([
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => 1,
             'meta_query' => [

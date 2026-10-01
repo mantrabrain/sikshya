@@ -183,7 +183,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
                     Email
                   </div>
                   <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{__('Email delivery', 'sikshya')}</h2>
-                  <p className="mt-1 text-sm text-slate-400/90 dark:text-slate-500/80">
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Configure how mail is sent and wrapped. Enable or edit individual messages on the Email templates screen.
                   </p>
                   {saveMsg ? <p className="mt-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">{saveMsg}</p> : null}

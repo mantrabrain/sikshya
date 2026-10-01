@@ -190,6 +190,18 @@ final class Plugin
             // PostTypeService — see `PostTypeManager::registerRestAccessiblePostMeta()`.
             $this->services['postTypeMeta'] = new \Sikshya\PostTypes\PostTypeManager();
 
+            // Keeps the course price/duration/difficulty alias meta keys in sync on
+            // write, so the two halves of each pair can never disagree (see the class
+            // docblock for why drift was a paywall problem, not a cosmetic one).
+            \Sikshya\Services\CourseMetaAliasMirror::init();
+
+            // Self-diagnosing notices for configuration that silently breaks the
+            // LMS (plain permalinks, registration off, priced courses with no
+            // gateway). Admin-only; they hook `admin_notices` deliberately.
+            if (is_admin()) {
+                \Sikshya\Admin\SiteHealthNotices::init();
+            }
+
             // Curriculum chapter/content helpers for REST (React admin).
             $this->services['courseBuilderUi'] = new \Sikshya\Services\CourseCurriculumActions();
 
@@ -395,11 +407,17 @@ final class Plugin
      */
     private function loadTextdomain(): void
     {
-        load_plugin_textdomain(
-            'sikshya',
-            false,
-            dirname(plugin_basename(SIKSHYA_PLUGIN_FILE)) . '/languages/'
-        );
+        // The plugin file is included long before `init`, and WordPress 6.7+ expects
+        // translations to be loaded no earlier than that (loading sooner is what
+        // trips the `_load_textdomain_just_in_time` notice). Defer the call rather
+        // than running it during plugin load.
+        add_action('init', static function (): void {
+            load_plugin_textdomain(
+                'sikshya',
+                false,
+                dirname(plugin_basename(SIKSHYA_PLUGIN_FILE)) . '/languages/'
+            );
+        }, 0);
     }
 
     /**

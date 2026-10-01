@@ -335,16 +335,66 @@ class CourseService
         $this->courseRepository->setMeta($course_id, '_sikshya_enrollment_count', $count);
     }
 
+    /**
+     * Regular price, resolved the same way checkout resolves it.
+     *
+     * A course price has historically lived under several alias meta keys
+     * (`_sikshya_price`, `_sikshya_course_price`, `sikshya_course_price`).
+     * They are only reconciled by the one-off `MirrorCourseAliases` migration
+     * step -- nothing mirrors them on save -- and each one is independently
+     * writable through the REST meta API, so a course can legitimately carry
+     * its price in just one of them.
+     *
+     * Reading a single key here was a paywall bypass: `CheckoutService`
+     * charges on the value from `sikshya_get_course_pricing()`, which checks
+     * every alias, while this method looked only at `_sikshya_price`. A course
+     * priced through any other alias therefore read as free, and
+     * `/sikshya/v1/me/enroll` granted free access to paid content. Delegate to
+     * the same canonical resolver so the paywall can never disagree with the
+     * thing that takes the money.
+     */
     public function getCoursePrice(int $course_id): float
     {
-        $price = $this->courseRepository->getMeta($course_id, '_sikshya_price', true);
-        return $price ? floatval($price) : 0.00;
+        if (function_exists('sikshya_get_course_pricing')) {
+            $pricing = sikshya_get_course_pricing($course_id);
+
+            return max(0.00, (float) ($pricing['price'] ?? 0));
+        }
+
+        // Fallback when template helpers are unavailable: consider every alias
+        // and let the highest value win, so "paid" always beats "free".
+        return $this->highestAliasedMeta($course_id, ['_sikshya_price', '_sikshya_course_price', 'sikshya_course_price']);
     }
 
+    /**
+     * Sale price, resolved through the same canonical helper as the regular price.
+     */
     public function getCourseSalePrice(int $course_id): float
     {
-        $sale_price = $this->courseRepository->getMeta($course_id, '_sikshya_sale_price', true);
-        return $sale_price ? floatval($sale_price) : 0.00;
+        if (function_exists('sikshya_get_course_pricing')) {
+            $pricing = sikshya_get_course_pricing($course_id);
+
+            return max(0.00, (float) ($pricing['sale_price'] ?? 0));
+        }
+
+        return $this->highestAliasedMeta($course_id, ['_sikshya_sale_price', '_sikshya_course_sale_price', 'sikshya_course_sale_price']);
+    }
+
+    /**
+     * @param string[] $keys Alias meta keys that may carry the same amount.
+     */
+    private function highestAliasedMeta(int $course_id, array $keys): float
+    {
+        $highest = 0.00;
+        foreach ($keys as $key) {
+            $raw = $this->courseRepository->getMeta($course_id, $key, true);
+            if ($raw === '' || $raw === null) {
+                continue;
+            }
+            $highest = max($highest, (float) $raw);
+        }
+
+        return $highest;
     }
 
     public function getCourseDuration(int $course_id): int

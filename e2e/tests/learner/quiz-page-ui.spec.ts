@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
+  learnUrl,
   createCourseViaRest,
   createQuizViaRest,
   createUserViaRest,
@@ -47,7 +48,7 @@ test.describe('learner: quiz page UI', () => {
     });
     expect(enrollRes.status()).toBeLessThan(400);
 
-    await session.page.goto(quiz.link, { waitUntil: 'domcontentloaded' });
+    await session.page.goto(learnUrl('quiz', quiz.slug), { waitUntil: 'domcontentloaded' });
 
     // The quiz template renders the intro panel + either Start quiz (when
     // questions exist) or an empty-state message. Either signals the player

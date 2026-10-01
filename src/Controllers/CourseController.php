@@ -2,6 +2,8 @@
 
 namespace Sikshya\Controllers;
 
+use Sikshya\Constants\PostTypes;
+
 use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Core\LegacyAjax;
 use Sikshya\Core\Plugin;
@@ -284,7 +286,7 @@ class CourseController
             }
 
             $courses = $this->courseModel->getAll($args);
-            $total_courses = wp_count_posts('sikshya_course');
+            $total_courses = wp_count_posts(PostTypes::COURSE);
 
             $courses_data = [];
             foreach ($courses as $course) {

@@ -13,6 +13,16 @@ test.beforeAll(async ({ request }) => {
   );
 });
 
+/**
+ * True when the REST layer refused because the site's plan does not include
+ * the feature. A 403 `sikshya_plan_feature_required` is the entitlement gate
+ * behaving correctly, so the spec skips rather than fails.
+ */
+function isPlanGated(status: number, body: unknown): boolean {
+  if (status !== 403) return false;
+  return /sikshya_plan_feature_required|sikshya_pro_required/i.test(JSON.stringify(body ?? ''));
+}
+
 test.describe('addon: enterprise_reports schedule CRUD', () => {
   test('admin can create a weekly scheduled report, find it, then delete it', async ({
     page,
@@ -41,6 +51,10 @@ test.describe('addon: enterprise_reports schedule CRUD', () => {
       },
     );
     const createBody = await create.json().catch(() => ({}));
+    if (isPlanGated(create.status(), createBody)) {
+      test.skip(true, 'requires a plan that includes "enterprise_reports"');
+    }
+
     expect(create.status(), JSON.stringify(createBody).slice(0, 200)).toBeLessThan(400);
     const scheduleId = Number(createBody?.id ?? 0);
     expect(scheduleId).toBeGreaterThan(0);

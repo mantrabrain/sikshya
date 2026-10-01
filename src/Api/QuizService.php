@@ -2,6 +2,8 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Constants\PostTypes;
+
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -15,7 +17,7 @@ class QuizService
     public function getQuizzes(WP_REST_Request $request): WP_REST_Response
     {
         $args = [
-            'post_type' => 'sikshya_quiz',
+            'post_type' => PostTypes::QUIZ,
             'post_status' => 'publish',
             'posts_per_page' => $request->get_param('per_page') ?: 10,
             'paged' => $request->get_param('page') ?: 1,
@@ -36,7 +38,7 @@ class QuizService
     {
         $data = $request->get_json_params();
         $post_id = wp_insert_post([
-            'post_type' => 'sikshya_quiz',
+            'post_type' => PostTypes::QUIZ,
             'post_title' => sanitize_text_field($data['title'] ?? ''),
             'post_content' => wp_kses_post($data['content'] ?? ''),
             'post_status' => 'publish',
@@ -51,7 +53,7 @@ class QuizService
     {
         $id = $request->get_param('id');
         $post = get_post($id);
-        if (!$post || $post->post_type !== 'sikshya_quiz') {
+        if (!$post || $post->post_type !== PostTypes::QUIZ) {
             return new WP_REST_Response(['error' => __('Quiz not found', 'sikshya')], 404);
         }
         return new WP_REST_Response($this->formatQuiz($post));

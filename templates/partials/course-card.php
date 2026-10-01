@@ -361,6 +361,7 @@ $card_label = sprintf(
                             <li class="sikshya-course-curriculum-stats__item">
                                 <span
                                     class="sikshya-course-curriculum-stats__badge sikshya-course-curriculum-stats__badge--icon-value"
+                                    role="img"
                                     tabindex="0"
                                     aria-label="<?php echo esc_attr($lessons_tip); ?>"
                                 >
@@ -385,6 +386,7 @@ $card_label = sprintf(
                             <li class="sikshya-course-curriculum-stats__item">
                                 <span
                                     class="sikshya-course-curriculum-stats__badge sikshya-course-curriculum-stats__badge--icon-value"
+                                    role="img"
                                     tabindex="0"
                                     aria-label="<?php echo esc_attr($quizzes_tip); ?>"
                                 >
@@ -409,6 +411,7 @@ $card_label = sprintf(
                             <li class="sikshya-course-curriculum-stats__item">
                                 <span
                                     class="sikshya-course-curriculum-stats__badge sikshya-course-curriculum-stats__badge--icon-value"
+                                    role="img"
                                     tabindex="0"
                                     aria-label="<?php echo esc_attr($assign_tip); ?>"
                                 >

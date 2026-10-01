@@ -144,7 +144,7 @@ export function GlobalSearchPalette() {
       if (!rows || rows.length === 0) return null;
       return (
         <div className="border-t border-slate-100 px-2 py-2 first:border-t-0 dark:border-slate-800">
-          <div className="px-2 pb-1 text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+          <div className="px-2 pb-1 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-500">
             {label}
           </div>
           <ul role="list" className="space-y-0.5">
@@ -181,7 +181,7 @@ export function GlobalSearchPalette() {
       >
         <NavIcon name="search" className="h-4 w-4 text-slate-500 dark:text-slate-400" />
         <span className="hidden sm:inline">{__('Search', 'sikshya')}</span>
-        <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 sm:inline">
+        <kbd className="hidden rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 sm:inline">
           ⌘K
         </kbd>
       </button>
@@ -197,7 +197,7 @@ export function GlobalSearchPalette() {
             className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl ring-1 ring-black/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10"
           >
             <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 dark:border-slate-800">
-              <NavIcon name="search" className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+              <NavIcon name="search" className="h-4 w-4 text-slate-500 dark:text-slate-500" />
               <input
                 ref={inputRef}
                 value={q}

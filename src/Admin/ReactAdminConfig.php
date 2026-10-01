@@ -519,6 +519,16 @@ final class ReactAdminConfig
             ];
         }
 
+        // Docs sits last so it reads as reference material rather than a task.
+        // Available to anyone who can reach the admin app, not just admins:
+        // instructors and assistants need the how-to guides too.
+        $items[] = [
+            'id' => 'docs',
+            'label' => __('Docs', 'sikshya'),
+            'icon' => 'bookOpen',
+            'href' => self::reactAppUrl('docs'),
+        ];
+
         if (current_user_can('manage_options')) {
             // Tools is used by the top header button (Import sample data, maintenance).
             // The sidebar hides it to avoid duplication.

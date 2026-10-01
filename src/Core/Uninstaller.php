@@ -2,6 +2,10 @@
 
 namespace Sikshya\Core;
 
+use Sikshya\Constants\Taxonomies;
+
+use Sikshya\Constants\PostTypes;
+
 use Sikshya\Database\Repositories\PluginLifecycleRepository;
 use Sikshya\Services\Settings;
 
@@ -68,11 +72,21 @@ class Uninstaller
      */
     private static function removePostTypes(): void
     {
+        /*
+         * Must be the REGISTERED post types. These were previously spelled
+         * `sikshya_course` / `sikshya_lesson` / ... which no post type has ever
+         * used since `sik_*` was adopted in 1.0.0, so opting in to data erasure
+         * deleted none of the user's course content. Question, chapter and
+         * certificate were missing from the list entirely.
+         */
         $post_types = [
-            'sikshya_course',
-            'sikshya_lesson',
-            'sikshya_quiz',
-            'sikshya_assignment',
+            PostTypes::COURSE,
+            PostTypes::LESSON,
+            PostTypes::QUIZ,
+            PostTypes::ASSIGNMENT,
+            PostTypes::QUESTION,
+            PostTypes::CHAPTER,
+            PostTypes::CERTIFICATE,
         ];
 
         foreach ($post_types as $post_type) {
@@ -90,11 +104,14 @@ class Uninstaller
         }
 
         // Remove taxonomies
+        // `sikshya_lesson_category` / `sikshya_quiz_category` were never
+        // registered; the real ones are difficulty / lesson type / question type.
         $taxonomies = [
-            'sikshya_course_category',
-            'sikshya_course_tag',
-            'sikshya_lesson_category',
-            'sikshya_quiz_category',
+            Taxonomies::COURSE_CATEGORY,
+            Taxonomies::COURSE_TAG,
+            Taxonomies::DIFFICULTY,
+            Taxonomies::LESSON_TYPE,
+            Taxonomies::QUESTION_TYPE,
         ];
 
         foreach ($taxonomies as $taxonomy) {

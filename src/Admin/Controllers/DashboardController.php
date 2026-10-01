@@ -2,6 +2,8 @@
 
 namespace Sikshya\Admin\Controllers;
 
+use Sikshya\Constants\PostTypes;
+
 use Sikshya\Core\Plugin;
 use Sikshya\Services\AnalyticsService;
 use Sikshya\Services\CacheService;
@@ -152,7 +154,10 @@ class DashboardController
     {
         global $wpdb;
         return (int) $wpdb->get_var(
-            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'sikshya_course' AND post_status = 'publish'"
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish'",
+                PostTypes::COURSE
+            )
         );
     }
 

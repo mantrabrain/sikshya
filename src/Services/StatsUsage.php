@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Sikshya\Services;
 
+use Sikshya\Constants\PostTypes;
+
 use WP_Error;
 
 // phpcs:ignore
@@ -186,8 +188,8 @@ final class StatsUsage
     {
         global $wpdb, $wp_version;
 
-        $courses = wp_count_posts('sikshya_course');
-        $lessons = wp_count_posts('sikshya_lesson');
+        $courses = wp_count_posts(PostTypes::COURSE);
+        $lessons = wp_count_posts(PostTypes::LESSON);
 
         $metricDate = gmdate('Y-m-d');
 

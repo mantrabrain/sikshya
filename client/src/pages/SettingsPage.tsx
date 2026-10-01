@@ -209,7 +209,7 @@ function PaymentSettingsTab(props: {
                 </span>
               ) : null}
             </div>
-            <div className="truncate text-xs text-slate-400/90 dark:text-slate-500/80">{subtitle}</div>
+            <div className="truncate text-xs text-slate-500 dark:text-slate-400">{subtitle}</div>
           </div>
         </div>
 
@@ -577,7 +577,7 @@ function SectionCard({
               ) : null}
             </div>
             {description ? (
-              <p className="mt-1 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{description}</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{description}</p>
             ) : null}
             {locked ? (
               <p className="mt-2 text-xs leading-relaxed text-accent-700 dark:text-accent-200">
@@ -839,7 +839,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                         </div>
                         <div
                           className={`mt-0.5 truncate text-xs leading-snug ${
-                            selected ? 'text-white/80' : 'text-slate-400/90 dark:text-slate-500/80'
+                            selected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
                           }`}
                         >
                           {t.description}
@@ -974,7 +974,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                                               <div className="text-sm font-semibold text-slate-900 dark:text-white">
                                                 Send usage data now
                                               </div>
-                                              <div className="mt-1 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">
+                                              <div className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                                                 Triggers an immediate one-time send to validate connectivity.
                                               </div>
                                             </div>
@@ -988,7 +988,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                                             </button>
                                           </div>
                                           {!enabled ? (
-                                            <p className="mt-2 text-xs text-slate-400/90 dark:text-slate-500/80">
+                                            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                                               Enable “Share anonymous usage data” to use Send now.
                                             </p>
                                           ) : null}

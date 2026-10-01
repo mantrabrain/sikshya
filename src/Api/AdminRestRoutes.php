@@ -1730,13 +1730,29 @@ class AdminRestRoutes extends AbstractAdminRestController
     public function getAdminEnrollments(WP_REST_Request $request): WP_REST_Response
     {
         $repo = new AdminTablesRepository();
-        $r = $repo->enrollmentsPaged([
+
+        $args = [
             'per_page' => max(1, min(100, absint($request->get_param('per_page') ?: 20))),
             'page' => max(1, absint($request->get_param('page') ?: 1)),
             'status' => (string) ($request->get_param('status') ?? ''),
             'course_id' => (int) ($request->get_param('course_id') ?: 0),
             'search' => (string) $request->get_param('search'),
-        ]);
+        ];
+
+        /*
+         * SECURITY: `permissionAdmin` only establishes that the caller may reach
+         * the staff backend — instructors pass it too. Without the scoping below
+         * any instructor could page through every enrolment on the site and read
+         * each learner's name, email address and payment amount, including for
+         * courses belonging to other instructors. Site administrators are
+         * unrestricted; everyone else is limited to courses they own.
+         */
+        $scoped = \Sikshya\Services\InstructorPermissions::scopedCourseIds(get_current_user_id());
+        if ($scoped !== null) {
+            $args['allowed_course_ids'] = $scoped;
+        }
+
+        $r = $repo->enrollmentsPaged($args);
 
         return new WP_REST_Response(
             [
@@ -1833,7 +1849,17 @@ class AdminRestRoutes extends AbstractAdminRestController
     public function getAdminQuizAttempts(WP_REST_Request $request): WP_REST_Response
     {
         $repo = new AdminTablesRepository();
-        $r = $repo->quizAttemptsPaged([
+
+        /*
+         * SECURITY: `permissionAdmin` admits instructors, so without this an
+         * instructor could page every learner quiz attempt on the site,
+         * including each learner's name and email address. Administrators stay
+         * unrestricted; everyone else is limited to courses they own. Mirrors
+         * the enrolments listing.
+         */
+        $scoped = \Sikshya\Services\InstructorPermissions::scopedCourseIds(get_current_user_id());
+
+        $args = [
             'per_page' => max(1, min(100, absint($request->get_param('per_page') ?: 30))),
             'page' => max(1, absint($request->get_param('page') ?: 1)),
             'quiz_id' => (int) ($request->get_param('quiz_id') ?: 0),
@@ -1841,7 +1867,13 @@ class AdminRestRoutes extends AbstractAdminRestController
             'user_id' => (int) ($request->get_param('user_id') ?: 0),
             'status' => (string) ($request->get_param('status') ?: ''),
             'search' => (string) $request->get_param('search'),
-        ]);
+        ];
+
+        if ($scoped !== null) {
+            $args['allowed_course_ids'] = $scoped;
+        }
+
+        $r = $repo->quizAttemptsPaged($args);
 
         return new WP_REST_Response(
             [
@@ -2278,7 +2310,14 @@ class AdminRestRoutes extends AbstractAdminRestController
         $page = max(1, absint($request->get_param('page') ?: 1));
         $offset = ($page - 1) * $per_page;
 
-        $rows = $repo->findAllPaged($per_page, $offset);
+        /*
+         * SECURITY: certificate rows carry a verification_code and document_url,
+         * so an unscoped listing would let any instructor verify and download
+         * certificates issued on other instructors' courses.
+         */
+        $scoped = \Sikshya\Services\InstructorPermissions::scopedCourseIds(get_current_user_id());
+
+        $rows = $repo->findAllPaged($per_page, $offset, $scoped);
         $out = [];
 
         $permalinks = PermalinkService::get();

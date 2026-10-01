@@ -83,6 +83,18 @@ async function postAddonSettings(
   return { status: res.status(), body: await res.json().catch(() => ({})) };
 }
 
+/**
+ * True when the REST layer refused because the site's plan does not include
+ * the feature. A 403 `sikshya_plan_feature_required` is the entitlement gate
+ * behaving correctly, so specs skip rather than fail — otherwise the suite is
+ * permanently red on any plan below Scale and stops being a useful gate.
+ */
+function isPlanGated(status: number, body: unknown): boolean {
+  if (status !== 403) return false;
+  const s = JSON.stringify(body ?? '');
+  return /sikshya_plan_feature_required|sikshya_pro_required/i.test(s);
+}
+
 const pickStringFieldKey = (schemaFields: unknown): string | null => {
   if (!Array.isArray(schemaFields)) return null;
   for (const f of schemaFields) {
@@ -116,6 +128,14 @@ for (const addonId of PRO_ADDONS) {
         description: 'no generic schema endpoint — addon ships its own admin page',
       });
       return;
+    }
+
+    if (isPlanGated(initial.status, initial.body)) {
+      test.info().annotations.push({
+        type: 'entitlement',
+        description: `${addonId} is not included in this site's plan — gate returned 403`,
+      });
+      test.skip(true, `requires a plan that includes "${addonId}"`);
     }
 
     expect(initial.status, JSON.stringify(initial.body).slice(0, 200)).toBeLessThan(400);

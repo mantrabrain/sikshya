@@ -8,6 +8,7 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Constants\PostTypes;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\CourseService;
 use WP_REST_Request;
@@ -100,7 +101,7 @@ class PublicRestRoutes
         $allowed_statuses = ['publish', 'private'];
         if (
             !$course_post
-            || $course_post->post_type !== 'sikshya_course'
+            || $course_post->post_type !== PostTypes::COURSE
             || !in_array($course_post->post_status, $allowed_statuses, true)
         ) {
             return new WP_REST_Response(['success' => false, 'message' => __('Invalid course.', 'sikshya')], 404);

@@ -959,10 +959,20 @@ class CoursesListTable extends AbstractListTable
      */
     private function getCourseLessonsCount($course_id): int
     {
+        /*
+         * Only the count is wanted, so do not hydrate any posts. This used to
+         * run with `posts_per_page => -1` and full meta/term priming purely to
+         * read `found_posts`, which on a large catalogue loads every matching
+         * lesson into memory to produce a single integer.
+         */
         $args = [
             'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
-            'posts_per_page' => -1,
+            'posts_per_page' => 1,
+            'fields' => 'ids',
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+            'ignore_sticky_posts' => true,
             'meta_query' => [
                 [
                     'key' => '_sikshya_lesson_course',
@@ -973,7 +983,8 @@ class CoursesListTable extends AbstractListTable
         ];
 
         $query = new \WP_Query($args);
-        return $query->found_posts;
+
+        return (int) $query->found_posts;
     }
 
     /**

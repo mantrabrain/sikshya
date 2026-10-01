@@ -2,6 +2,8 @@
 
 namespace Sikshya\Models;
 
+use Sikshya\Constants\PostTypes;
+
 use WP_Post;
 
 // phpcs:ignore
@@ -35,7 +37,7 @@ class Quiz
     public function getAll(array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_quiz',
+            'post_type' => PostTypes::QUIZ,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'date',
@@ -59,7 +61,7 @@ class Quiz
     {
         $quiz = get_post($quiz_id);
 
-        if (!$quiz || $quiz->post_type !== 'sikshya_quiz') {
+        if (!$quiz || $quiz->post_type !== PostTypes::QUIZ) {
             return null;
         }
 
@@ -86,7 +88,7 @@ class Quiz
         $data = wp_parse_args($data, $defaults);
 
         // Set post type
-        $data['post_type'] = 'sikshya_quiz';
+        $data['post_type'] = PostTypes::QUIZ;
 
         // Create the quiz
         $quiz_id = wp_insert_post($data);
@@ -111,7 +113,7 @@ class Quiz
     public function update(int $quiz_id, array $data)
     {
         $data['ID'] = $quiz_id;
-        $data['post_type'] = 'sikshya_quiz';
+        $data['post_type'] = PostTypes::QUIZ;
 
         return wp_update_post($data);
     }
@@ -351,7 +353,7 @@ class Quiz
     public function getByCourse(int $course_id): array
     {
         $args = [
-            'post_type' => 'sikshya_quiz',
+            'post_type' => PostTypes::QUIZ,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'date',

@@ -13,6 +13,16 @@ test.beforeAll(async ({ request }) => {
   );
 });
 
+/**
+ * True when the REST layer refused because the site's plan does not include
+ * the feature. A 403 `sikshya_plan_feature_required` is the entitlement gate
+ * behaving correctly, so the spec skips rather than fails.
+ */
+function isPlanGated(status: number, body: unknown): boolean {
+  if (status !== 403) return false;
+  return /sikshya_plan_feature_required|sikshya_pro_required/i.test(JSON.stringify(body ?? ''));
+}
+
 test.describe('addon: public_api_keys end-to-end', () => {
   test('admin creates an API key, lists it, then revokes it', async ({ page, request }) => {
     const nonce = await getAdminNonce(page);
@@ -26,6 +36,10 @@ test.describe('addon: public_api_keys end-to-end', () => {
       data: { label, scopes: ['read:courses'] },
     });
     const createBody = await create.json().catch(() => ({}));
+    if (isPlanGated(create.status(), createBody)) {
+      test.skip(true, 'requires a plan that includes "public_api_keys"');
+    }
+
     expect(create.status(), JSON.stringify(createBody).slice(0, 200)).toBeLessThan(400);
     expect(createBody?.ok).toBe(true);
 

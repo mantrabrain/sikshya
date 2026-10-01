@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
+  learnUrl,
   attachQuestionsToQuiz,
   createCourseViaRest,
   createQuestionViaRest,
@@ -55,7 +56,7 @@ test.describe('learner: quiz attempt UI', () => {
     });
     expect(enrollRes.status()).toBeLessThan(400);
 
-    await session.page.goto(quiz.link, { waitUntil: 'domcontentloaded' });
+    await session.page.goto(learnUrl('quiz', quiz.slug), { waitUntil: 'domcontentloaded' });
 
     // Start quiz button is enabled because the quiz now has at least one question.
     const startBtn = session.page.locator('[data-sikshya-quiz-start]').first();
