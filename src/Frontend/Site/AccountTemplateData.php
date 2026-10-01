@@ -14,9 +14,8 @@ use Sikshya\Services\LearnerCurriculumHelper;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\PublicCurriculumService;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

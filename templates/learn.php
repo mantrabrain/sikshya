@@ -6,7 +6,7 @@
  */
 
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 use Sikshya\Frontend\Site\LearnTemplateData;
@@ -37,8 +37,8 @@ $page_title = sprintf(
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo esc_html($page_title); ?></title>
-	<link rel="stylesheet" href="<?php echo esc_url($ds_href); ?>">
-	<link rel="stylesheet" href="<?php echo esc_url($learn_href); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url($ds_href); ?>">
+    <link rel="stylesheet" href="<?php echo esc_url($learn_href); ?>">
     <?php
     /**
      * Extension point for learn-shell <head> (no wp_head() — keeps the shell minimal).

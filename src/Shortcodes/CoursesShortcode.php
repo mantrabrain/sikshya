@@ -5,9 +5,8 @@ namespace Sikshya\Shortcodes;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

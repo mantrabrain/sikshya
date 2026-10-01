@@ -10,9 +10,8 @@ use Sikshya\Database\Tables\EnrollmentsTable;
 use Sikshya\Database\Tables\ProgressTable;
 use Sikshya\Database\Tables\QuizAttemptsTable;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

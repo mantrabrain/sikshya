@@ -13,9 +13,8 @@ use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\PublicCurriculumService;
 use Sikshya\Services\Settings;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

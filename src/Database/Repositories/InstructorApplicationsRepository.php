@@ -2,9 +2,8 @@
 
 namespace Sikshya\Database\Repositories;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

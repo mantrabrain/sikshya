@@ -12,9 +12,8 @@ use Sikshya\Models\Lesson;
 use Sikshya\Models\Quiz;
 use Sikshya\Models\Enrollment;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

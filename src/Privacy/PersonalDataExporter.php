@@ -2,9 +2,8 @@
 
 namespace Sikshya\Privacy;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

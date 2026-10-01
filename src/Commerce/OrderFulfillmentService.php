@@ -7,9 +7,8 @@ use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\Settings;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

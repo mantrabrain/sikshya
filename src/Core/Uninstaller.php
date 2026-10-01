@@ -9,9 +9,8 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\PluginLifecycleRepository;
 use Sikshya\Services\Settings;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

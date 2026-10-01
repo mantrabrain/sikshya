@@ -6,9 +6,8 @@ use Sikshya\Constants\PostTypes;
 
 use WP_Post;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

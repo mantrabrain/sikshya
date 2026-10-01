@@ -6,9 +6,8 @@ use Sikshya\Core\Plugin;
 use Sikshya\Addons\Addons;
 use WP_REST_Server;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -5,9 +5,8 @@ namespace Sikshya\Frontend\Site;
 use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -5,9 +5,8 @@ namespace Sikshya\Services;
 use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\LogRepository;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

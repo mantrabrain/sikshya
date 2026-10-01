@@ -4,9 +4,8 @@ namespace Sikshya\Admin\Views;
 
 use Sikshya\Core\Plugin;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**
@@ -114,11 +113,11 @@ abstract class BaseView
 
         if (file_exists($template_path)) {
             try {
-				// EXTR_SKIP: never overwrite a local in this scope (`$template_path`,
-				// `$template`, `$this`) — an unguarded extract() would silently clobber
-				// `$template_path` on the very next line if `$this->data` ever had a
-				// same-named key, redirecting the include to the wrong file.
-				extract($this->data, EXTR_SKIP);
+                // EXTR_SKIP: never overwrite a local in this scope (`$template_path`,
+                // `$template`, `$this`) — an unguarded extract() would silently clobber
+                // `$template_path` on the very next line if `$this->data` ever had a
+                // same-named key, redirecting the include to the wrong file.
+                extract($this->data, EXTR_SKIP);
                 include $template_path;
             } catch (\Exception $e) {
                 error_log('Sikshya BaseView: Template include error: ' . $e->getMessage());

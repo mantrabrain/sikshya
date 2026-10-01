@@ -7,9 +7,8 @@ use Sikshya\Services\PermalinkService;
 use WP_Error;
 use WP_User;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -7,9 +7,8 @@ use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Licensing\PricingUrl;
 use WP_Error;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

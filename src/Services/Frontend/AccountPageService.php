@@ -86,32 +86,62 @@ final class AccountPageService
          *
          */
         $partialPath = apply_filters('sikshya_account_view_template', $defaultPartial, $view, $legacy);
-		if (!is_string($partialPath) || !self::isSafeTemplatePath($partialPath)) {
+        if (!is_string($partialPath) || !self::isSafeTemplatePath($partialPath)) {
             $partialPath = $plugin->getTemplatePath('partials/account-view-dashboard.php');
         }
 
         return (string) $partialPath;
     }
 
-	/**
-	 * Whether a filter-supplied template path is readable AND resolves inside
-	 * wp-content (themes/plugins) rather than an arbitrary filesystem location
-	 * a compromised/misbehaving addon could point `sikshya_account_view_template` at.
-	 */
-	private static function isSafeTemplatePath(string $path): bool
-	{
-		$real = realpath($path);
-		if ($real === false || !is_readable($real)) {
-			return false;
-		}
+    /**
+     * Whether a filter-supplied template path is readable AND resolves inside
+     * wp-content (themes/plugins) rather than an arbitrary filesystem location
+     * a compromised/misbehaving addon could point `sikshya_account_view_template` at.
+     */
+    private static function isSafeTemplatePath(string $path): bool
+    {
+        $normalized = wp_normalize_path($path);
 
-		$content_dir = realpath(WP_CONTENT_DIR);
-		if ($content_dir === false) {
-			return false;
-		}
+        // No parent-directory segments at all, whatever they would resolve to.
+        if (preg_match('#(^|/)\.\.(/|$)#', $normalized) === 1) {
+            return false;
+        }
 
-		return strpos($real, $content_dir . DIRECTORY_SEPARATOR) === 0;
-	}
+        if (!is_file($path) || !is_readable($path)) {
+            return false;
+        }
+
+        $roots = [WP_CONTENT_DIR, WP_PLUGIN_DIR, get_theme_root(), get_template_directory(), get_stylesheet_directory()];
+        if (defined('WPMU_PLUGIN_DIR')) {
+            $roots[] = WPMU_PLUGIN_DIR;
+        }
+        if (defined('SIKSHYA_PLUGIN_DIR')) {
+            $roots[] = SIKSHYA_PLUGIN_DIR;
+        }
+
+        $real = realpath($path);
+        $real = $real === false ? '' : wp_normalize_path($real);
+
+        foreach ($roots as $root) {
+            if (!is_string($root) || $root === '') {
+                continue;
+            }
+
+            $prefix = trailingslashit(wp_normalize_path($root));
+            // The path as given (so a symlinked plugin or theme directory still works) ...
+            if (strpos($normalized, $prefix) === 0) {
+                return true;
+            }
+
+            // ... or where it really lives.
+            $real_root = realpath($root);
+            if ($real !== '' && $real_root !== false && strpos($real, trailingslashit(wp_normalize_path($real_root))) === 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private static function handleProfilePost(): void
     {

@@ -11,7 +11,7 @@
  */
 
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 use Sikshya\Frontend\Site\PublicPageUrls;

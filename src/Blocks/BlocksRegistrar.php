@@ -6,9 +6,8 @@ use Sikshya\Core\Plugin;
 use Sikshya\Shortcodes\AuthShortcodes;
 use Sikshya\Shortcodes\CoursesShortcode;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

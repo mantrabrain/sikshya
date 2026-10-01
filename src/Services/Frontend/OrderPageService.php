@@ -5,9 +5,8 @@ namespace Sikshya\Services\Frontend;
 use Sikshya\Frontend\Site\OrderTemplateData;
 use Sikshya\Presentation\Models\OrderPageModel;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 final class OrderPageService

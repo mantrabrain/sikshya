@@ -6,9 +6,8 @@ use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use Sikshya\Database\Tables\ProgressTable;
 use Sikshya\Services\LearnerCurriculumHelper;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 class ProgressRepository implements RepositoryInterface
@@ -27,54 +26,57 @@ class ProgressRepository implements RepositoryInterface
         return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->table_name)) === $this->table_name;
     }
 
-	/**
-	 * Whitelisted progress columns that are safe to sort by. MySQL
-	 * identifiers can't be parameterised by `$wpdb->prepare()`, so any
-	 * ORDER BY interpolation is a latent SQLi trap the day a caller
-	 * starts forwarding request params here.
-	 */
-	private const SAFE_ORDERBY = [
-		'id' => 'id',
-		'user_id' => 'user_id',
-		'course_id' => 'course_id',
-		'lesson_id' => 'lesson_id',
-		'quiz_id' => 'quiz_id',
-		'status' => 'status',
-		'percentage' => 'percentage',
-		'time_spent' => 'time_spent',
-		'completed_date' => 'completed_date',
-		'updated_at' => 'updated_at',
-	];
+    /**
+     * Whitelisted progress columns that are safe to sort by. MySQL
+     * identifiers can't be parameterised by `$wpdb->prepare()`, so any
+     * ORDER BY interpolation is a latent SQLi trap the day a caller
+     * starts forwarding request params here.
+     */
+    private const SAFE_ORDERBY = [
+        'id' => 'id',
+        'user_id' => 'user_id',
+        'course_id' => 'course_id',
+        'lesson_id' => 'lesson_id',
+        'quiz_id' => 'quiz_id',
+        'status' => 'status',
+        'percentage' => 'percentage',
+        'time_spent' => 'time_spent',
+        'completed_date' => 'completed_date',
+        'created_at' => 'created_at',
+        'updated_at' => 'updated_at',
+    ];
 
-	/**
-	 * Normalise the paging / ordering args every list-style query in this
-	 * repository consumes. Enforces a hard whitelist on the identifier,
-	 * clamps direction to ASC/DESC, and int-casts the paging cursors so
-	 * no downstream method has to remember to do it.
-	 *
-	 * @param array<string, mixed> $args
-	 * @return array{orderby: string, order: string, limit: int, offset: int}
-	 */
-	private static function normalizeOrderArgs(array $args): array
-	{
-		$orderby_in = strtolower((string) ($args['orderby'] ?? 'updated_at'));
-		$orderby = self::SAFE_ORDERBY[$orderby_in] ?? 'updated_at';
+    /**
+     * Normalise the paging / ordering args every list-style query in this
+     * repository consumes. Enforces a hard whitelist on the identifier,
+     * clamps direction to ASC/DESC, and int-casts the paging cursors so
+     * no downstream method has to remember to do it.
+     *
+     * @param array<string, mixed> $args
+     * @return array{orderby: string, order: string, limit: int, offset: int}
+     */
+    private static function normalizeOrderArgs(array $args): array
+    {
+        $orderby_raw = $args['orderby'] ?? 'updated_at';
+        $orderby_in = is_scalar($orderby_raw) ? strtolower((string) $orderby_raw) : 'updated_at';
+        $orderby = self::SAFE_ORDERBY[$orderby_in] ?? 'updated_at';
 
-		$order = strtoupper((string) ($args['order'] ?? 'DESC'));
-		if ($order !== 'ASC' && $order !== 'DESC') {
-			$order = 'DESC';
-		}
+        $order_raw = $args['order'] ?? 'DESC';
+        $order = is_scalar($order_raw) ? strtoupper((string) $order_raw) : 'DESC';
+        if ($order !== 'ASC' && $order !== 'DESC') {
+            $order = 'DESC';
+        }
 
-		$limit = max(0, min(500, (int) ($args['limit'] ?? 10)));
-		$offset = max(0, (int) ($args['offset'] ?? 0));
+        $limit = max(0, min(500, (int) ($args['limit'] ?? 10)));
+        $offset = max(0, (int) ($args['offset'] ?? 0));
 
-		return [
-			'orderby' => $orderby,
-			'order' => $order,
-			'limit' => $limit,
-			'offset' => $offset,
-		];
-	}
+        return [
+            'orderby' => $orderby,
+            'order' => $order,
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+    }
 
     /**
      * Query progress rows by user/course filters.
@@ -116,11 +118,11 @@ class ProgressRepository implements RepositoryInterface
     {
         global $wpdb;
 
-		$safe = self::normalizeOrderArgs($args);
+        $safe = self::normalizeOrderArgs($args);
 
         $sql = "SELECT * FROM {$this->table_name}";
-		$sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
-		$sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
+        $sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
+        $sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
 
         return $wpdb->get_results($sql);
     }
@@ -210,11 +212,11 @@ class ProgressRepository implements RepositoryInterface
     {
         global $wpdb;
 
-		$safe = self::normalizeOrderArgs($args);
+        $safe = self::normalizeOrderArgs($args);
 
         $sql = $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE user_id = %d", $user_id);
-		$sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
-		$sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
+        $sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
+        $sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
 
         return $wpdb->get_results($sql);
     }
@@ -223,11 +225,11 @@ class ProgressRepository implements RepositoryInterface
     {
         global $wpdb;
 
-		$safe = self::normalizeOrderArgs($args);
+        $safe = self::normalizeOrderArgs($args);
 
         $sql = $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE course_id = %d", $course_id);
-		$sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
-		$sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
+        $sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
+        $sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
 
         return $wpdb->get_results($sql);
     }

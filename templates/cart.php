@@ -6,7 +6,7 @@
  */
 
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 use Sikshya\Services\Frontend\CartPageService;

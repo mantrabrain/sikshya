@@ -6,7 +6,7 @@
  */
 
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 sikshya_get_header();

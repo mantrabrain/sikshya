@@ -8,7 +8,7 @@
  */
 
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 if (!isset($outline_blocks) || !is_array($outline_blocks)) {

@@ -5,9 +5,8 @@ namespace Sikshya\Frontend\Controllers;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

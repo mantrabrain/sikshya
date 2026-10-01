@@ -4,9 +4,8 @@ namespace Sikshya\Frontend\Controllers;
 
 use Sikshya\Core\Plugin;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -6,9 +6,8 @@ use Sikshya\Constants\PostTypes;
 
 use Sikshya\Core\Plugin;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

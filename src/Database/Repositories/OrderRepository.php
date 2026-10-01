@@ -5,9 +5,8 @@ namespace Sikshya\Database\Repositories;
 use Sikshya\Database\Tables\OrdersTable;
 use Sikshya\Database\Tables\OrderItemsTable;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

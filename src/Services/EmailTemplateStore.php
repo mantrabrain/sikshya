@@ -4,9 +4,8 @@ namespace Sikshya\Services;
 
 use Sikshya\Utils\RichText;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

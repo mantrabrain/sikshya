@@ -2,9 +2,8 @@
 
 namespace Sikshya\Database\Tables;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 final class LessonContentTable extends AbstractTable

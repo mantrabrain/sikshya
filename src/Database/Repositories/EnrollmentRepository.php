@@ -5,9 +5,8 @@ namespace Sikshya\Database\Repositories;
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use Sikshya\Database\Tables\EnrollmentsTable;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 class EnrollmentRepository implements RepositoryInterface

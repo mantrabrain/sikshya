@@ -7,9 +7,8 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Services\LessonCourseLink;
 use WP_Post;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

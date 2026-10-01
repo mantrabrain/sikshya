@@ -13,9 +13,8 @@ use Sikshya\Services\Settings;
 use Sikshya\Frontend\Site\CurriculumOutlineMeta;
 use Sikshya\Frontend\Site\PublicPageUrls;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -5,9 +5,8 @@ namespace Sikshya\Frontend\Site;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\LearnerCertificateService;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

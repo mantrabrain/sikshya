@@ -7,9 +7,8 @@ use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Certificates\CertificateRenderer;
 use Sikshya\Certificates\CertificateTemplateDefaults;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

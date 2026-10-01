@@ -8,9 +8,8 @@ use Sikshya\Database\Repositories\CourseRepository;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Services\Settings;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -6,9 +6,8 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use WP_Query;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 class CourseRepository implements RepositoryInterface

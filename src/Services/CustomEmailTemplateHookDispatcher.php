@@ -4,9 +4,8 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\OrderRepository;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

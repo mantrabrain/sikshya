@@ -23,9 +23,8 @@ use Sikshya\Admin\ProUpgradeAdminNudge;
 use Sikshya\Admin\SetupWizardController;
 use Sikshya\Services\AdminMarketingNoticeService;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**
@@ -35,44 +34,77 @@ if (!defined('ABSPATH')) {
  */
 class Admin
 {
-	/**
-	 * Registers the always-on Sikshya admin-chrome stylesheet and attaches the
-	 * menu-icon-sizing / setup-wizard-hiding rules (and, when relevant, the
-	 * React-shell chrome rules) as inline CSS instead of raw `echo`'d `<style>`
-	 * tags on `admin_head`.
-	 */
-	public static function enqueueSikshyaAdminInlineStyles(): void
-	{
-		wp_register_style('sikshya-admin-inline', false, [], SIKSHYA_VERSION);
-		wp_enqueue_style('sikshya-admin-inline');
+    /**
+     * Registers the always-on Sikshya admin-chrome stylesheet and attaches the
+     * menu-icon-sizing / setup-wizard-hiding rules (and, when relevant, the
+     * React-shell chrome rules) as inline CSS instead of raw `echo`'d `<style>`
+     * tags on `admin_head`.
+     */
+    public static function enqueueSikshyaAdminInlineStyles(): void
+    {
+        wp_register_style('sikshya-admin-inline', false, [], SIKSHYA_VERSION);
+        wp_enqueue_style('sikshya-admin-inline');
 
-		wp_add_inline_style('sikshya-admin-inline', self::adminMenuIconCss());
-		wp_add_inline_style('sikshya-admin-inline', self::hideSetupWizardSubmenuCss());
+        wp_add_inline_style('sikshya-admin-inline', self::adminMenuIconCss());
+        wp_add_inline_style('sikshya-admin-inline', self::hideSetupWizardSubmenuCss());
 
-		if (self::isSikshyaReactAppRequest() || self::isSikshyaSetupWizardRequest()) {
-			wp_add_inline_style('sikshya-admin-inline', self::reactShellChromeCss());
-		}
+        if (self::isSikshyaReactAppRequest() || self::isSikshyaSetupWizardRequest()) {
+            wp_add_inline_style('sikshya-admin-inline', self::reactShellChromeCss());
+        }
 
-		if (self::isSikshyaAdminPage()) {
-			wp_add_inline_style('sikshya-admin-inline', self::dismissibleNoticeHidingCss());
-		}
-	}
+        if (self::isSikshyaAdminPage()) {
+            wp_add_inline_style('sikshya-admin-inline', self::dismissibleNoticeHidingCss());
+        }
+    }
 
-	/**
-	 * Hide dismissible WP core notices on Sikshya admin pages (they clutter the custom UI).
-	 */
-	private static function dismissibleNoticeHidingCss(): string
-	{
-		return '
-			.notice.is-dismissible,
-			.error.is-dismissible,
-			.updated.is-dismissible,
-			.update-nag,
-			.settings-error {
-				display: none !important;
-			}
-		';
-	}
+    /**
+     * Former `admin_head` printer for the admin menu icon sizing.
+     *
+     * Kept only so add-ons that still call it do not fatal; the rules are now attached by
+     * {@see self::enqueueSikshyaAdminInlineStyles()}.
+     *
+     * @deprecated 1.0.10 Use {@see self::enqueueSikshyaAdminInlineStyles()}.
+     */
+    public static function printSikshyaAdminMenuIconCss(): void
+    {
+        _deprecated_function(__METHOD__, '1.0.10', 'Admin::enqueueSikshyaAdminInlineStyles()');
+    }
+
+    /**
+     * Former `admin_head` printer that hid the setup-wizard submenu link.
+     *
+     * @deprecated 1.0.10 Use {@see self::enqueueSikshyaAdminInlineStyles()}.
+     */
+    public static function hideSetupWizardSubmenuLink(): void
+    {
+        _deprecated_function(__METHOD__, '1.0.10', 'Admin::enqueueSikshyaAdminInlineStyles()');
+    }
+
+    /**
+     * Former `admin_head` printer for the React shell chrome rules.
+     *
+     * @deprecated 1.0.10 Use {@see self::enqueueSikshyaAdminInlineStyles()}.
+     */
+    public static function printSikshyaReactShellHead(): void
+    {
+        _deprecated_function(__METHOD__, '1.0.10', 'Admin::enqueueSikshyaAdminInlineStyles()');
+    }
+
+    /**
+     * Hide dismissible WP core notices on Sikshya admin pages (they clutter the custom UI).
+     */
+    private static function dismissibleNoticeHidingCss(): string
+    {
+        return '
+            .notice.is-dismissible,
+            .error.is-dismissible,
+            .updated.is-dismissible,
+            .update-nag,
+            .settings-error {
+                display: none !important;
+            }
+        ';
+    }
 
     /**
      * Size the Sikshya top-level WP admin menu icon.
@@ -80,9 +112,9 @@ class Admin
      * When `add_menu_page()` receives an image URL, WordPress renders an `<img>` inside the menu icon slot.
      * Without a size override, custom logos can appear oversized/misaligned.
      */
-	private static function adminMenuIconCss(): string
+    private static function adminMenuIconCss(): string
     {
-		return '
+        return '
             #adminmenu #toplevel_page_sikshya .wp-menu-image img {
                 width: 20px;
                 height: 20px;
@@ -91,7 +123,7 @@ class Admin
                 display: block;
                 box-sizing: content-box;
             }
-		';
+        ';
     }
 
     /**
@@ -102,13 +134,13 @@ class Admin
      * {@see user_can_access_admin_page()} (wrong hook / empty parent) and shows
      * “Sorry, you are not allowed to access this page.” for direct wizard URLs.
      */
-	private static function hideSetupWizardSubmenuCss(): string
+    private static function hideSetupWizardSubmenuCss(): string
     {
-		return '
+        return '
             #adminmenu #toplevel_page_sikshya .wp-submenu li:has(a[href*="page=sikshya-setup"]) {
                 display: none !important;
             }
-		';
+        ';
     }
 
     /**
@@ -180,7 +212,7 @@ class Admin
         add_action('admin_init', [self::class, 'redirectLegacySikshyaReactMenus'], 0);
         add_filter('show_admin_bar', [self::class, 'hideAdminBarOnSikshyaApp']);
         add_action('admin_enqueue_scripts', [self::class, 'dequeueWordPressUiOnSikshyaApp'], 10000);
-		add_action('admin_enqueue_scripts', [self::class, 'enqueueSikshyaAdminInlineStyles']);
+        add_action('admin_enqueue_scripts', [self::class, 'enqueueSikshyaAdminInlineStyles']);
 
         // Late strip: plugins often register `admin_notices` after `admin_init`.
         add_action('current_screen', [$this, 'stripAdminNoticesOnReactShell'], 0);
@@ -228,7 +260,7 @@ class Admin
          * Setup wizard: registered under Sikshya so `page=sikshya-setup` resolves and core access
          * checks see a parent (`get_admin_page_parent()` reads `$submenu`). Do not call
          * `remove_submenu_page()` — it drops the submenu row and breaks direct wizard URLs.
-		 * The link is hidden via {@see hideSetupWizardSubmenuCss()}.
+         * The link is hidden via {@see hideSetupWizardSubmenuCss()}.
          */
         add_submenu_page(
             AdminPages::DASHBOARD,
@@ -273,9 +305,9 @@ class Admin
     /**
      * Hide WP skip links and other chrome on the Sikshya full-screen shell.
      */
-	private static function reactShellChromeCss(): string
+    private static function reactShellChromeCss(): string
     {
-		return '
+        return '
             body.sikshya-react-shell .screen-reader-shortcut,
             body.sikshya-react-shell #wpbody-content > .screen-reader-text,
             body.sikshya-react-shell a[href="#wpbody-content"],
@@ -302,7 +334,7 @@ class Admin
             body.sikshya-react-shell #wpbody-content > p.notice {
                 display: none !important;
             }
-		';
+        ';
     }
 
     /**
@@ -763,7 +795,7 @@ class Admin
      *
      * @return bool
      */
-	private static function isSikshyaAdminPage(): bool
+    private static function isSikshyaAdminPage(): bool
     {
         $screen = get_current_screen();
 

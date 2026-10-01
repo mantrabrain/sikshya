@@ -5,9 +5,8 @@ namespace Sikshya\Services;
 use Sikshya\Database\Repositories\InstructorApplicationsRepository;
 use Sikshya\Frontend\Site\InstructorContext;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

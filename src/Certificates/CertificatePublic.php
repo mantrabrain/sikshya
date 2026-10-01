@@ -5,9 +5,8 @@ namespace Sikshya\Certificates;
 use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Services\PermalinkService;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

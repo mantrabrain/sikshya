@@ -6,7 +6,7 @@
  */
 
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 use Sikshya\Services\Frontend\CheckoutPageService;
@@ -84,14 +84,21 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
 // `sikshya-checkout-page` is enqueued in the footer (see Frontend::enqueuePageSpecificAssets()),
 // so registering this inline addition here — before wp_footer() runs — still prints it
 // immediately ahead of the script tag.
-wp_add_inline_script(
-	'sikshya-checkout-page',
-	'window.sikshyaCheckoutConfig = ' . wp_json_encode($checkout_js_config) . ';',
-	'before'
-);
+$checkout_config_js = 'window.sikshyaCheckoutConfig = ' . wp_json_encode($checkout_js_config) . ';';
+$checkout_config_attached = wp_script_is('sikshya-checkout-page', 'enqueued');
+if ($checkout_config_attached) {
+    wp_add_inline_script('sikshya-checkout-page', $checkout_config_js, 'before');
+}
 ?>
 
 <div <?php foreach ($root_attrs as $attr => $val) echo ' ' . esc_attr((string) $attr) . '="' . esc_attr((string) $val) . '"'; ?>>
+    <?php
+    if (!$checkout_config_attached) {
+        // The page script is not enqueued on this request (an add-on or theme removed it), so the
+        // config would be dropped. Print it where it always used to be so the page keeps working.
+        wp_print_inline_script_tag($checkout_config_js);
+    }
+    ?>
     <header class="sikshya-course-lp__masthead">
         <div class="sikshya-container sikshya-container--course sikshya-course-lp__masthead-inner">
             <?php

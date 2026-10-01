@@ -11,9 +11,8 @@ use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\Settings;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -4,9 +4,8 @@ namespace Sikshya\Frontend\Site;
 
 use Sikshya\Database\Repositories\InstructorMetricsRepository;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -8,9 +8,8 @@ use Sikshya\Core\Plugin;
 use Sikshya\Services\AnalyticsService;
 use Sikshya\Services\CacheService;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

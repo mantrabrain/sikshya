@@ -5,9 +5,8 @@ namespace Sikshya\Frontend\Controllers;
 use Sikshya\Core\Plugin;
 use Sikshya\Frontend\Site\PublicPageUrls;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

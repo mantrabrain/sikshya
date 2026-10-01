@@ -7,9 +7,8 @@ use Sikshya\Services\LessonCourseLink;
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use WP_Query;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 class LessonRepository implements RepositoryInterface

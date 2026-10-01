@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Sikshya\Licensing;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

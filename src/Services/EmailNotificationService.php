@@ -6,9 +6,8 @@ use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Site\PublicPageUrls;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

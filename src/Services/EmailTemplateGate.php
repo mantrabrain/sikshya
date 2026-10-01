@@ -6,9 +6,8 @@ use Sikshya\Addons\Addons;
 use Sikshya\Licensing\FeatureRegistry;
 use Sikshya\Licensing\TierCapabilities;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

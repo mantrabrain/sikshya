@@ -30,9 +30,8 @@ use Sikshya\Blocks\BlocksRegistrar;
 use Sikshya\Shortcodes\CoursesShortcode;
 use Sikshya\Shortcodes\AuthShortcodes;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

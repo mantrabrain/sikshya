@@ -2,9 +2,8 @@
 
 namespace Sikshya\Blocks;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

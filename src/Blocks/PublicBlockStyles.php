@@ -4,9 +4,8 @@ namespace Sikshya\Blocks;
 
 use Sikshya\Core\Plugin;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

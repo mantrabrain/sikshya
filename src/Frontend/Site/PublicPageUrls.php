@@ -6,9 +6,8 @@ use Sikshya\Services\PermalinkService;
 use Sikshya\Services\LearnPublicIdService;
 use Sikshya\Constants\PostTypes;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -7,9 +7,8 @@ namespace Sikshya\Services;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

@@ -7,9 +7,8 @@ use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\InstructorMetricsRepository;
 use Sikshya\Admin\ReactAdminConfig;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

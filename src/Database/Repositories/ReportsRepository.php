@@ -8,9 +8,8 @@ use Sikshya\Database\Tables\EnrollmentsTable;
 use Sikshya\Database\Tables\PaymentsTable;
 use Sikshya\Services\Settings;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

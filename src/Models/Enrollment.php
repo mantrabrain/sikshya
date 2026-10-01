@@ -5,9 +5,8 @@ namespace Sikshya\Models;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

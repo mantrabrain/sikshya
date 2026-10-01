@@ -4,9 +4,8 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\AssignmentSubmissionsTable;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

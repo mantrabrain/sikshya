@@ -9,7 +9,7 @@
  */
 
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 $display_name = $page_model->getDisplayName();

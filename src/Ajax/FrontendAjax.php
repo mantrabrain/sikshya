@@ -131,15 +131,15 @@ class FrontendAjax extends AjaxAbstract
             return;
         }
 
-		// Paid courses: block free enrollment (same rule as the active enrollment paths).
-		if (function_exists('sikshya_get_course_pricing')) {
-			$pricing = sikshya_get_course_pricing($course_id);
-			$is_paid = null !== $pricing['effective'] && (float) $pricing['effective'] > 0.00001;
-			if ($is_paid) {
-				$this->sendError('This course requires purchase.');
-				return;
-			}
-		}
+        // Paid courses: block free enrollment (same rule as the active enrollment paths).
+        if (function_exists('sikshya_get_course_pricing')) {
+            $pricing = sikshya_get_course_pricing($course_id);
+            $is_paid = null !== $pricing['effective'] && (float) $pricing['effective'] > 0.00001;
+            if ($is_paid) {
+                $this->sendError(__('This course requires purchase.', 'sikshya'));
+                return;
+            }
+        }
 
         // Add enrollment
         if (!is_array($enrollment)) {

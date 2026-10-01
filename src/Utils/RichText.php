@@ -2,9 +2,8 @@
 
 namespace Sikshya\Utils;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

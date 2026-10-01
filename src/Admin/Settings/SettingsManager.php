@@ -9,9 +9,8 @@ use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**

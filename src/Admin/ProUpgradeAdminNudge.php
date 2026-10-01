@@ -5,9 +5,8 @@ namespace Sikshya\Admin;
 use Sikshya\Constants\AdminPages;
 use Sikshya\Licensing\PricingUrl;
 
-// phpcs:ignore
 if (!defined('ABSPATH')) {
-	exit;
+    exit;
 }
 
 /**
