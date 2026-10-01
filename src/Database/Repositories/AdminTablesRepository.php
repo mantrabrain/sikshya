@@ -246,6 +246,33 @@ final class AdminTablesRepository
         $where = ['1=1'];
         $prepare = [];
 
+        /*
+         * SECURITY: same ownership scoping as the enrolments listing. `null`
+         * means unrestricted (administrators); an empty array means the caller
+         * owns no courses and must see nothing rather than everything.
+         */
+        $allowed_course_ids = array_key_exists('allowed_course_ids', $args) && is_array($args['allowed_course_ids'])
+            ? array_values(array_filter(array_map('intval', $args['allowed_course_ids']), static fn($id) => $id > 0))
+            : null;
+
+        if (array_key_exists('allowed_course_ids', $args) && $allowed_course_ids === []) {
+            return [
+                'items' => [],
+                'total' => 0,
+                'pages' => 0,
+                'page' => $page,
+                'per_page' => $per_page,
+                'table_missing' => false,
+            ];
+        }
+
+        if ($allowed_course_ids !== null) {
+            $where[] = 'a.course_id IN (' . implode(',', array_fill(0, count($allowed_course_ids), '%d')) . ')';
+            foreach ($allowed_course_ids as $cid) {
+                $prepare[] = $cid;
+            }
+        }
+
         if ($quiz_id > 0) {
             $where[] = 'a.quiz_id = %d';
             $prepare[] = $quiz_id;

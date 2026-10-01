@@ -245,12 +245,33 @@ class CertificateRepository
     /**
      * @return array<int, object>
      */
-    public function findAllPaged(int $limit = 50, int $offset = 0): array
+    /**
+     * @param int[]|null $allowed_course_ids Null for no restriction; an empty
+     *                                       array yields no rows (fail closed).
+     */
+    public function findAllPaged(int $limit = 50, int $offset = 0, ?array $allowed_course_ids = null): array
     {
         global $wpdb;
 
         $limit = max(1, min(200, $limit));
         $offset = max(0, $offset);
+
+        if ($allowed_course_ids !== null) {
+            $ids = array_values(array_filter(array_map('intval', $allowed_course_ids), static fn($id) => $id > 0));
+            if ($ids === []) {
+                return [];
+            }
+
+            $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholders generated, values bound below.
+            return $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM {$this->table_name} WHERE course_id IN ({$placeholders}) ORDER BY issued_date DESC LIMIT %d OFFSET %d",
+                    ...array_merge($ids, [$limit, $offset])
+                )
+            );
+        }
 
         return $wpdb->get_results(
             $wpdb->prepare(
