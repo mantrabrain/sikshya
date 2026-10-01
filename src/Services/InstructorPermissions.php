@@ -32,6 +32,45 @@ final class InstructorPermissions
         return Settings::isTruthy(Settings::get('instructors_can_create_courses', '1'));
     }
 
+    /**
+     * Course ids an admin-screen listing should be limited to for this user.
+     *
+     * Returns `null` when the user is not restricted (site administrators and
+     * non-instructor staff), mirroring the convention the Pro review
+     * moderation repository already uses: `null` means "no restriction",
+     * an empty array means "no courses" and must produce zero rows rather
+     * than falling through to an unfiltered query.
+     *
+     * @return int[]|null
+     */
+    public static function scopedCourseIds(int $user_id): ?array
+    {
+        if ($user_id <= 0) {
+            return [];
+        }
+        if (user_can($user_id, 'manage_options') || user_can($user_id, 'manage_sikshya')) {
+            return null;
+        }
+        if (!self::isInstructorUser($user_id)) {
+            return null;
+        }
+
+        $ids = get_posts(
+            [
+                'post_type' => \Sikshya\Constants\PostTypes::COURSE,
+                'post_status' => ['publish', 'private', 'draft', 'pending', 'future'],
+                'author' => $user_id,
+                'posts_per_page' => -1,
+                'fields' => 'ids',
+                'no_found_rows' => true,
+                'update_post_meta_cache' => false,
+                'update_post_term_cache' => false,
+            ]
+        );
+
+        return array_values(array_map('intval', (array) $ids));
+    }
+
     public static function canEditCourse(int $user_id, int $course_id): bool
     {
         if ($course_id <= 0 || $user_id <= 0) {

@@ -1730,13 +1730,29 @@ class AdminRestRoutes extends AbstractAdminRestController
     public function getAdminEnrollments(WP_REST_Request $request): WP_REST_Response
     {
         $repo = new AdminTablesRepository();
-        $r = $repo->enrollmentsPaged([
+
+        $args = [
             'per_page' => max(1, min(100, absint($request->get_param('per_page') ?: 20))),
             'page' => max(1, absint($request->get_param('page') ?: 1)),
             'status' => (string) ($request->get_param('status') ?? ''),
             'course_id' => (int) ($request->get_param('course_id') ?: 0),
             'search' => (string) $request->get_param('search'),
-        ]);
+        ];
+
+        /*
+         * SECURITY: `permissionAdmin` only establishes that the caller may reach
+         * the staff backend — instructors pass it too. Without the scoping below
+         * any instructor could page through every enrolment on the site and read
+         * each learner's name, email address and payment amount, including for
+         * courses belonging to other instructors. Site administrators are
+         * unrestricted; everyone else is limited to courses they own.
+         */
+        $scoped = \Sikshya\Services\InstructorPermissions::scopedCourseIds(get_current_user_id());
+        if ($scoped !== null) {
+            $args['allowed_course_ids'] = $scoped;
+        }
+
+        $r = $repo->enrollmentsPaged($args);
 
         return new WP_REST_Response(
             [

@@ -56,6 +56,33 @@ final class AdminTablesRepository
         $where = ['1=1'];
         $prepare = [];
 
+        /*
+         * SECURITY: a listing may be limited to courses the caller owns. `null`
+         * means no restriction (administrators); an empty array means the caller
+         * owns nothing and must see zero rows — never an unfiltered query.
+         */
+        $allowed_course_ids = array_key_exists('allowed_course_ids', $args) && is_array($args['allowed_course_ids'])
+            ? array_values(array_filter(array_map('intval', $args['allowed_course_ids']), static fn($id) => $id > 0))
+            : null;
+
+        if (array_key_exists('allowed_course_ids', $args) && $allowed_course_ids === []) {
+            return [
+                'items' => [],
+                'total' => 0,
+                'pages' => 0,
+                'page' => $page,
+                'per_page' => $per_page,
+                'table_missing' => false,
+            ];
+        }
+
+        if ($allowed_course_ids !== null) {
+            $where[] = 'e.course_id IN (' . implode(',', array_fill(0, count($allowed_course_ids), '%d')) . ')';
+            foreach ($allowed_course_ids as $cid) {
+                $prepare[] = $cid;
+            }
+        }
+
         if ($status !== '') {
             $where[] = 'e.status = %s';
             $prepare[] = sanitize_key($status);
@@ -244,8 +271,18 @@ final class AdminTablesRepository
         $where_sql = implode(' AND ', $where);
         $table_sql = esc_sql($table);
 
+        $count_query = "SELECT COUNT(*) FROM `{$table_sql}` a LEFT JOIN {$users_table} u ON u.ID = a.user_id LEFT JOIN {$posts_table} q ON q.ID = a.quiz_id LEFT JOIN {$posts_table} c ON c.ID = a.course_id WHERE {$where_sql}";
+
+        /*
+         * With no filters applied, `$where_sql` is just `1=1` and `$prepare` is
+         * empty — calling prepare() with no placeholders and no arguments trips
+         * WordPress's `_doing_it_wrong` notice on the default, unfiltered view of
+         * the screen. Mirrors the guard already used by the payments query below.
+         */
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name escaped; values bound.
-        $total = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$table_sql}` a LEFT JOIN {$users_table} u ON u.ID = a.user_id LEFT JOIN {$posts_table} q ON q.ID = a.quiz_id LEFT JOIN {$posts_table} c ON c.ID = a.course_id WHERE {$where_sql}", ...$prepare));
+        $total = $prepare === []
+            ? (int) $wpdb->get_var($count_query)
+            : (int) $wpdb->get_var($wpdb->prepare($count_query, ...$prepare));
         $pages = $total > 0 ? (int) ceil($total / $per_page) : 0;
 
         $prepare_rows = array_merge($prepare, [$per_page, $offset]);
