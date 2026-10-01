@@ -8,6 +8,10 @@ use Sikshya\Constants\PostTypes;
 
 use WP_Error;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Sikshya usage telemetry (opt-in, privacy-safe).
  *

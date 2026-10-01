@@ -4,6 +4,10 @@ namespace Sikshya\Commerce;
 
 use Sikshya\Licensing\TierCapabilities;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Payment gateway registry (extensible via filters).
  *

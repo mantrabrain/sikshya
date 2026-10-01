@@ -2,6 +2,10 @@
 
 namespace Sikshya\Services;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Collects environment/system info for admin tools.
  */

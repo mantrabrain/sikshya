@@ -2,6 +2,10 @@
 
 namespace Sikshya\Services;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Reads course catalog / archive settings stored via {@see Settings}.
  *

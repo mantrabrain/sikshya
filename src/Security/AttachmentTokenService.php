@@ -2,6 +2,10 @@
 
 namespace Sikshya\Security;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * HMAC-signed download tokens for course/lesson attachments.
  *

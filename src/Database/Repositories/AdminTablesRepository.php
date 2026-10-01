@@ -7,6 +7,10 @@ use Sikshya\Database\Tables\EnrollmentsTable;
 use Sikshya\Database\Tables\QuizAttemptsTable;
 use Sikshya\Database\Tables\PaymentsTable;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Admin-focused table listings (joins custom tables with WP users/posts).
  *

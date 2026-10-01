@@ -7,6 +7,10 @@ use Sikshya\Services\LessonCourseLink;
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use WP_Query;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class LessonRepository implements RepositoryInterface
 {
     public function findAll(array $args = []): array

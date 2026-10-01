@@ -5,6 +5,10 @@ namespace Sikshya\Frontend\Site;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * View-model for the legacy `templates/courses-grid.php` browse layout.
  *

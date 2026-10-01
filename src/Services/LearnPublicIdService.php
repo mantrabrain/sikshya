@@ -2,6 +2,10 @@
 
 namespace Sikshya\Services;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Stable public ids for Learn player items (lesson/quiz/assignment).
  *

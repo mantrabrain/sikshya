@@ -2,6 +2,10 @@
 
 namespace Sikshya\Blocks;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Detect Sikshya blocks/shortcodes in post content (for asset loading).
  *

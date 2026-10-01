@@ -4,6 +4,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\OrderRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Registers WordPress hooks for custom email templates so stored {@see EmailTemplateStore} `event` keys actually send mail.
  *

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Sikshya\Certificates;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Default seeded certificate templates: visual-builder layout JSON + rendered HTML body.
  *

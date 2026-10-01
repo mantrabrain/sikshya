@@ -6,6 +6,10 @@ use Sikshya\Constants\PostTypes;
 
 use Sikshya\Core\Plugin;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Frontend Lesson Controller
  *

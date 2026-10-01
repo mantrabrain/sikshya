@@ -4,6 +4,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\CertificateRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Read-only certificate queries for REST.
  */

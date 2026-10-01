@@ -2,6 +2,10 @@
 
 namespace Sikshya\Frontend\Site;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Shared view-model for archive/taxonomy templates.
  *

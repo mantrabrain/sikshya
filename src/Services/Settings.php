@@ -2,6 +2,10 @@
 
 namespace Sikshya\Services;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Centralized settings read/write helper.
  *

@@ -6,6 +6,10 @@ use Sikshya\Constants\PostTypes;
 use WP_REST_Request;
 use WP_REST_Response;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class CourseService
 {
     /**

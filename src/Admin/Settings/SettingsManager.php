@@ -9,6 +9,10 @@ use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Settings Manager Class
  *

@@ -5,6 +5,10 @@ namespace Sikshya\Shortcodes;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Shortcode: [sikshya_courses]
  *

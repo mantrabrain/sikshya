@@ -2,6 +2,10 @@
 
 namespace Sikshya\Services;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Question Type Service
  *

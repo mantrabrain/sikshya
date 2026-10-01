@@ -6,6 +6,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Constants\PostTypes;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Global Settings → Instructors: permission toggles for the instructor role.
  *

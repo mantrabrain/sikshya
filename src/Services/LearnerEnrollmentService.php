@@ -4,6 +4,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\EnrollmentRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Learner enrollment checks for frontend controllers (Model layer).
  *

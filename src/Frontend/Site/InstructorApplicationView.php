@@ -4,6 +4,10 @@ namespace Sikshya\Frontend\Site;
 
 use Sikshya\Core\Plugin;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Account: "Apply for instructor" view for learners.
  *

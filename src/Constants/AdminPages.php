@@ -2,6 +2,10 @@
 
 namespace Sikshya\Constants;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Admin Page Constants
  *

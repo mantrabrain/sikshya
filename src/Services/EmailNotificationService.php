@@ -6,6 +6,10 @@ use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Site\PublicPageUrls;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Basic email notifications (wp_mail) with editable templates.
  *

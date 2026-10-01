@@ -5,6 +5,10 @@ namespace Sikshya\Frontend\Site;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\CourseService;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * POST handler for cart and free enrollment actions (no logic in templates).
  *

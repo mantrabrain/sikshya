@@ -5,6 +5,10 @@ namespace Sikshya\Frontend\Site;
 use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Request-scoped cache for (user × course) state used by archive cards.
  *

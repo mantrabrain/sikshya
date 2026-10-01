@@ -2,6 +2,10 @@
 
 namespace Sikshya\Helpers;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Shared SVG icon paths from {@see assets/admin/icons/icons.json} for PHP templates.
  */

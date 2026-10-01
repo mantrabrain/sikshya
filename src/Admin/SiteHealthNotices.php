@@ -6,6 +6,10 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\Settings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Self-diagnosing admin notices for configuration that silently breaks the LMS.
  *

@@ -2,6 +2,10 @@
 
 namespace Sikshya\Security;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Transient-based brute-force protection for the Sikshya auth endpoints.
  *

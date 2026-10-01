@@ -7,6 +7,10 @@ use Sikshya\Security\AttachmentTokenService;
 use WP_REST_Request;
 use WP_REST_Server;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * REST proxy that streams attachment files through Sikshya rather than
  * exposing the raw `wp-content/uploads/` URL.
