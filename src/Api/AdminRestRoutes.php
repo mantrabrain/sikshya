@@ -25,6 +25,7 @@ use Sikshya\Commerce\OrderFulfillmentService;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Services\CategoryService;
+use Sikshya\Services\InstructorPermissions;
 use Sikshya\Services\CourseBuilderService;
 use Sikshya\Services\CourseCurriculumActions;
 use Sikshya\Database\Repositories\CouponRepository;
@@ -767,6 +768,39 @@ class AdminRestRoutes extends AbstractAdminRestController
         return $ui instanceof CourseCurriculumActions ? $ui : null;
     }
 
+    /**
+     * Ownership gate for the curriculum + course-builder endpoints.
+     *
+     * `permissionAdmin` only proves staff-backend access and *some* edit
+     * capability, which every instructor has for every course. Each mutating
+     * handler below therefore has to check the specific object it is about to
+     * touch. Returns a ready-to-return 403 response, or null when allowed.
+     *
+     * @param int ...$post_ids Objects the request would modify; 0 is ignored.
+     */
+    private function denyUnlessCanEdit(int ...$post_ids): ?WP_REST_Response
+    {
+        $user_id = get_current_user_id();
+
+        foreach ($post_ids as $post_id) {
+            if ($post_id <= 0) {
+                continue;
+            }
+            if (!InstructorPermissions::canEditObject($user_id, $post_id)) {
+                return new WP_REST_Response(
+                    [
+                        'success' => false,
+                        'message' => __('You are not allowed to modify this item.', 'sikshya'),
+                        'code' => 'forbidden',
+                    ],
+                    403
+                );
+            }
+        }
+
+        return null;
+    }
+
     public function createChapter(WP_REST_Request $request): WP_REST_Response
     {
         $ui = $this->curriculumActions();
@@ -774,7 +808,12 @@ class AdminRestRoutes extends AbstractAdminRestController
             return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
-        $r = $ui->restCreateChapter($this->jsonBody($request));
+        $payload = $this->jsonBody($request);
+        if (($deny = $this->denyUnlessCanEdit((int) ($payload['course_id'] ?? 0))) !== null) {
+            return $deny;
+        }
+
+        $r = $ui->restCreateChapter($payload);
         if (empty($r['success'])) {
             return new WP_REST_Response(['success' => false, 'message' => $r['message'] ?? ''], 400);
         }
@@ -797,6 +836,10 @@ class AdminRestRoutes extends AbstractAdminRestController
         }
 
         $id = (int) $request->get_param('id');
+        if (($deny = $this->denyUnlessCanEdit($id)) !== null) {
+            return $deny;
+        }
+
         $r = $ui->restChapterData($id);
         if (empty($r['success'])) {
             return new WP_REST_Response(['success' => false, 'message' => $r['message'] ?? ''], 400);
@@ -814,6 +857,9 @@ class AdminRestRoutes extends AbstractAdminRestController
 
         $p = $this->jsonBody($request);
         $p['chapter_id'] = (int) $request->get_param('id');
+        if (($deny = $this->denyUnlessCanEdit((int) $p['chapter_id'])) !== null) {
+            return $deny;
+        }
         $r = $ui->restUpdateChapter($p);
         if (empty($r['success'])) {
             return new WP_REST_Response(['success' => false, 'message' => $r['message'] ?? ''], 400);
@@ -1021,18 +1067,13 @@ class AdminRestRoutes extends AbstractAdminRestController
         // grants every LMS-staff role (including instructors) blanket entry.
         // Without an explicit per-post ownership check here, instructor A
         // could `POST` with instructor B's course_id and rewrite the post.
-        // `current_user_can('edit_post', $id)` honours WP's post-author cap
-        // mapping so site admins (`edit_others_posts`) still pass.
+        // The check cannot use `current_user_can('edit_post', $id)`: these post
+        // types register with `capability_type => 'post'`, so that maps onto
+        // `edit_published_posts`, which the instructor role does not hold — it
+        // rejected instructors editing their *own* published courses.
         $editing_course_id = isset($params['course_id']) ? (int) $params['course_id'] : 0;
-        if ($editing_course_id > 0 && !current_user_can('edit_post', $editing_course_id)) {
-            return new WP_REST_Response(
-                [
-                    'success' => false,
-                    'message' => __('You are not allowed to edit this course.', 'sikshya'),
-                    'code' => 'forbidden',
-                ],
-                403
-            );
+        if (($deny = $this->denyUnlessCanEdit($editing_course_id)) !== null) {
+            return $deny;
         }
 
         $service = $this->plugin->getService('courseBuilder');
@@ -1177,7 +1218,16 @@ class AdminRestRoutes extends AbstractAdminRestController
             return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
-        $out = $svc->createContent($this->jsonBody($request));
+        $payload = $this->jsonBody($request);
+        $deny = $this->denyUnlessCanEdit(
+            (int) ($payload['course_id'] ?? 0),
+            (int) ($payload['chapter_id'] ?? 0)
+        );
+        if ($deny !== null) {
+            return $deny;
+        }
+
+        $out = $svc->createContent($payload);
 
         return new WP_REST_Response(
             [
@@ -1197,6 +1247,14 @@ class AdminRestRoutes extends AbstractAdminRestController
         }
 
         $p = $this->jsonBody($request);
+        $deny = $this->denyUnlessCanEdit(
+            (int) ($p['content_id'] ?? 0),
+            (int) ($p['chapter_id'] ?? 0)
+        );
+        if ($deny !== null) {
+            return $deny;
+        }
+
         $out = $svc->linkContentToChapter((int) ($p['content_id'] ?? 0), (int) ($p['chapter_id'] ?? 0));
 
         return new WP_REST_Response(
@@ -1219,6 +1277,9 @@ class AdminRestRoutes extends AbstractAdminRestController
         $p = $this->jsonBody($request);
         $item_id = (int) ($p['item_id'] ?? 0);
         $data = isset($p['data']) && is_array($p['data']) ? $p['data'] : [];
+        if (($deny = $this->denyUnlessCanEdit($item_id)) !== null) {
+            return $deny;
+        }
         $out = $svc->saveContentItem($item_id, $data);
 
         return new WP_REST_Response(
@@ -1238,6 +1299,10 @@ class AdminRestRoutes extends AbstractAdminRestController
         }
 
         $p = $this->jsonBody($request);
+        if (($deny = $this->denyUnlessCanEdit((int) ($p['course_id'] ?? 0))) !== null) {
+            return $deny;
+        }
+
         $out = $svc->saveChapterOrder((int) ($p['course_id'] ?? 0), isset($p['chapter_order']) && is_array($p['chapter_order']) ? $p['chapter_order'] : []);
 
         return new WP_REST_Response(
@@ -1254,6 +1319,10 @@ class AdminRestRoutes extends AbstractAdminRestController
         }
 
         $p = $this->jsonBody($request);
+        if (($deny = $this->denyUnlessCanEdit((int) ($p['chapter_id'] ?? 0))) !== null) {
+            return $deny;
+        }
+
         $out = $svc->saveLessonOrder((int) ($p['chapter_id'] ?? 0), isset($p['lesson_order']) && is_array($p['lesson_order']) ? $p['lesson_order'] : []);
 
         return new WP_REST_Response(
@@ -1274,6 +1343,10 @@ class AdminRestRoutes extends AbstractAdminRestController
         $chapter_order = isset($p['chapter_order']) && is_array($p['chapter_order']) ? $p['chapter_order'] : [];
         $blocks = isset($p['chapters']) && is_array($p['chapters']) ? $p['chapters'] : [];
 
+        if (($deny = $this->denyUnlessCanEdit($course_id)) !== null) {
+            return $deny;
+        }
+
         $out = $svc->saveOutlineStructure($course_id, $chapter_order, $blocks);
 
         return new WP_REST_Response(
@@ -1287,6 +1360,12 @@ class AdminRestRoutes extends AbstractAdminRestController
         $p = $this->jsonBody($request);
         $chapters = isset($p['chapters']) && is_array($p['chapters']) ? array_map('absint', $p['chapters']) : [];
         $lessons = isset($p['lessons']) && is_array($p['lessons']) ? array_map('absint', $p['lessons']) : [];
+
+        // Force-deletes, bypassing the trash — the single most destructive
+        // curriculum route, and previously unscoped.
+        if (($deny = $this->denyUnlessCanEdit(...array_merge($chapters, $lessons))) !== null) {
+            return $deny;
+        }
 
         $deleted = 0;
         $errors = [];
@@ -1796,6 +1875,10 @@ class AdminRestRoutes extends AbstractAdminRestController
             );
         }
 
+        if (($deny = $this->denyUnlessCanEdit($course_id)) !== null) {
+            return $deny;
+        }
+
         $course_post = get_post($course_id);
         if (!$course_post || (string) $course_post->post_type !== PostTypes::COURSE) {
             return new WP_REST_Response(
@@ -1918,7 +2001,10 @@ class AdminRestRoutes extends AbstractAdminRestController
         // attempt row's stored course_id and let WP's post-author cap mapping
         // decide (site admins with `edit_others_posts` still pass).
         $attempt_course_id = (int) ($row->course_id ?? 0);
-        if ($attempt_course_id > 0 && !current_user_can('edit_post', $attempt_course_id)) {
+        if (
+            $attempt_course_id > 0
+            && !InstructorPermissions::canEditObject(get_current_user_id(), $attempt_course_id)
+        ) {
             return new WP_REST_Response(
                 ['ok' => false, 'code' => 'forbidden', 'message' => __('You are not allowed to manage attempts on this course.', 'sikshya')],
                 403

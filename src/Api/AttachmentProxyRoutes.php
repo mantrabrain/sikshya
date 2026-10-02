@@ -67,21 +67,7 @@ final class AttachmentProxyRoutes
             );
         }
 
-        // Resolve the requester. Try cookie session first (cheap), JWT
-        // Bearer second (mobile clients).
-        $current_uid = (int) \get_current_user_id();
-        if ($current_uid <= 0) {
-            $bearer = JwtAuthService::bearerFromRequest($request);
-            if ($bearer !== '') {
-                $jwt = $this->plugin->getService('jwtAuth');
-                if ($jwt instanceof JwtAuthService) {
-                    $resolved = $jwt->validateToken($bearer);
-                    if (!\is_wp_error($resolved)) {
-                        $current_uid = (int) $resolved;
-                    }
-                }
-            }
-        }
+        $current_uid = $this->resolveRequesterId($request);
 
         if ($current_uid <= 0) {
             $this->bail(401, \__('Authentication required to download this file.', 'sikshya'));
@@ -127,6 +113,65 @@ final class AttachmentProxyRoutes
      * the client probably expected an octet-stream and would mishandle a
      * JSON body.
      */
+    /**
+     * Identify who is asking for the file.
+     *
+     * Three sources, in cost order: the resolved REST user, a Bearer JWT (mobile
+     * clients), and finally the logged-in cookie read directly.
+     *
+     * That last step is what makes these links usable. A signed download URL is
+     * built to be *clicked* — it goes in a Downloads list, and a click is a
+     * top-level navigation carrying cookies but no nonce. WordPress's
+     * `rest_cookie_check_errors()` deliberately calls `wp_set_current_user(0)`
+     * for any REST request that presents no nonce, so `get_current_user_id()` is
+     * 0 here even for a perfectly valid session, and every protected attachment
+     * answered 401 the moment a learner clicked it rather than fetched it.
+     *
+     * Reading the cookie back is safe for this route specifically:
+     *
+     *   - It is a read-only GET that streams a file and changes no state, so the
+     *     nonce is not protecting anything against CSRF. The worst a forged
+     *     request achieves is making someone download their own file, and the
+     *     response is not readable cross-origin.
+     *   - Authority comes from the HMAC token, not from the session. The token
+     *     names the attachment and the single user id allowed to use it, and the
+     *     identity check below still has to pass, so a valid cookie alone opens
+     *     nothing.
+     *   - `wp_validate_auth_cookie()` is the same primitive WordPress uses to
+     *     authenticate an ordinary page load, so this accepts exactly the
+     *     sessions the rest of the site accepts.
+     */
+    private function resolveRequesterId(WP_REST_Request $request): int
+    {
+        $uid = (int) \get_current_user_id();
+        if ($uid > 0) {
+            return $uid;
+        }
+
+        $bearer = JwtAuthService::bearerFromRequest($request);
+        if ($bearer !== '') {
+            $jwt = $this->plugin->getService('jwtAuth');
+            if ($jwt instanceof JwtAuthService) {
+                $resolved = $jwt->validateToken($bearer);
+                if (!\is_wp_error($resolved)) {
+                    return (int) $resolved;
+                }
+            }
+        }
+
+        if (defined('LOGGED_IN_COOKIE') && !empty($_COOKIE[LOGGED_IN_COOKIE])) {
+            $cookie = \wp_unslash($_COOKIE[LOGGED_IN_COOKIE]);
+            if (is_string($cookie) && $cookie !== '') {
+                $from_cookie = (int) \wp_validate_auth_cookie($cookie, 'logged_in');
+                if ($from_cookie > 0) {
+                    return $from_cookie;
+                }
+            }
+        }
+
+        return 0;
+    }
+
     private function bail(int $http_status, string $message): void
     {
         \status_header($http_status);

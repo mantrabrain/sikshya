@@ -346,6 +346,22 @@ abstract class AbstractTab implements TabInterface
         $fields = $this->getFields();
         $success = true;
 
+        // `update_post_meta()` also returns false when the value is unchanged, so
+        // a bare false is not an error — on a re-save that is every field. The
+        // original guard used `current_user_can('edit_post', ...)` to tell a
+        // genuine failure from a no-op, but these post types register with
+        // `capability_type => 'post'`, so that maps onto `edit_published_posts`,
+        // which the instructor role does not hold. The result was that every
+        // no-op write counted as a failure and the whole Pricing tab answered
+        // "Failed to save some data" for any instructor editing their own
+        // published course.
+        //
+        // Resolved once here rather than per field: it cannot change mid-loop.
+        $user_can_edit = \Sikshya\Services\InstructorPermissions::canEditObject(
+            get_current_user_id(),
+            $course_id
+        );
+
         // Save structured fields (sections)
         foreach ($fields as $section_id => $section_config) {
             $section_fields = $section_config['fields'] ?? [];
@@ -375,7 +391,7 @@ abstract class AbstractTab implements TabInterface
                     $result = update_post_meta($course_id, $meta_key, $sanitized_value);
                 }
 
-                if ($result === false && !current_user_can('edit_post', $course_id)) {
+                if ($result === false && !$user_can_edit) {
                     $success = false;
                 }
             }

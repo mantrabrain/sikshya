@@ -5,6 +5,7 @@ namespace Sikshya\Frontend\Controllers;
 use Sikshya\Constants\PostTypes;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Services\LessonAttachments;
 
 /**
  * Frontend Lesson Controller
@@ -380,30 +381,34 @@ class LessonController
     }
 
     /**
-     * Get lesson attachments
+     * Get lesson attachments.
+     *
+     * Delegates to {@see LessonAttachments}, which reads the canonical meta key.
+     * This method previously read `sikshya_lesson_attachments` while the only
+     * writer stored `_sikshya_lesson_attachments`, so it always returned an empty
+     * list; it also handed out raw uploads URLs, bypassing the attachment
+     * protection that course resources go through, and called `filesize()` on
+     * whatever path WordPress reported, which warns when the file is gone.
+     *
+     * The returned keys are unchanged so existing consumers keep working.
+     *
+     * @return array<int, array{id:int, title:string, url:string, type:string, size:int}>
      */
     private function getLessonAttachments(int $lesson_id): array
     {
-        $attachments = get_post_meta($lesson_id, 'sikshya_lesson_attachments', true);
+        $rows = LessonAttachments::forDisplay($lesson_id, (int) get_current_user_id());
 
-        if (!$attachments) {
-            return [];
-        }
-
-        $attachment_data = [];
-        foreach ($attachments as $attachment_id) {
-            $attachment = get_post($attachment_id);
-            if ($attachment) {
-                $attachment_data[] = [
-                    'id' => $attachment_id,
-                    'title' => $attachment->post_title,
-                    'url' => wp_get_attachment_url($attachment_id),
-                    'type' => get_post_mime_type($attachment_id),
-                    'size' => filesize(get_attached_file($attachment_id)),
+        return array_map(
+            static function (array $row): array {
+                return [
+                    'id' => (int) $row['id'],
+                    'title' => (string) $row['title'],
+                    'url' => (string) $row['url'],
+                    'type' => (string) $row['mime'],
+                    'size' => (int) $row['filesize'],
                 ];
-            }
-        }
-
-        return $attachment_data;
+            },
+            $rows
+        );
     }
 }

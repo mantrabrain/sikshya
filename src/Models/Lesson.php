@@ -280,8 +280,7 @@ class Lesson
      */
     public function getAttachments(int $lesson_id): array
     {
-        $attachments = $this->getMeta($lesson_id, '_sikshya_lesson_attachments', true);
-        return is_array($attachments) ? $attachments : [];
+        return \Sikshya\Services\LessonAttachments::idsFor($lesson_id);
     }
 
     /**
@@ -293,7 +292,9 @@ class Lesson
      */
     public function setAttachments(int $lesson_id, array $attachments)
     {
-        return $this->setMeta($lesson_id, '_sikshya_lesson_attachments', $attachments);
+        \Sikshya\Services\LessonAttachments::set($lesson_id, $attachments);
+
+        return true;
     }
 
     /**

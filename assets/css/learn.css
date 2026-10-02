@@ -3872,6 +3872,27 @@
   color: #1f4585;
 }
 
+/* Lesson attachments sit above the course-wide resource list, so the two
+   groups need a visible label and a little separation without introducing a
+   heavier heading than the panel's own H3. */
+.sikshya-learnH4 {
+  margin: 0 0 8px;
+  font-size: var(--sikshya-learn-fs-12, 12px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sikshya-learn-text-muted, #5b6b7c);
+}
+
+.sikshya-resList--lesson {
+  margin-bottom: 18px;
+}
+
+.sikshya-resList__meta {
+  margin-left: 8px;
+  font-size: var(--sikshya-learn-fs-12, 12px);
+}
+
 /* Notes + announcements + reviews */
 .sikshya-noteMock {
   display: grid;

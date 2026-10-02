@@ -61,12 +61,6 @@ final class FeatureRegistry
                 'group' => 'learner',
                 'description' => __('My courses, progress, completion.', 'sikshya'),
             ],
-            'wishlist' => [
-                'label' => __('Wishlist', 'sikshya'),
-                'tier' => 'free',
-                'group' => 'learner',
-                'description' => __('Save courses for later.', 'sikshya'),
-            ],
             'quiz_basic' => [
                 'label' => __('Basic quizzes (MCQ, T/F, short answer)', 'sikshya'),
                 'tier' => 'free',

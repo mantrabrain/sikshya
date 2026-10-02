@@ -409,11 +409,41 @@ while (have_posts()) :
                                     if (!is_array($resources)) {
                                         $resources = [];
                                     }
+
+                                    // Attachments authored on this lesson come
+                                    // first: they are the materials for the step
+                                    // the learner is actually on, where the
+                                    // course list below applies to the whole
+                                    // course.
+                                    $lesson_attachments = \Sikshya\Services\LessonAttachments::forDisplay(
+                                        (int) $page_model->getLessonId(),
+                                        (int) get_current_user_id()
+                                    );
                                     ?>
                                     <h3 class="sikshya-learnH3"><?php esc_html_e('Downloads', 'sikshya'); ?></h3>
-                                    <?php if ($resources === []) : ?>
+                                    <?php if ($lesson_attachments !== []) : ?>
+                                        <h4 class="sikshya-learnH4"><?php esc_html_e('For this lesson', 'sikshya'); ?></h4>
+                                        <ul class="sikshya-resList sikshya-resList--lesson">
+                                            <?php foreach ($lesson_attachments as $att) : ?>
+                                                <li>
+                                                    <a class="sikshya-resLink" href="<?php echo esc_url((string) $att['url']); ?>" target="_blank" rel="noopener noreferrer" download>
+                                                        <?php echo esc_html((string) $att['title']); ?>
+                                                    </a>
+                                                    <?php if ((int) $att['filesize'] > 0) : ?>
+                                                        <span class="sikshya-resList__meta sikshya-muted">
+                                                            <?php echo esc_html(size_format((int) $att['filesize'])); ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php endif; ?>
+                                    <?php if ($resources === [] && $lesson_attachments === []) : ?>
                                         <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this lesson yet.', 'sikshya'); ?></p>
-                                    <?php else : ?>
+                                    <?php elseif ($resources !== []) : ?>
+                                        <?php if ($lesson_attachments !== []) : ?>
+                                            <h4 class="sikshya-learnH4"><?php esc_html_e('For the whole course', 'sikshya'); ?></h4>
+                                        <?php endif; ?>
                                         <ul class="sikshya-resList">
                                             <?php foreach ($resources as $r) : ?>
                                                 <?php

@@ -199,6 +199,29 @@ class PostTypeManager
         // when a .vtt isn't available.
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_transcript_url');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_transcript_text');
+        // Lesson: downloadable attachments, stored as media library ids.
+        // Sanitized through the same normalizer the renderer reads with, so a
+        // REST write cannot persist ids that are not real attachments.
+        register_post_meta(
+            PostTypes::LESSON,
+            \Sikshya\Services\LessonAttachments::META_KEY,
+            [
+                'type' => 'array',
+                'single' => true,
+                'show_in_rest' => [
+                    'schema' => [
+                        'type' => 'array',
+                        'items' => [
+                            'type' => 'integer',
+                        ],
+                    ],
+                ],
+                'auth_callback' => $auth,
+                'sanitize_callback' => static function ($meta_value): array {
+                    return \Sikshya\Services\LessonAttachments::normalizeIds($meta_value);
+                },
+            ]
+        );
 
         // Question (sik_question).
         $str_meta(PostTypes::QUESTION, '_sikshya_question_type');

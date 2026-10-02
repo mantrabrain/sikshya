@@ -114,7 +114,13 @@ class Frontend
         // Singular Sikshya post types (course/lesson/quiz/assignment/certificate).
         if (is_singular([PostTypes::COURSE, PostTypes::LESSON, PostTypes::QUIZ, PostTypes::ASSIGNMENT, PostTypes::CERTIFICATE])) {
             $post_id = get_queried_object_id();
-            if ($post_id > 0 && current_user_can('edit_post', $post_id)) {
+            // Not `current_user_can('edit_post', ...)`: on these post types that
+            // maps to `edit_published_posts`, which the instructor role lacks, so
+            // instructors saw no Edit link on their own published courses.
+            if (
+                $post_id > 0
+                && \Sikshya\Services\InstructorPermissions::canEditObject(get_current_user_id(), $post_id)
+            ) {
                 $pt = (string) get_post_type($post_id);
                 $label = __('Edit', 'sikshya');
                 $href = get_edit_post_link($post_id, 'raw');

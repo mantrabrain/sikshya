@@ -73,6 +73,7 @@ import {
   type QuestionType,
 } from '../../components/shared/AddQuestionAuthoringModal';
 import { __ } from '../../lib/i18n';
+import { LessonAttachmentsField } from '../../components/shared/LessonAttachmentsField';
 
 const FIELD =
   'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
@@ -320,6 +321,8 @@ export function LessonEditor(props: ContentEditorProps) {
   const [transcriptUrl, setTranscriptUrl] = useState('');
   const [transcriptText, setTranscriptText] = useState('');
   const [isFreePreview, setIsFreePreview] = useState(false);
+  // Downloadable materials for this lesson, stored as media library ids.
+  const [attachmentIds, setAttachmentIds] = useState<number[]>([]);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [editorTab, setEditorTab] = useState<'content' | 'settings'>('content');
   const [proValues, setProValues] = useState<ProLessonValues>(PRO_LESSON_DEFAULTS);
@@ -342,8 +345,9 @@ export function LessonEditor(props: ContentEditorProps) {
       setDurationUnit('min');
       setLessonType('text');
       setVideoUrl('');
-      setTranscriptUrl('');
+        setTranscriptUrl('');
       setTranscriptText('');
+      setAttachmentIds([]);
       setProValues(PRO_LESSON_DEFAULTS);
       return;
     }
@@ -375,6 +379,12 @@ export function LessonEditor(props: ContentEditorProps) {
     setVideoUrl(String(readMeta(m, '_sikshya_lesson_video_url') ?? ''));
     setTranscriptUrl(String(readMeta(m, '_sikshya_lesson_transcript_url') ?? ''));
     setTranscriptText(String(readMeta(m, '_sikshya_lesson_transcript_text') ?? ''));
+    const rawAttachments = readMeta(m, '_sikshya_lesson_attachments');
+    setAttachmentIds(
+      Array.isArray(rawAttachments)
+        ? rawAttachments.map((v) => Number(v)).filter((n) => Number.isFinite(n) && n > 0)
+        : [],
+    );
     setIsFreePreview(Boolean(readMeta(m, '_sikshya_is_free') === true || String(readMeta(m, '_sikshya_is_free') ?? '') === '1'));
     setProValues(readProLessonFromMeta(m));
   }, [editor.post, editor.isNew]);
@@ -400,6 +410,7 @@ export function LessonEditor(props: ContentEditorProps) {
         _sikshya_lesson_video_url: kind === 'video' ? videoUrl.trim() : '',
         _sikshya_lesson_transcript_url: transcriptUrl.trim(),
         _sikshya_lesson_transcript_text: transcriptText,
+        _sikshya_lesson_attachments: attachmentIds,
         _sikshya_is_free: isFreePreview ? '1' : '0',
         ...buildProLessonMetaForKind(kind, proValues),
       },
@@ -620,6 +631,22 @@ export function LessonEditor(props: ContentEditorProps) {
                   />
                 </div>
               ) : null}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                <label className={LABEL} htmlFor="sik-lesson-attachments">
+                  {__('Attachments', 'sikshya')}
+                </label>
+                <p className={HINT}>
+                  {__(
+                    'PDFs, slides, worksheets or any file learners should be able to download for this lesson. They appear under Downloads on the lesson page, above the course-wide resources.',
+                    'sikshya',
+                  )}
+                </p>
+                <LessonAttachmentsField
+                  id="sik-lesson-attachments"
+                  value={attachmentIds}
+                  onChange={setAttachmentIds}
+                />
+              </div>
               {lessonType === 'live' ? (
                 <ProLessonLiveBlock values={proValues} onChange={setProValues} />
               ) : null}

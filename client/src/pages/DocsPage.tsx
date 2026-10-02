@@ -146,7 +146,7 @@ function buildSections(cfg: SikshyaReactConfig): Section[] {
                 __('Basic coupons', 'sikshya'),
                 __('Manual enrolment, and free-course self-enrolment', 'sikshya'),
                 __('Learner dashboard with progress and achievements', 'sikshya'),
-                __('Announcements, course preview, wishlist and basic reports', 'sikshya'),
+                __('Announcements, course preview, lesson attachments and basic reports', 'sikshya'),
                 __('Blocks and shortcodes for courses, sign-in and registration', 'sikshya'),
               ],
             },

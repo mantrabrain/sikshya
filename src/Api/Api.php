@@ -3,6 +3,10 @@
 namespace Sikshya\Api;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Constants\PostTypes;
+use Sikshya\Services\InstructorPermissions;
+use WP_Error;
+use WP_REST_Request;
 use Sikshya\Addons\Addons;
 use WP_REST_Server;
 
@@ -641,6 +645,21 @@ class Api
         $public_rest = new PublicRestRoutes($this->plugin);
         $public_rest->register();
 
+        /*
+         * Public certificate verification. This class existed but was never
+         * instantiated anywhere, so `/sikshya/v1/public/certificates/verify`
+         * answered 404: a learner could see their verification code, and the
+         * privacy exporter and data-retention notes both describe third parties
+         * checking a certificate with it, but nothing could actually be verified.
+         *
+         * Safe to expose unauthenticated, which is the point of verification: the
+         * code is a 64-character hash (so not enumerable), the response carries
+         * only the certificate number, issue date, course title and the
+         * recipient's display name, and a revoked or unknown code returns 404.
+         */
+        $certificates_public = new CertificatesPublicRoutes();
+        $certificates_public->register();
+
         $learner_rest = new LearnerRestRoutes($this->plugin);
         $learner_rest->register();
 
@@ -660,6 +679,55 @@ class Api
         // Addons enable/disable API for React admin.
         $addons_rest = new AdminAddonsRestRoutes($this->plugin);
         $addons_rest->register();
+    }
+
+    /**
+     * Blanket capability plus, for a single-object route, an ownership check.
+     *
+     * The `canManage*` callbacks below test only plural capabilities
+     * (`edit_sikshya_courses`), which every instructor holds for every course.
+     * On the `/{id}` routes that made instructor A able to rewrite or delete
+     * instructor B's course, lesson and quiz. The object-level decision lives in
+     * {@see InstructorPermissions} so these routes, the course builder and the
+     * curriculum endpoints cannot drift apart.
+     *
+     * Routes without an `id` (collection reads, creates) are unchanged.
+     *
+     * @param  WP_REST_Request|mixed $request
+     * @return bool|WP_Error
+     */
+    private function scopedObjectPermission($request, bool $blanket)
+    {
+        if (!$blanket) {
+            return new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
+        }
+        if (!$request instanceof WP_REST_Request) {
+            return true;
+        }
+
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return true;
+        }
+
+        $user_id = get_current_user_id();
+
+        // Deleting a whole course is governed by its own instructor setting
+        // (`instructors_can_delete_courses`, off by default) rather than by the
+        // edit permission, so the two toggles keep their documented meaning.
+        if ($request->get_method() === 'DELETE' && get_post_type($id) === PostTypes::COURSE) {
+            if (!InstructorPermissions::canDeleteCourse($user_id, $id)) {
+                return new WP_Error(
+                    'sikshya_forbidden_object',
+                    __('You are not allowed to delete this course.', 'sikshya'),
+                    ['status' => 403]
+                );
+            }
+
+            return true;
+        }
+
+        return InstructorPermissions::guardEditObject($id, $user_id) ?? true;
     }
 
     // --- Courses ---
@@ -683,9 +751,9 @@ class Api
     {
         return $this->plugin->getService('api.course')->deleteCourse($request);
     }
-    public function canManageCourses()
+    public function canManageCourses($request = null)
     {
-        return current_user_can('manage_sikshya') || current_user_can('edit_sikshya_courses');
+        return $this->scopedObjectPermission($request, current_user_can('manage_sikshya') || current_user_can('edit_sikshya_courses'));
     }
 
     // --- Lessons ---
@@ -709,9 +777,9 @@ class Api
     {
         return $this->plugin->getService('api.lesson')->deleteLesson($request);
     }
-    public function canManageLessons()
+    public function canManageLessons($request = null)
     {
-        return current_user_can('manage_sikshya') || current_user_can('edit_sikshya_lessons');
+        return $this->scopedObjectPermission($request, current_user_can('manage_sikshya') || current_user_can('edit_sikshya_lessons'));
     }
 
     // --- Quizzes ---
@@ -735,9 +803,9 @@ class Api
     {
         return $this->plugin->getService('api.quiz')->deleteQuiz($request);
     }
-    public function canManageQuizzes()
+    public function canManageQuizzes($request = null)
     {
-        return current_user_can('manage_sikshya') || current_user_can('edit_sikshya_quizzes');
+        return $this->scopedObjectPermission($request, current_user_can('manage_sikshya') || current_user_can('edit_sikshya_quizzes'));
     }
 
     // --- Users ---

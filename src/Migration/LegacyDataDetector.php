@@ -84,7 +84,8 @@ final class LegacyDataDetector
      *     options: string[],
      *     post_types: array<string,int>,
      *     taxonomies: array<string,int>,
-     *     tables: string[]
+     *     tables: string[],
+     *     legacy_item_rows: int
      * }
      */
     public static function fingerprint(): array
@@ -97,6 +98,7 @@ final class LegacyDataDetector
             'post_types' => [],
             'taxonomies' => [],
             'tables' => [],
+            'legacy_item_rows' => 0,
         ];
 
         if (!isset($wpdb) || !is_object($wpdb)) {
@@ -149,15 +151,72 @@ final class LegacyDataDetector
             }
         }
 
-        // Structural signals for scheduling migration: legacy CPTs and/or legacy taxonomies only.
-        // Table suffixes match tables the *current* Sikshya also creates on activation, so their
-        // mere presence must NOT set has_legacy_data — otherwise fresh installs run a no-op
-        // migration and show "Legacy data migration completed successfully" forever.
-        // Table list above remains on the Tools fingerprint for support/debugging.
+        $found['legacy_item_rows'] = self::countUnmigratedLegacyItemRows();
+
+        // Structural signals for scheduling migration: legacy CPTs, legacy taxonomies, or
+        // unmigrated rows in the legacy user_items table.
+        //
+        // Table *presence* must NOT count: two of the suffixes above
+        // (`sikshya_order_items`, `sikshya_logs`) are also created by the current Sikshya on
+        // activation, so keying on existence made fresh installs run a no-op migration and show
+        // "Legacy data migration completed successfully" forever. The table list stays on the
+        // Tools fingerprint for support/debugging.
+        //
+        // Row *content* is a different matter, and is why `legacy_item_rows` is included.
+        // Enrollments and progress live only in `wp_sikshya_user_items`, which the current
+        // plugin never creates, and they migrate *after* the post types are renamed. A run
+        // interrupted between those two points leaves no legacy CPTs behind, so a
+        // post-types-only signal reports "nothing to migrate" and every learner's enrolment and
+        // progress is silently abandoned in a table nothing reads.
+        //
+        // The rows signal is deliberately ignored once the migration has finished. Migration
+        // *copies* out of `user_items` and never empties it, so an unconditional row check would
+        // stay true for the life of the site — re-arming the pending flag on every activation
+        // and bringing back the "migration completed successfully" notice this detector was
+        // changed to stop showing. Gating on the state keeps the signal pointed at exactly the
+        // case it is for: work that was started and not carried through.
+        $migration_finished = MigrationState::load()->isFinished();
+
         $found['has_legacy_data'] = !empty($found['post_types'])
-            || !empty($found['taxonomies']);
+            || !empty($found['taxonomies'])
+            || ($found['legacy_item_rows'] > 0 && !$migration_finished);
 
         return $found;
+    }
+
+    /**
+     * Rows in the legacy `user_items` table that still describe legacy content.
+     *
+     * Returns 0 when the table is absent — which is the case on every install
+     * that never ran the old plugin, since the current Sikshya does not create
+     * it. Only rows whose `item_type` is one of the legacy post types count.
+     *
+     * This is a raw count, reported on the Tools fingerprint for support. It is
+     * NOT on its own a statement that work is pending: migration copies these
+     * rows rather than consuming them, so they persist after a successful run.
+     * See {@see self::fingerprint()} for how the count is qualified.
+     */
+    private static function countUnmigratedLegacyItemRows(): int
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'sikshya_user_items';
+        $exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
+        if (!is_string($exists) || $exists !== $table) {
+            return 0;
+        }
+
+        $placeholders = implode(',', array_fill(0, count(self::LEGACY_POST_TYPES), '%s'));
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix and a literal.
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$table} WHERE item_type IN ({$placeholders})",
+                self::LEGACY_POST_TYPES
+            )
+        );
+
+        return max(0, (int) $count);
     }
 
     /**
