@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { getAdminNonce } from '../../utils/factories';
+import { readSettingsTab, writeSettingsTab } from '../../utils/settings';
 
 test.describe('admin: settings save round-trip', () => {
   test('admin can toggle enable_offline_payment via /settings/save', async ({ page, request }) => {
@@ -13,18 +14,18 @@ test.describe('admin: settings save round-trip', () => {
     const before = String(readBody?.data?.values?.enable_offline_payment ?? '0');
 
     const target = before === '1' ? '0' : '1';
+    // Full-tab write: `/settings/save` replaces the tab, so posting only this one
+    // key would reset every other payment setting and leak into later specs.
+    const priorTab = await readSettingsTab(request, nonce, 'payment');
     const saveRes = await request.post('/wp-json/sikshya/v1/settings/save', {
       headers: { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' },
-      data: { tab: 'payment', values: { enable_offline_payment: target } },
+      data: { tab: 'payment', values: { ...priorTab, enable_offline_payment: target } },
     });
     const saveBody = await saveRes.json().catch(() => ({}));
     expect(saveRes.ok(), JSON.stringify(saveBody)).toBeTruthy();
     expect(String(saveBody?.data?.values?.enable_offline_payment ?? '')).toBe(target);
 
     // Restore so we don't leave the dev DB toggled.
-    await request.post('/wp-json/sikshya/v1/settings/save', {
-      headers: { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' },
-      data: { tab: 'payment', values: { enable_offline_payment: before } },
-    });
+    await writeSettingsTab(request, nonce, 'payment', priorTab);
   });
 });

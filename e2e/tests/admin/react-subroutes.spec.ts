@@ -36,6 +36,25 @@ const VIEWS_FREE = [
   'integrations',
   'license',
   'activity-log',
+  // Added after auditing ReactAdminConfig: every one of these is a real nav
+  // destination (`reactAppUrl($id)`) that no spec visited, so a screen could
+  // throw on mount and nothing would notice. Several are gated features whose
+  // screens must still render an upgrade state rather than erroring.
+  'content-library',
+  'learning-rules',
+  'reviews',
+  'discussions',
+  'course-team',
+  'certificates-hub',
+  'assignment-submissions',
+  'grading',
+  'sales',
+  'subscriptions',
+  'marketplace',
+  'branding',
+  'email-hub',
+  'integrations-hub',
+  'docs',
 ] as const;
 
 const IGNORE_PATTERNS: RegExp[] = [

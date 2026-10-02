@@ -9,6 +9,22 @@ dotenv.config({ path: path.resolve(__dirname, 'e2e/.env') });
 
 const baseURL = process.env.WP_BASE_URL ?? 'http://sikshya.local';
 
+/**
+ * Cross-browser projects are opt-in via `PW_CROSS_BROWSER=1`.
+ *
+ * The suite is serial (`workers: 1`), so enabling WebKit and Firefox by default
+ * would triple every local and CI run for engines that rarely regress. Run them
+ * deliberately — before a release, or when touching front-end CSS/JS:
+ *
+ *   PW_CROSS_BROWSER=1 npx playwright test
+ *   PW_CROSS_BROWSER=1 npx playwright test --project=admin-webkit
+ */
+const crossBrowser = process.env.PW_CROSS_BROWSER === '1';
+
+const adminMatch = /tests\/(smoke|admin|pro)\/.*\.spec\.ts$/;
+const publicMatch = /tests\/(learner|checkout)\/.*\.spec\.ts$/;
+const storageState = 'e2e/.auth/admin.json';
+
 export default defineConfig({
   testDir: './e2e/tests',
   outputDir: './test-results',
@@ -35,19 +51,37 @@ export default defineConfig({
   projects: [
     {
       name: 'admin',
-      testMatch: /tests\/(smoke|admin|pro)\/.*\.spec\.ts$/,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'e2e/.auth/admin.json',
-      },
+      testMatch: adminMatch,
+      use: { ...devices['Desktop Chrome'], storageState },
     },
     {
       name: 'public',
-      testMatch: /tests\/(learner|checkout)\/.*\.spec\.ts$/,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'e2e/.auth/admin.json',
-      },
+      testMatch: publicMatch,
+      use: { ...devices['Desktop Chrome'], storageState },
     },
+    ...(crossBrowser
+      ? [
+          {
+            name: 'admin-webkit',
+            testMatch: adminMatch,
+            use: { ...devices['Desktop Safari'], storageState },
+          },
+          {
+            name: 'public-webkit',
+            testMatch: publicMatch,
+            use: { ...devices['Desktop Safari'], storageState },
+          },
+          {
+            name: 'admin-firefox',
+            testMatch: adminMatch,
+            use: { ...devices['Desktop Firefox'], storageState },
+          },
+          {
+            name: 'public-firefox',
+            testMatch: publicMatch,
+            use: { ...devices['Desktop Firefox'], storageState },
+          },
+        ]
+      : []),
   ],
 });

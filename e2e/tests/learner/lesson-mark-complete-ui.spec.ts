@@ -57,10 +57,17 @@ test.describe('learner: lesson player UI Mark-as-complete', () => {
     });
     await expect(completeBtn).toContainText(/Mark as complete/i);
 
+    // Wait for the completion request rather than a load state, which resolves
+    // immediately — otherwise the assertion below can run before the server has
+    // recorded anything, and would pass for a button that does nothing.
     await Promise.all([
-      session.page.waitForLoadState('domcontentloaded'),
+      session.page.waitForResponse(
+        (r) => /lesson-complete|complete-lesson/.test(r.url()) || r.request().isNavigationRequest(),
+        { timeout: 20_000 },
+      ),
       completeBtn.click(),
     ]);
+    await session.page.waitForLoadState('domcontentloaded');
 
     // After the REST call resolves the page reloads; the button flips to "Completed".
     const completedBtn = session.page.locator('[data-sikshya-mark-complete]').first();

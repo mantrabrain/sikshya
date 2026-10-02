@@ -7,6 +7,7 @@ import {
   STUDENT_ROLE,
 } from '../../utils/factories';
 import { studentSession } from '../../utils/learner';
+import { patchSettingsTab, writeSettingsTab } from '../../utils/settings';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -26,13 +27,14 @@ test.describe('checkout: coupon discount round-trip', () => {
       { headers: { 'X-WP-Nonce': adminNonce } },
     );
     const settingsBody = await readSettings.json().catch(() => ({}));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const prevCoupons = String(settingsBody?.data?.values?.enable_coupons ?? '0');
-    if (prevCoupons !== '1') {
-      await request.post('/wp-json/sikshya/v1/settings/save', {
-        headers: { 'X-WP-Nonce': adminNonce, 'Content-Type': 'application/json' },
-        data: { tab: 'payment', values: { enable_coupons: '1' } },
-      });
-    }
+    // Patch, never partial-save: posting only `enable_coupons` resets every other
+    // key in the payment tab, which switched the offline gateway off and broke the
+    // purchase spec depending on test order.
+    const originalPayment = await patchSettingsTab(request, adminNonce, 'payment', {
+      enable_coupons: '1',
+    });
 
     // Paid course at 100 (price meta now persists via wp/v2 thanks to the
     // PostTypeManager fix).
@@ -81,10 +83,18 @@ test.describe('checkout: coupon discount round-trip', () => {
     await expect(addForm, 'paid course should render the "Add to cart" form').toBeVisible({
       timeout: 20_000,
     });
+    // Wait for the POST itself, not `waitForLoadState` — that resolves
+    // immediately when the current page is already loaded, so the add-to-cart
+    // request was still in flight when the quote below was requested. WebKit
+    // aborted it, leaving an empty cart and a `invalid_params` quote.
     await Promise.all([
-      session.page.waitForLoadState('domcontentloaded'),
+      session.page.waitForResponse(
+        (r) => r.request().method() === 'POST' && r.request().isNavigationRequest(),
+        { timeout: 20_000 },
+      ),
       addForm.evaluate((f: HTMLFormElement) => f.submit()),
     ]);
+    await session.page.waitForLoadState('domcontentloaded');
 
     // Baseline quote (no coupon).
     const baseQuote = await session.request.post('/wp-json/sikshya/v1/checkout/quote', {
@@ -125,5 +135,6 @@ test.describe('checkout: coupon discount round-trip', () => {
     }
 
     await session.context.close();
+    await writeSettingsTab(request, adminNonce, 'payment', originalPayment);
   });
 });

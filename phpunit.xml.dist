@@ -9,6 +9,31 @@
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTestsThatDoNotTestAnything="true"
          cacheResultFile=".phpunit.result.cache">
+    <groups>
+        <!--
+            The uninstall suite drops Sikshya's tables and removes its roles.
+            DROP TABLE forces an implicit commit, which defeats the transaction
+            wp-phpunit wraps each test in, so running it alongside the rest
+            would leave later tests without a schema. Run it on its own by
+            passing the group name "uninstall" to phpunit.
+        -->
+        <exclude>
+            <group>uninstall</group>
+            <!--
+                The migration suite needs real (non TEMPORARY) legacy tables so
+                the steps' SHOW TABLES detection sees them, which also forces an
+                implicit commit. Excluded for the same reason as above; run it on
+                its own by passing the group name "migration" to phpunit.
+            -->
+            <group>migration</group>
+            <!--
+                Multisite tests need the network schema, which only
+                phpunit.multisite.xml installs. Excluded here so they are not
+                reported as skipped on every single-site run.
+            -->
+            <group>multisite</group>
+        </exclude>
+    </groups>
     <testsuites>
         <testsuite name="unit">
             <directory suffix="Test.php">tests/Unit</directory>

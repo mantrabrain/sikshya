@@ -35,10 +35,21 @@ test.describe('admin: enroll without purchase (admin bypass)', () => {
     });
 
     // Submit the form and follow the redirect.
-    await Promise.all([
-      page.waitForLoadState('domcontentloaded'),
+    //
+    // `page.waitForLoadState()` is NOT a navigation waiter — it resolves at once
+    // when the current page is already loaded, so the POST was still in flight
+    // when the test moved on and WebKit aborted it at context teardown (the
+    // enrolment row was never written). Wait on the POST response itself.
+    const [bypassResponse] = await Promise.all([
+      page.waitForResponse(
+        (r) => r.request().method() === 'POST' && r.request().isNavigationRequest(),
+        { timeout: 20_000 },
+      ),
       bypassForm.evaluate((f: HTMLFormElement) => f.submit()),
     ]);
+    await page.waitForLoadState('domcontentloaded');
+
+    expect(bypassResponse.status(), 'POST of the bypass form').toBeLessThan(400);
 
     // After admin bypass, the success path lands on the learn shell. If
     // enrollment failed, the page would redirect back with an error flash

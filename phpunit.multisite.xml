@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Multisite run. wp-phpunit switches on the WP_MULTISITE env var, set below, and
+    reinstalls the test database with the network schema — so this must be invoked
+    as its own process, never alongside the single-site configs.
+
+        vendor/bin/phpunit -c phpunit.multisite.xml
+
+    Only tests tagged "multisite" run here; everything else is covered by the
+    single-site configs. The uninstaller's is_multisite() branches (the sitemeta
+    sweep and delete_site_option calls) are unreachable from a single-site run,
+    which is the reason this file exists.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+         bootstrap="tests/integration-bootstrap.php"
+         colors="true"
+         verbose="true"
+         failOnRisky="true"
+         failOnWarning="false"
+         beStrictAboutOutputDuringTests="false"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         cacheResultFile=".phpunit-multisite.result.cache">
+    <php>
+        <env name="WP_MULTISITE" value="1"/>
+    </php>
+    <groups>
+        <include>
+            <group>multisite</group>
+        </include>
+    </groups>
+    <testsuites>
+        <testsuite name="multisite">
+            <directory suffix="Test.php">tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

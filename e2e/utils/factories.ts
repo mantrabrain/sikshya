@@ -447,6 +447,12 @@ export async function loginAs(
   username: string,
   password: string,
 ): Promise<Page> {
+  // A context built from `browser.newContext()` inherits the project's
+  // `storageState` — the administrator's session. Without clearing it first, the
+  // admin's cookie stays in the jar alongside this user's and the server may
+  // honour either one. See the note in `studentSession()`.
+  await context.clearCookies();
+
   const page = await context.newPage();
   await page.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
   await page.locator('#user_login').fill(username);

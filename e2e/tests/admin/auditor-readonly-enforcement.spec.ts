@@ -27,10 +27,17 @@ test.describe('admin: sikshya_auditor read-only enforcement', () => {
     await auditPage.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
     await auditPage.locator('#user_login').fill(username);
     await auditPage.locator('#user_pass').fill(password);
+    // `waitForLoadState` resolves at once on an already-loaded page, so the login
+    // POST could still be in flight when the nonce is read below — giving an
+    // anonymous nonce and an intermittent failure. Wait for the POST itself.
     await Promise.all([
-      auditPage.waitForLoadState('domcontentloaded'),
+      auditPage.waitForResponse(
+        (r) => r.request().method() === 'POST' && r.request().isNavigationRequest(),
+        { timeout: 20_000 },
+      ),
       auditPage.locator('#wp-submit').click(),
     ]);
+    await auditPage.waitForLoadState('domcontentloaded');
 
     // Pull a fresh wp_rest nonce from the auditor session. The Sikshya React
     // admin shell reliably enqueues wp-api-request so wpApiSettings.nonce is
