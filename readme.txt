@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.9
+Stable tag: 1.0.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,7 +21,7 @@ Sikshya LMS — WordPress learning management plugin for online courses, quizzes
 
 * **Sell** — Free or paid online courses with Stripe and PayPal, coupons, and orders via [native checkout](https://mantrabrain.com/plugins/sikshya-lms/features/native-checkout/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_native_checkout) in the free core.
 * **Teach** — Visual [course builder](https://mantrabrain.com/plugins/sikshya-lms/features/course-builder/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_course_builder), structured curriculum, [video & text lessons](https://mantrabrain.com/plugins/sikshya-lms/features/video-text-lessons/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_video_text_lessons), [quizzes & auto-grading](https://mantrabrain.com/plugins/sikshya-lms/features/quizzes/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_quizzes), assignments, and [course certificates](https://mantrabrain.com/plugins/sikshya-lms/features/basic-certificates/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_basic_certificates).
-* **Support learners** — Dashboards, progress, wishlist, and role-aware flows for instructors and staff.
+* **Support learners** — Dashboards, progress, and role-aware flows for instructors and staff.
 
 ### Quick links
 
@@ -114,7 +114,7 @@ Each headline below links to its dedicated feature page on the Sikshya site.
 **Learners**
 
 * Student dashboard: enrollments, progress, resume learning.
-* Wishlist for saved courses.
+* Downloadable lesson attachments and course resources, protected per learner.
 * Role-aware flows for administrators and instructors.
 
 **[Native checkout](https://mantrabrain.com/plugins/sikshya-lms/features/native-checkout/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_native_checkout)** — checkout & monetization (free baseline)
@@ -416,6 +416,48 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.10 - 2026-10-01 =
+**Security and data-integrity release — update immediately.**
+
+Every item below was reproduced on a live install before the fix and re-tested after, and each is covered by a new automated test.
+
+**Instructors could modify and destroy each other's content (critical)**
+* On any site with more than one instructor, instructor A could rewrite instructor B's course, lesson and quiz, rename B's chapters, inject lessons into B's course, and **permanently delete B's chapters and lessons** — that route force-deletes, bypassing the trash, so the content was unrecoverable. A could also enrol themselves into B's paid course, taking paid content for free.
+* The routes checked only plural capabilities such as `edit_sikshya_courses`, which every instructor holds for every course, so there was no per-course check at all. WordPress core refused the same writes through `/wp/v2`; only Sikshya's own routes were open.
+* Ownership is now resolved once, in `InstructorPermissions::canEditObject()`, and applied to every course-owned object. A lesson, quiz or chapter inherits ownership from its course.
+
+**Learner personal data was visible to any instructor (high)**
+* `/admin/enrollments`, `/admin/quiz-attempts` and `/admin/issued-certificates` returned every row on the site — including learner names, email addresses and certificate verification codes — to any instructor, not just rows for their own courses. All three are now scoped.
+
+**Erasing data on uninstall never actually happened**
+* WordPress loads only `uninstall.php` when deleting a plugin, so Composer's autoloader was never registered and the uninstaller raised a fatal error on its first statement. Nothing was ever removed, whatever you had opted in to — relevant if you rely on this for a data-deletion request.
+* What it would have removed was also incomplete: 13 of 21 option names in its list have never existed, while roughly 28 options the plugin does write were missing from it, including the JWT signing secret. User meta was not touched at all (cart contents and learner-authored lesson notes survived), and the four scheduled events it cleared are not events Sikshya registers, so the three real ones stayed behind.
+* Uninstall now loads correctly, verifies its dependencies before starting so it can never half-erase, and clears options, user meta, stray post meta and its own cron events. Erasure is still strictly opt-in and still defaults to off. Sikshya Pro's data is left to Pro's own uninstaller.
+
+**An interrupted upgrade could abandon learner enrolments and progress**
+* Enrolments and progress are migrated after the post types are renamed. A migration stopped in between left no legacy post types behind, so the plugin reported "nothing to migrate" and every learner's enrolment and progress was abandoned in a table nothing reads. Detection now recognises that state and resumes.
+
+**Certificate verification did not work**
+* The public verification endpoint was implemented but never registered, so `/sikshya/v1/public/certificates/verify` returned 404 and a certificate's verification code could not be checked by anyone. It is now live, and returns only the certificate number, issue date, course title and recipient name.
+
+**Downloadable files could not be downloaded**
+* Every protected attachment link returned "Authentication required to download this file." as soon as a learner clicked it. The links are signed REST URLs, and WordPress treats a REST request that arrives without a nonce as logged out — which is exactly what a click is. Fetching the URL from JavaScript worked, clicking it never did, so course resources have not been reachable by learners.
+* The download endpoint now identifies the requester from the session cookie as well. Authority still comes from the signed token, which names a single attachment and a single account: a link shared with anyone else is still refused, and so is a logged-out visitor.
+
+**Lesson attachments now work**
+* `Lesson attachments` has been listed as a free feature without a working implementation: the meta was written under one key and read under another, no screen offered a way to add files, and no template displayed them. Nothing was lost, because nothing could be saved.
+* Lessons now have an **Attachments** field in the lesson editor that opens the media library and takes any number of files. They appear under Resources on the lesson, listed above the course-wide downloads and labelled "For this lesson", with the same per-learner link protection course resources use.
+
+**Removed from the feature list**
+* `Wishlist` was advertised but has never had an implementation of any kind. It has been removed from the feature list rather than left as a promise; nothing changes on your site.
+
+**Fixes**
+* Instructors could not edit their own published courses: the course builder answered "You are not allowed to edit this course", and the Pricing tab failed every save with "Failed to save some data". Both were caused by a capability check that cannot succeed for these post types.
+* The front-end admin bar showed no Edit link to an instructor on their own published course.
+* Removed a `wpdb::prepare()` call with no placeholders on the default Quiz Attempts view.
+* The lesson Resources tab no longer says "No resources available for this lesson yet" while listing files.
+* Lesson attachment ids are validated on save, so a value that is not a real media file can no longer be stored or rendered as a dead link.
 
 = 1.0.9 - 2026-10-01 =
 **Critical fixes — update immediately.**
