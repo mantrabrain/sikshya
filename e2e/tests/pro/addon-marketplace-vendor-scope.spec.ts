@@ -7,6 +7,7 @@ import {
   INSTRUCTOR_ROLE,
   STUDENT_ROLE,
 } from '../../utils/factories';
+import { freshContext } from '../../utils/context';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -85,7 +86,7 @@ test.describe('addon: marketplace vendor scoping', () => {
     ).toBeTruthy();
 
     // --- Vendor A
-    const ctxA = await browser.newContext();
+    const ctxA = await freshContext(browser);
     const pageA = await loginAs(ctxA, nameA, password);
     const nonceA = await restNonceFor(pageA);
     expect(nonceA, 'vendor A must obtain a REST nonce').toBeTruthy();
@@ -116,7 +117,7 @@ test.describe('addon: marketplace vendor scoping', () => {
     await ctxA.close();
 
     // --- Vendor B: the same endpoint must answer for B, not A.
-    const ctxB = await browser.newContext();
+    const ctxB = await freshContext(browser);
     const pageB = await loginAs(ctxB, nameB, password);
     const nonceB = await restNonceFor(pageB);
     const meB = await ctxB.request.get(VENDOR_SELF, { headers: { 'X-WP-Nonce': nonceB } });
@@ -134,7 +135,7 @@ test.describe('addon: marketplace vendor scoping', () => {
     await ctxB.close();
 
     // --- A plain learner must be refused the payout surfaces entirely.
-    const ctxL = await browser.newContext();
+    const ctxL = await freshContext(browser);
     const pageL = await loginAs(ctxL, learnerName, password);
     const nonceL = await restNonceFor(pageL);
     for (const [label, url] of [

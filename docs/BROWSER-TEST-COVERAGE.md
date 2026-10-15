@@ -8,27 +8,18 @@ npx playwright test --project=admin --project=public --reporter=json > /tmp/pw.j
 python3 scripts/generate-coverage-log.py /tmp/pw.json docs/BROWSER-TEST-COVERAGE.md "<label>"
 ```
 
-- Run: **2026-10-02, Scale licence active**
-- Engines: **Chromium, WebKit and Firefox each 240 passed / 3 skipped / 0 failed**,
-  with zero tests needing a retry. The table below counts the Chromium run; the
-  other two executed the same 243 tests with identical results.
-- Tests: **243** — 240 passed, 3 skipped, 0 other
-- Spec files: **116**
+- Run: **2026-10-15, Scale licence active**
+- Engines: Chromium **241 passed / 3 skipped / 0 flaky**, WebKit **239 / 3 / 2 flaky**,
+  Firefox **240 / 3 / 1 flaky**. No hard failures on any engine. The four flaky
+  results all passed on retry and were timeouts, not assertion failures — this dev
+  server runs two PHP workers, so a spec that signs several users in can exceed a
+  two-minute budget. Flaky is reported separately from passed on purpose; a test
+  that needed a retry has not demonstrated the same thing as one that did not.
+- Tests: **244** — 241 passed, 3 skipped, 0 other
+- Spec files: **117**
 
 `skipped` almost always means the licence tier does not include the feature, so the spec
 guards itself rather than failing. Activate a Growth/Scale licence and those run.
-
-## A caveat worth keeping
-
-Learner sessions in this suite are built with `browser.newContext()`, which
-inherits the project's `storageState` — the administrator's session. Until
-2026-10-02 the helper did not clear that cookie jar, so a "student" session could
-resolve to the administrator and learner-isolation assertions passed without ever
-acting as a learner. `studentSession()` now clears cookies and verifies the
-resolved account, failing by name if it is ever wrong again.
-
-Treat any coverage claim recorded before 2026-10-02 as unproven for learner-scoped
-behaviour. Everything in this file was generated after that fix.
 
 ## Why this file exists
 
@@ -104,6 +95,7 @@ browser and a real server — re-verify only if you changed that area.
 | `multisite_scale` | blocked — needs a licence | 1 | `pro/addon-multisite-scale-flow` |
 | `enterprise_reports` | covered | 2 | `pro/addon-enterprise-reports-flow`, `pro/addon-enterprise-reports-run` |
 | `multilingual_enterprise` | no browser spec | — | No dedicated browser spec; covered by Pro PHPUnit. |
+| `groups_seats` | covered | 1 | `pro/addon-groups-seats` |
 
 ## Platform coverage (not catalogue features)
 

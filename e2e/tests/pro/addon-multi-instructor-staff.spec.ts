@@ -7,6 +7,7 @@ import {
   slug,
   INSTRUCTOR_ROLE,
 } from '../../utils/factories';
+import { freshContext } from '../../utils/context';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -81,7 +82,7 @@ test.describe('addon: multi-instructor course staff', () => {
     // admin stays owned by the admin — which quietly turns an ownership test into a
     // no-op). The realistic path is the one used here: the instructor creates it,
     // so WordPress sets them as the author.
-    const ownerCtx = await browser.newContext();
+    const ownerCtx = await freshContext(browser);
     const ownerPage = await loginAs(ownerCtx, ownerName, password);
     const ownerNonce = await restNonceFor(ownerPage);
     expect(ownerNonce, 'the owner must obtain a REST nonce').toBeTruthy();
@@ -158,7 +159,7 @@ test.describe('addon: multi-instructor course staff', () => {
     await ownerCtx.close();
 
     // --- An unrelated instructor must not be able to add staff to that course.
-    const strangerCtx = await browser.newContext();
+    const strangerCtx = await freshContext(browser);
     const strangerPage = await loginAs(strangerCtx, strangerName, password);
     const strangerNonce = await restNonceFor(strangerPage);
 

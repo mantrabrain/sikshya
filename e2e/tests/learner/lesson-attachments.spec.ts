@@ -10,6 +10,7 @@ import {
   STUDENT_ROLE,
 } from '../../utils/factories';
 import { studentSession } from '../../utils/learner';
+import { freshContext } from '../../utils/context';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -204,10 +205,7 @@ test.describe('learner: lesson attachments', () => {
 
       // A genuinely cookie-less context: the ambient `request` fixture carries
       // the admin session, so clearing a header would not make it anonymous.
-      const guestContext = await browser.newContext({
-        baseURL: baseURL ?? 'http://sikshya.local',
-        ignoreHTTPSErrors: true,
-      });
+      const guestContext = await freshContext(browser, baseURL);
       try {
         const anonymous = await guestContext.request.get(href);
         expect(

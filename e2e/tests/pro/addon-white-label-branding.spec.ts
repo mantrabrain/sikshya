@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { getAdminNonce } from '../../utils/factories';
+import { adminContext, freshContext } from '../../utils/context';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -17,7 +18,7 @@ let original: Record<string, unknown> | null = null;
 
 test.afterAll(async ({ request, browser }) => {
   if (original === null) return;
-  const ctx = await browser.newContext({ storageState: 'e2e/.auth/admin.json' });
+  const ctx = await adminContext(browser);
   const page = await ctx.newPage();
   const nonce = await getAdminNonce(page);
   await request.post('/wp-json/sikshya/v1/pro/white-label', {

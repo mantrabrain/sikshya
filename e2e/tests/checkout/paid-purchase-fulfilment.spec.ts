@@ -10,6 +10,7 @@ import {
 } from '../../utils/factories';
 import { studentSession } from '../../utils/learner';
 import { patchSettingsTab, writeSettingsTab } from '../../utils/settings';
+import { adminContext, freshContext } from '../../utils/context';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -37,7 +38,7 @@ test.beforeAll(async ({ request, browser }) => {
   //
   // `patchSettingsTab` preserves the rest of the tab: `/settings/save` replaces
   // whatever tab it is handed, so a partial save silently resets its neighbours.
-  const ctx = await browser.newContext({ storageState: 'e2e/.auth/admin.json' });
+  const ctx = await adminContext(browser);
   const page = await ctx.newPage();
   const nonce = await getAdminNonce(page);
   priorPaymentTab = await patchSettingsTab(request, nonce, 'payment', {
@@ -47,7 +48,7 @@ test.beforeAll(async ({ request, browser }) => {
 });
 
 test.afterAll(async ({ request, browser }) => {
-  const ctx = await browser.newContext({ storageState: 'e2e/.auth/admin.json' });
+  const ctx = await adminContext(browser);
   const page = await ctx.newPage();
   const nonce = await getAdminNonce(page);
   await writeSettingsTab(request, nonce, 'payment', priorPaymentTab);

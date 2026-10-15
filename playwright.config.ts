@@ -32,7 +32,10 @@ export default defineConfig({
   workers: 1,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list'], ['html', { open: 'never' }]],
-  timeout: 60_000,
+  // Several specs sign two or three real users in through wp-login.php against a
+  // dev server with few PHP workers, so a single test legitimately spans more
+  // than a minute. 60s was being hit by exactly those specs.
+  timeout: 120_000,
   expect: { timeout: 10_000 },
 
   globalSetup: './e2e/global-setup.ts',

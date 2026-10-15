@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createUserViaRest, slug } from '../../utils/factories';
+import { freshContext } from '../../utils/context';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -22,7 +23,7 @@ test.describe('admin: sikshya_auditor read-only enforcement', () => {
 
     // Log the auditor in via wp-login.php in a fresh browser context to
     // exercise the cookie + nonce auth path (matches the React admin).
-    const ctx = await browser.newContext({ baseURL: baseURL ?? 'http://sikshya.local' });
+    const ctx = await freshContext(browser, baseURL);
     const auditPage = await ctx.newPage();
     await auditPage.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
     await auditPage.locator('#user_login').fill(username);
@@ -33,7 +34,9 @@ test.describe('admin: sikshya_auditor read-only enforcement', () => {
     await Promise.all([
       auditPage.waitForResponse(
         (r) => r.request().method() === 'POST' && r.request().isNavigationRequest(),
-        { timeout: 20_000 },
+        // Generous on purpose: this waits on a real wp-login.php POST, and the
+        // dev server runs few PHP workers, so 20s was occasionally not enough.
+        { timeout: 60_000 },
       ),
       auditPage.locator('#wp-submit').click(),
     ]);

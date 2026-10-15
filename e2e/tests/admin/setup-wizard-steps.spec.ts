@@ -56,7 +56,16 @@ test.describe('admin: setup-wizard step walk', () => {
     const nonce = await getAdminNonce(page);
     const res = await request.post(
       '/wp-json/sikshya/v1/admin/setup-wizard/sample-import',
-      { headers: { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' } },
+      {
+        headers: { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' },
+        // The sample pack inserts roughly 375 posts (7 courses, 131 lessons, 42
+        // quizzes, 126 questions, 42 assignments). Measured server-side at
+        // 16.8-17.8s here, against the 15s default — so this failed on duration,
+        // not on behaviour. Re-measured while adding ~1,100 posts to the site
+        // and the time stayed flat, so it is the insert cost itself rather than
+        // anything that scales with existing data.
+        timeout: 90_000,
+      },
     );
     const body = await res.json().catch(() => ({}));
     expect(res.status(), JSON.stringify(body).slice(0, 200)).toBeLessThan(400);

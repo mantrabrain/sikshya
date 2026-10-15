@@ -107,6 +107,45 @@ WebKit + Firefox, all green. That is a solid functional gate and **not yet** an 
 - **i18n**: pseudolocale rendering pass to catch hardcoded strings and layout breakage at 1.4x text length.
 - **Data protection**: GDPR export and erase correctness per learner.
 
+## Measured findings worth acting on
+
+Both found while testing, both recorded rather than hotfixed.
+
+**Sample import is a ~17-second synchronous request.** The setup wizard's sample
+pack inserts about 375 posts (7 courses, 131 lessons, 42 quizzes, 126 questions,
+42 assignments) and measured 16.8–17.8 seconds server-side. Re-measured while
+adding ~1,100 posts to the site and the time stayed flat, so it is the insert
+cost itself, not something that scales with existing data — it is not the same
+class of bug as the 34-second archive query. It still matters: plenty of shared
+hosts cap `max_execution_time` at 30 seconds, so on a slower host this can die
+part-way and leave half-imported sample data behind. It should be batched with
+progress reporting rather than left as one blocking call.
+
+**The test suite had a systemic identity leak.** `browser.newContext()` inherits
+the project's `storageState`, which is the administrator's session. Sixteen call
+sites across ten specs created "another user" contexts that silently carried the
+admin cookie — and they were disproportionately the permission and isolation
+specs (vendor scoping, multi-instructor stranger checks, auditor read-only,
+instructor-versus-student). Fixed with two helpers, `freshContext()` and
+`adminContext()`, so intent is explicit at the call site. How many assertions
+were previously vacuous was not measured and is not claimed.
+
+## Current test baseline
+
+- PHP: Free 128 (27 unit, 101 integration) plus 12 uninstall, 21 migration, 4
+  multisite; Pro 625 integration and 9 unit. Green on PHP 7.4 and 8.4.
+- Browser: 244 tests per engine. Chromium 241 passed / 3 skipped / 0 flaky;
+  WebKit 239 / 3 / 2 flaky; Firefox 240 / 3 / 1 flaky. No hard failures.
+- Known flake: `studentSession` can still report no authenticated session under
+  load, because a real `wp-login.php` POST against two PHP workers occasionally
+  outlasts its wait. It passes on retry. Worth hardening with a bounded re-check
+  of `/users/me` before it throws.
+
+Still missing from the list under "What enterprise-level testing has to mean":
+load and scale with asserted query budgets, accessibility with a publishable
+VPAT, REST role-matrix fuzzing, upgrade on real data, and i18n pseudolocale
+rendering. None of those exist yet.
+
 ## Caveats
 
 Competitor feature lists are from vendor marketing pages and may overstate depth or be out of date;

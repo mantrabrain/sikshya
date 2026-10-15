@@ -8,6 +8,7 @@ import {
 } from '../../utils/factories';
 import { studentSession } from '../../utils/learner';
 import { patchSettingsTab, writeSettingsTab } from '../../utils/settings';
+import { adminContext, freshContext } from '../../utils/context';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -22,7 +23,7 @@ test.use({ storageState: 'e2e/.auth/admin.json' });
 let priorPaymentTab: Record<string, unknown> = {};
 
 test.beforeAll(async ({ request, browser }) => {
-  const ctx = await browser.newContext({ storageState: 'e2e/.auth/admin.json' });
+  const ctx = await adminContext(browser);
   const page = await ctx.newPage();
   const nonce = await getAdminNonce(page);
   priorPaymentTab = await patchSettingsTab(request, nonce, 'payment', {
@@ -33,7 +34,7 @@ test.beforeAll(async ({ request, browser }) => {
 });
 
 test.afterAll(async ({ request, browser }) => {
-  const ctx = await browser.newContext({ storageState: 'e2e/.auth/admin.json' });
+  const ctx = await adminContext(browser);
   const page = await ctx.newPage();
   const nonce = await getAdminNonce(page);
   await writeSettingsTab(request, nonce, 'payment', priorPaymentTab);

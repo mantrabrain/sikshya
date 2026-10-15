@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { slug } from '../../utils/factories';
+import { freshContext } from '../../utils/context';
 
 // Run unauthenticated (no admin storage state) so the rate limiter applies.
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -15,7 +16,7 @@ test.describe('admin: /auth/web-register rate limiter', () => {
     const statuses: number[] = [];
     let last429 = false;
     for (let i = 0; i < 14; i++) {
-      const ctx = await browser.newContext();
+      const ctx = await freshContext(browser);
       const page = await ctx.newPage();
       try {
         await page.goto('/', { waitUntil: 'domcontentloaded' });

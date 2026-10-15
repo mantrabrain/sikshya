@@ -44,12 +44,34 @@ export async function studentSession(
   await page.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
   await page.locator('#user_login').fill(username);
   await page.locator('#user_pass').fill(password);
-  await page.locator('#wp-submit').click();
 
-  // Wait to leave the login form specifically, rather than for any URL at all.
-  await page
-    .waitForURL((url) => !/wp-login\.php/.test(url.pathname), { timeout: 30_000 })
-    .catch(() => undefined);
+  /*
+   * Wait for whichever signal arrives first: the login POST response, or the
+   * navigation away from the form.
+   *
+   * Waiting only for the URL change let a slow POST still be in flight when the
+   * nonce was read below, producing a logged-out nonce and an intermittent 401
+   * that read as "no authenticated session" rather than "the login was still
+   * going". But waiting only for the POST is worse: the
+   * `isNavigationRequest()` predicate does not match in WebKit, so every login
+   * burned its full timeout and the WebKit suite went from 20 minutes to 1.3
+   * hours. Racing the two is fast on every engine and still cannot proceed with
+   * a half-finished login.
+   */
+  await Promise.all([
+    Promise.race([
+      page
+        .waitForResponse(
+          (r) => r.request().method() === 'POST' && r.request().isNavigationRequest(),
+          { timeout: 30_000 },
+        )
+        .catch(() => undefined),
+      page
+        .waitForURL((url) => !/wp-login\.php/.test(url.pathname), { timeout: 30_000 })
+        .catch(() => undefined),
+    ]),
+    page.locator('#wp-submit').click(),
+  ]);
 
   const loginError = await page
     .locator('#login_error')

@@ -10,6 +10,7 @@ import {
   STUDENT_ROLE,
 } from '../../utils/factories';
 import { studentSession } from '../../utils/learner';
+import { freshContext } from '../../utils/context';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -82,7 +83,7 @@ test.describe('addon: instructor dashboard panels', () => {
     await learner.context.close();
 
     // The instructor's account page must show them.
-    const instructorCtx = await browser.newContext({ baseURL: baseURL ?? 'http://sikshya.local' });
+    const instructorCtx = await freshContext(browser, baseURL);
     const instructorPage = await loginAs(instructorCtx, instructorName, password);
     // The addon renders onto the instructor sub-view, not the account root.
     await instructorPage.goto('/my-learning/instructor/', { waitUntil: 'domcontentloaded' });
