@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.10
+Stable tag: 1.0.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,6 +416,13 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.11 - 2026-10-15 =
+**Groups & seat licensing (new, Scale).**
+* Sell a block of seats to an organisation and let them run their own roster. A group owner, or a leader they appoint, adds and removes learners without needing you, and membership grants access to every course the group holds.
+* Seats are enforced: once the purchased number is used, adding another learner is refused rather than quietly handing over unpaid access. Reducing a plan below current usage is reported as over-capacity instead of showing a negative number.
+* A learner removed from a group keeps their enrolment and progress. For compliance training that record is the thing the customer needs to keep, so leaving a roster does not erase it.
+* Requires Sikshya Pro 1.0.6.
 
 = 1.0.10 - 2026-10-01 =
 **Security and data-integrity release — update immediately.**

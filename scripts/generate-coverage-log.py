@@ -19,7 +19,7 @@ TIERS = {
         " dynamic_checkout_fields assignments_advanced quiz_advanced live_classes social_login"
         " scorm_h5p_pro".split(),
  'scale': "marketplace_multivendor white_label webhooks zapier email_marketing public_api_keys"
-          " multisite_scale enterprise_reports multilingual_enterprise".split(),
+          " multisite_scale enterprise_reports multilingual_enterprise groups_seats".split(),
 }
 FEATURE_TIER = {f: t for t, fs in TIERS.items() for f in fs}
 
@@ -109,6 +109,7 @@ MAP = {
  'pro/addon-email-marketing-pipeline': ['email_marketing'],
  'pro/addon-email-marketing-rule-flow': ['email_marketing'],
  'pro/addon-enterprise-reports-flow': ['enterprise_reports'],
+ 'pro/addon-groups-seats': ['groups_seats'],
  'pro/addon-gradebook-grading': ['gradebook'],
  'pro/addon-gradebook-grid-flow': ['gradebook'],
  'pro/addon-instructor-dashboard-flow': ['instructor_dashboard'],

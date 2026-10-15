@@ -494,6 +494,15 @@ final class FeatureRegistry
                     'sikshya'
                 ),
             ],
+            'groups_seats' => [
+                'label' => __('Groups & seat licensing', 'sikshya'),
+                'tier' => 'scale',
+                'group' => 'platform',
+                'description' => __(
+                    "Sell a block of seats to an organisation and let them run their own roster.\n\nA group owner or a leader they appoint adds and removes learners without needing your help, and membership grants access to every course the group holds. Seats are enforced: once the purchased number is used, adding another learner is refused until seats are added.\n\nTurn this on for company, school or team training sold per seat rather than per learner.",
+                    'sikshya'
+                ),
+            ],
             'multisite_scale' => [
                 'label' => __('Multisite & network license tools', 'sikshya'),
                 'tier' => 'scale',
