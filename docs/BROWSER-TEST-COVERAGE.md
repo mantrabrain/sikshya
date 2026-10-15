@@ -8,7 +8,16 @@ npx playwright test --project=admin --project=public --reporter=json > /tmp/pw.j
 python3 scripts/generate-coverage-log.py /tmp/pw.json docs/BROWSER-TEST-COVERAGE.md "<label>"
 ```
 
-- Run: **2026-10-15 chromium, Scale licence active**
+- Run: **2026-10-15 final, Scale licence active**
+- Engines: Chromium **245 passed / 3 skipped / 0 flaky**, WebKit **245 / 3 / 0**,
+  Firefox **244 / 3 / 1 flaky**. No hard failures on any engine, and no retries on
+  Chromium or WebKit. The Firefox flake was a 120-second test timeout on a spec
+  that signs two learners in, on a dev server with two PHP workers; it passed on
+  retry. Flaky is reported apart from passed deliberately — a test that needed a
+  retry has not demonstrated the same thing as one that did not.
+- The Chromium figures above are the run this table was generated from, taken
+  after the admin-listing query reductions. WebKit and Firefox were run on the
+  commit before those, so their numbers cover everything except that change.
 - Tests: **248** — 245 passed, 3 skipped, 0 other
 - Spec files: **121**
 
