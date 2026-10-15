@@ -187,6 +187,41 @@ class OrderRepository
     }
 
     /**
+     * Line items for many orders at once.
+     *
+     * The admin orders listing called {@see self::getItems()} once per order, so
+     * a page of 20 orders spent 20 queries just fetching lines. One `IN` query
+     * answers the page.
+     *
+     * @param int[] $order_ids
+     * @return array<int, array<int, object>> order_id => rows
+     */
+    public function getItemsForOrders(array $order_ids): array
+    {
+        global $wpdb;
+
+        $order_ids = array_values(array_unique(array_filter(array_map('intval', $order_ids))));
+        if ($order_ids === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($order_ids), '%d'));
+
+        // phpcs:ignore WordPress.DB.PreparedSQL
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$this->items} WHERE order_id IN ({$placeholders}) ORDER BY id ASC",
+            $order_ids
+        ));
+
+        $out = [];
+        foreach ((array) $rows as $row) {
+            $out[(int) $row->order_id][] = $row;
+        }
+
+        return $out;
+    }
+
+    /**
      * @param array<string, mixed> $patch
      */
     public function updateOrder(int $id, array $patch): bool

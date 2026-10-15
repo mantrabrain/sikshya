@@ -807,16 +807,78 @@ final class LegacyMigrationIntegrationTest extends WP_UnitTestCase
         }
         self::assertTrue(LegacyMigrator::isComplete(), 'The batched run must still converge.');
 
+        /*
+         * Asserted per learner rather than as a total.
+         *
+         * Counting all rows for these users assumed the destination table held
+         * nothing else for them, which is not a property this test controls: the
+         * migration fixtures create legacy tables, that DDL implicitly commits
+         * the per-test transaction in MySQL, and so rows from earlier tests and
+         * earlier runs survive. The total then read 122 against a seeded 120 and
+         * the suite failed only on the first run after a full suite — the test's
+         * own cleanup removed the strays, so it passed on a retry and looked
+         * intermittent.
+         *
+         * What the test actually means is "no seeded enrolment was dropped at a
+         * batch boundary", which is a statement about each learner, and is true
+         * regardless of what else is in the table.
+         */
         $enrollments = EnrollmentsTable::getTableName();
         $placeholders = implode(',', array_fill(0, count($students), '%d'));
+        $per_user = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT user_id, COUNT(*) AS rows_for_user FROM {$enrollments}
+                 WHERE user_id IN ({$placeholders}) GROUP BY user_id",
+                $students
+            ),
+            ARRAY_A
+        );
+
+        $counts = [];
+        foreach ((array) $per_user as $row) {
+            $counts[(int) $row['user_id']] = (int) $row['rows_for_user'];
+        }
+
+        $missing = [];
+        foreach ($students as $student) {
+            if (!isset($counts[$student]) || $counts[$student] < 1) {
+                $missing[] = $student;
+            }
+        }
+
+        self::assertSame(
+            [],
+            $missing,
+            'Every legacy enrolment must survive, including the rows that sit on a batch '
+            . 'boundary. Learners with no migrated enrolment: ' . implode(', ', $missing)
+        );
+
+        /*
+         * And the exact count, scoped to the rows the migrator itself wrote.
+         *
+         * The per-learner check above is robust but too weak on its own: it only
+         * notices a learner who ended with *nothing*, so losing one row out of a
+         * batch while that learner still had another enrolment would slip past.
+         * Verified by dropping every fiftieth row in the migrator — the
+         * per-learner assertion did not notice.
+         *
+         * `payment_method = 'legacy'` is what {@see MigrateEnrollments} stamps on
+         * everything it creates, so this counts precisely this fixture's migrated
+         * rows and ignores anything else in a shared table.
+         */
         $migrated = (int) $wpdb->get_var(
-            $wpdb->prepare("SELECT COUNT(*) FROM {$enrollments} WHERE user_id IN ({$placeholders})", $students)
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$enrollments}
+                 WHERE user_id IN ({$placeholders}) AND payment_method = 'legacy'",
+                $students
+            )
         );
 
         self::assertSame(
             120,
             $migrated,
-            'Every legacy enrolment must survive, including the rows that sit on a batch boundary.'
+            'Exactly the seeded legacy enrolments must have been migrated; a row dropped at a '
+            . 'batch boundary shows up here even when the learner has other enrolments.'
         );
 
         // Cleanup: these users and rows are outside the fixture tearDown.

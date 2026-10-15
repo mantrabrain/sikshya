@@ -42,6 +42,52 @@ class QuizAttemptRepository
         );
     }
 
+    /**
+     * Completed-attempt counts for many (learner, quiz) pairs at once.
+     *
+     * The admin attempts listing called {@see self::countAttemptsForUserQuiz()}
+     * once per row, so a 30-row page spent 30 queries deciding how many attempts
+     * each learner had left. One grouped count answers the whole page.
+     *
+     * Restricting on both id lists rather than the exact pairs can match a few
+     * combinations the page does not show. That is harmless — the caller only
+     * reads the keys it asked about — and it keeps this to a single statement.
+     *
+     * @param int[] $user_ids
+     * @param int[] $quiz_ids
+     * @return array<string, int> "userId:quizId" => completed attempts
+     */
+    public function countAttemptsForPairs(array $user_ids, array $quiz_ids): array
+    {
+        global $wpdb;
+
+        $user_ids = array_values(array_unique(array_filter(array_map('intval', $user_ids))));
+        $quiz_ids = array_values(array_unique(array_filter(array_map('intval', $quiz_ids))));
+        if ($user_ids === [] || $quiz_ids === []) {
+            return [];
+        }
+
+        $u = implode(',', array_fill(0, count($user_ids), '%d'));
+        $q = implode(',', array_fill(0, count($quiz_ids), '%d'));
+
+        // phpcs:ignore WordPress.DB.PreparedSQL
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT user_id, quiz_id, COUNT(*) AS used
+             FROM {$this->attempts_table}
+             WHERE user_id IN ({$u}) AND quiz_id IN ({$q})
+               AND status IN ('completed','graded','passed')
+             GROUP BY user_id, quiz_id",
+            array_merge($user_ids, $quiz_ids)
+        ), ARRAY_A);
+
+        $out = [];
+        foreach ((array) $rows as $row) {
+            $out[(int) $row['user_id'] . ':' . (int) $row['quiz_id']] = (int) $row['used'];
+        }
+
+        return $out;
+    }
+
     public function countDistinctQuizzesForUser(int $user_id): int
     {
         global $wpdb;

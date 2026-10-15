@@ -339,6 +339,28 @@ final class AdminTablesRepository
         $repo = new QuizAttemptRepository();
 
         $items = [];
+        /*
+         * Both of the per-row lookups below are hoisted out of the loop. Asking
+         * for each quiz's attempt limit and each learner's attempt count one row
+         * at a time cost about two queries per row, so a 30-row page spent ~60
+         * queries on figures that one meta-cache prime and one grouped count can
+         * answer for the whole page.
+         */
+        $quiz_ids = array_values(array_unique(array_filter(array_map(
+            static fn (array $row): int => isset($row['quiz_id']) ? (int) $row['quiz_id'] : 0,
+            $rows
+        ))));
+        $user_ids = array_values(array_unique(array_filter(array_map(
+            static fn (array $row): int => isset($row['user_id']) ? (int) $row['user_id'] : 0,
+            $rows
+        ))));
+
+        if ($quiz_ids !== []) {
+            // One query warms `get_post_meta()` for every quiz on the page.
+            update_meta_cache('post', $quiz_ids);
+        }
+        $used_by_pair = $repo->countAttemptsForPairs($user_ids, $quiz_ids);
+
         foreach ($rows as $r) {
             $qid = isset($r['quiz_id']) ? (int) $r['quiz_id'] : 0;
             $uid = isset($r['user_id']) ? (int) $r['user_id'] : 0;
@@ -347,7 +369,7 @@ final class AdminTablesRepository
             if ($limit < 0) {
                 $limit = 0;
             }
-            $used = ($uid > 0 && $qid > 0) ? $repo->countAttemptsForUserQuiz($uid, $qid) : 0;
+            $used = ($uid > 0 && $qid > 0) ? (int) ($used_by_pair[$uid . ':' . $qid] ?? 0) : 0;
             $remaining = $limit > 0 ? max(0, $limit - $used) : null;
 
             $items[] = [
