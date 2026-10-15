@@ -494,6 +494,15 @@ final class FeatureRegistry
                     'sikshya'
                 ),
             ],
+            'cohorts' => [
+                'label' => __('Cohorts (scheduled intakes)', 'sikshya'),
+                'tier' => 'pro',
+                'group' => 'course',
+                'description' => __(
+                    "Run a course as a scheduled intake that learners move through together.\n\nA cohort has a start date, and drip schedules count from it instead of from each learner's own sign-up date — so everyone in the January intake reaches week two on the same day, however late they joined. Ordinary drip cannot express that.\n\nEach intake reports its own progress, and a whole group can be moved into one in a single step.\n\nTurn this on for term-based courses, bootcamps and corporate training rounds.",
+                    'sikshya'
+                ),
+            ],
             'groups_seats' => [
                 'label' => __('Groups & seat licensing', 'sikshya'),
                 'tier' => 'scale',

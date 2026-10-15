@@ -15,6 +15,7 @@ TIERS = {
          " email_notifications_basic page_builder_widgets_basic".split(),
  'starter': "content_drip course_reviews prerequisites instructor_dashboard drip_notifications calendar".split(),
  'pro': "email_advanced_customization community_discussions multi_instructor reports_advanced gradebook"
+        " cohorts"
         " activity_log certificates_advanced subscriptions course_bundles coupons_advanced"
         " dynamic_checkout_fields assignments_advanced quiz_advanced live_classes social_login"
         " scorm_h5p_pro".split(),
@@ -98,6 +99,7 @@ MAP = {
  'pro/addon-calendar-flow': ['calendar'],
  'pro/addon-certificates-advanced-public': ['certificates_advanced'],
  'pro/addon-certificates-advanced-flow': ['certificates_advanced'],
+ 'pro/addon-cohorts-drip-anchor': ['cohorts', 'content_drip'],
  'pro/addon-content-drip-enforcement': ['content_drip'],
  'pro/addon-content-drip-flow': ['content_drip'],
  'pro/addon-coupons-advanced-rules': ['coupons_advanced'],

@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,6 +416,12 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.12 - 2026-10-15 =
+**Cohorts (new, Pro).**
+* Run a course as a scheduled intake that learners move through together. A cohort has a start date, and drip schedules count from it rather than from each learner's own sign-up — so everyone in the January intake reaches week two on the same day, however late they joined. Ordinary per-learner drip cannot express that.
+* Joining an intake grants its course, each intake reports its own progress, and a whole group can be moved into one in a single step.
+* Requires Sikshya Pro 1.0.7.
 
 = 1.0.11 - 2026-10-15 =
 **Groups & seat licensing (new, Scale).**

@@ -86,15 +86,37 @@ export async function studentSession(
 
   // Visit the frontend so the `sikshyaFrontend` localization is in the page.
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  const restNonce = await page.evaluate(() => {
+  let restNonce = await page.evaluate(() => {
     const w = window as unknown as { sikshyaFrontend?: { restNonce?: string } };
     return w.sikshyaFrontend?.restNonce ?? '';
   });
 
-  // Confirm the session really belongs to the requested account.
-  const meRes = await context.request.get('/wp-json/wp/v2/users/me', {
+  /*
+   * Confirm the session really belongs to the requested account.
+   *
+   * Re-checked a few times before giving up. The cookie can land marginally
+   * after the navigation settles on a loaded server, and a single read then
+   * reported "no authenticated session" for a login that was merely slow — a
+   * flake that looked like a product failure. The assertion itself is unchanged:
+   * a session for the wrong account is still refused immediately below.
+   */
+  let meRes = await context.request.get('/wp-json/wp/v2/users/me', {
     headers: restNonce ? { 'X-WP-Nonce': restNonce } : {},
   });
+  for (let attempt = 0; attempt < 3 && meRes.status() === 401; attempt++) {
+    await page.waitForTimeout(1_000);
+    // Re-read the nonce too: a nonce captured while logged out stays invalid
+    // however long we wait for the cookie.
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    restNonce = await page.evaluate(() => {
+      const w = window as unknown as { sikshyaFrontend?: { restNonce?: string } };
+      return w.sikshyaFrontend?.restNonce ?? '';
+    });
+    meRes = await context.request.get('/wp-json/wp/v2/users/me', {
+      headers: restNonce ? { 'X-WP-Nonce': restNonce } : {},
+    });
+  }
+
   const meBody = (await meRes.json().catch(() => ({}))) as {
     id?: number;
     slug?: string;
