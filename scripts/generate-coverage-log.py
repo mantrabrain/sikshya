@@ -20,7 +20,8 @@ TIERS = {
         " dynamic_checkout_fields assignments_advanced quiz_advanced live_classes social_login"
         " scorm_h5p_pro".split(),
  'scale': "marketplace_multivendor white_label webhooks zapier email_marketing public_api_keys"
-          " multisite_scale enterprise_reports multilingual_enterprise groups_seats".split(),
+          " multisite_scale enterprise_reports multilingual_enterprise groups_seats"
+          " compliance_training".split(),
 }
 FEATURE_TIER = {f: t for t, fs in TIERS.items() for f in fs}
 
@@ -99,6 +100,7 @@ MAP = {
  'pro/addon-calendar-flow': ['calendar'],
  'pro/addon-certificates-advanced-public': ['certificates_advanced'],
  'pro/addon-certificates-advanced-flow': ['certificates_advanced'],
+ 'pro/addon-compliance-training': ['compliance_training'],
  'pro/addon-cohorts-drip-anchor': ['cohorts', 'content_drip'],
  'pro/addon-content-drip-enforcement': ['content_drip'],
  'pro/addon-content-drip-flow': ['content_drip'],

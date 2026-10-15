@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.12
+Stable tag: 1.0.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,6 +416,13 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.13 - 2026-10-15 =
+**Compliance & mandatory training (new, Scale).**
+* Make a course mandatory for a role, group or cohort with a deadline, and report on who is compliant. Somebody who joins the audience later inherits the obligation without you re-assigning anything.
+* Recurring training reopens on its own cycle, dated from when the learner actually certified rather than from the old deadline, and every past cycle stays on the record as the audit trail.
+* Overdue is worked out from the deadline and the clock rather than stored, so a report is never stale. Waivers record who granted them and why, and are counted separately from training that actually happened.
+* Requires Sikshya Pro 1.0.8.
 
 = 1.0.12 - 2026-10-15 =
 **Cohorts (new, Pro).**

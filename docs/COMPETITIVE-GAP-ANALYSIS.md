@@ -8,8 +8,13 @@ Goal: Sikshya Free + Pro + addons at enterprise grade.
 - **Every "we don't have this" line was grepped against `sikshya/src` and `sikshya-pro/src`** before being
   written down. Where a grep hit turned out to be an incidental substring match it is called out.
 - **Competitor inventories** come from vendor pages (LearnDash on liquidweb.com, the LifterLMS store,
-  Themeum's Tutor LMS addon docs), not from comparison blogs. Treat competitor *pricing* and tier
-  placement as unverified — it moved between sources.
+  Themeum's Tutor LMS addon docs, StyleMix's MasterStudy feature pages, the LearnPress add-ons page),
+  not from comparison blogs. Treat competitor *pricing* and tier placement as unverified — it moved
+  between sources.
+- **The first version of this document was incomplete.** It covered LearnDash, LifterLMS and Tutor
+  only. MasterStudy and LearnPress were added later and produced a dozen gaps this file had missed,
+  listed under "Second pass" below. Breadth of catalogue is MasterStudy's strength and it is where we
+  are furthest behind.
 - **Enterprise requirements** are the recurring items across buyer checklists and RFP guides. No
   authoritative standard defines "enterprise LMS", so these are market expectations, not a spec.
 
@@ -49,6 +54,41 @@ These are the ones that lose a procurement conversation outright.
 | **SMS / Twilio notifications** | LifterLMS (incl. enrol-by-text) | **None** |
 | **Quiz export / import** | Tutor | **None** |
 | **Shared course steps** (reuse a lesson across courses) | LearnDash | **None** |
+
+## Second pass — gaps found only after adding MasterStudy and LearnPress
+
+MasterStudy publishes by far the widest catalogue of the five. Each line below was
+grepped against both plugins before being written down.
+
+| Gap | Who has it | Our status |
+|---|---|---|
+| **Taxes on checkout** | MasterStudy | **A setting that does nothing.** `tax_rate` exists in `SettingsManager` and is read nowhere in `Commerce/` or `Services/` — an administrator can set a rate and no total changes |
+| **Audio lessons** | MasterStudy | **Half-wired.** The lesson editor has a branch for `lessonType === 'audio'`, but the type picker offers no such option and the server allowlist is `['text','video','live','scorm','h5p']`, so an audio lesson silently becomes a text one |
+| **PDF lessons** | MasterStudy | None |
+| **Question media** (image/audio inside a question) | MasterStudy, LearnDash (audio clip) | None |
+| **Gamification points + leaderboard** | MasterStudy, LearnDash | None. `points_earned` is quiz scoring, not a points economy |
+| **Trial courses** | MasterStudy | None |
+| **Memberships** (access by membership level, distinct from subscriptions) | MasterStudy, LifterLMS, LearnPress (PMPro) | Subscriptions only |
+| **Course collections** | LearnPress | None (bundles are a purchase unit, not a browse grouping) |
+| **Upsell / bonus coupons at checkout** | LearnPress | None |
+| **Direct messages between users** | MasterStudy | None. Discussions are per-course, not person-to-person |
+| **Public instructor / student profiles** | MasterStudy | None |
+| **Divi and WPBakery support** | MasterStudy | Gutenberg and basic widgets only |
+| **Ready-made starter site templates** (~20) | MasterStudy | None. A significant adoption lever rather than a capability |
+| **Wishlist** | LearnPress ships it **free** | Removed from our catalogue in 1.0.10 because it had no implementation. Correct as an honesty fix, but the competitive answer is to build it |
+| **LMS migration importers** | MasterStudy imports from Tutor, LearnDash, LearnPress, LifterLMS and Masteriyo | None |
+
+Our live-class provider coverage is better than the gap list above implies: Zoom, Google Meet, Jitsi
+and Webex are all present in `LiveProviderCatalog`.
+
+### Two bugs this research surfaced
+
+Both verified by reading the code, neither fixed yet:
+
+1. **`tax_rate` is a no-op setting.** Same class of problem as the advertised-but-unbuilt wishlist: the
+   UI implies a capability that does not exist. Either wire it into order totals or remove it.
+2. **The `audio` lesson type is inconsistent across layers.** Dead UI code for a type the server
+   rejects. Either finish it or remove the branch.
 
 ## Tier 3 — commercial polish
 

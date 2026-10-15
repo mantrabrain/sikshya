@@ -503,6 +503,15 @@ final class FeatureRegistry
                     'sikshya'
                 ),
             ],
+            'compliance_training' => [
+                'label' => __('Compliance & mandatory training', 'sikshya'),
+                'tier' => 'scale',
+                'group' => 'platform',
+                'description' => __(
+                    "Make courses mandatory for a role, a group or a cohort, with a deadline, and report on who is compliant.\n\nSomeone who joins the audience later inherits the obligation automatically — you do not re-assign anything. Recurring training (annual fire safety, yearly refreshers) reopens on its own cycle, dated from when the learner actually certified, and each past cycle stays on the record as the audit trail.\n\nOverdue is worked out from the deadline and the clock rather than stored, so a report is never stale. A waiver is recorded with who granted it and why, and is counted separately from training that actually happened.\n\nTurn this on for regulated industries and any staff training you have to evidence.",
+                    'sikshya'
+                ),
+            ],
             'groups_seats' => [
                 'label' => __('Groups & seat licensing', 'sikshya'),
                 'tier' => 'scale',
