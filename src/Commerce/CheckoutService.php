@@ -192,11 +192,22 @@ final class CheckoutService
             }
         }
 
+        /*
+         * Tax applies to the post-discount amount: a coupon reduces the taxable
+         * base rather than tax being charged on a price nobody paid. With the
+         * shipped default rate of 0 this returns the amount untouched, so
+         * existing stores see no change from tax being wired up at all.
+         */
+        $taxed = TaxService::apply((float) $total);
+
         return [
             'line_amounts' => $line_amounts,
             'subtotal' => $subtotal,
             'discount' => round((float) $discount, 2),
-            'total' => round((float) $total, 2),
+            'tax' => $taxed['tax'],
+            'tax_rate' => $taxed['rate'],
+            'tax_inclusive' => $taxed['inclusive'],
+            'total' => $taxed['total'],
             'currency' => $currency,
             'coupon_id' => $coupon_id,
         ];
@@ -223,12 +234,21 @@ final class CheckoutService
         return [
             'subtotal' => $p['subtotal'],
             'discount' => $p['discount'],
+            'tax' => $p['tax'],
+            'tax_rate' => $p['tax_rate'],
+            'tax_inclusive' => $p['tax_inclusive'],
             'total' => $p['total'],
             'currency' => $cur,
             'formatted' => [
                 'subtotal' => number_format_i18n($p['subtotal'], 2) . ' ' . $cur,
                 'discount' => $p['discount'] > 0.00001
                     ? '-' . number_format_i18n($p['discount'], 2) . ' ' . $cur
+                    : '',
+                // Blank rather than "0.00" when no tax applies, so a store that
+                // charges none shows no tax line at all.
+                'tax' => $p['tax'] > 0.00001
+                    ? number_format_i18n($p['tax'], 2) . ' ' . $cur
+                    . ($p['tax_inclusive'] ? ' ' . __('(included)', 'sikshya') : '')
                     : '',
                 'total' => number_format_i18n($p['total'], 2) . ' ' . $cur,
             ],
@@ -254,6 +274,7 @@ final class CheckoutService
         $line_amounts = $p['line_amounts'];
         $subtotal = $p['subtotal'];
         $discount = $p['discount'];
+        $tax = $p['tax'];
         $total = $p['total'];
         $currency = $p['currency'];
         $coupon_id = $p['coupon_id'];
@@ -274,6 +295,7 @@ final class CheckoutService
                 'currency' => $currency,
                 'subtotal' => $subtotal,
                 'discount_total' => $discount,
+                'tax_total' => $tax,
                 'total' => $total,
                 'gateway' => '',
                 'coupon_id' => $coupon_id,

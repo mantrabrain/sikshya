@@ -19,6 +19,7 @@ final class OrdersTable extends AbstractTable
             currency varchar(3) NOT NULL DEFAULT 'USD',
             subtotal decimal(12,2) NOT NULL DEFAULT 0.00,
             discount_total decimal(12,2) NOT NULL DEFAULT 0.00,
+            tax_total decimal(12,2) NOT NULL DEFAULT 0.00,
             total decimal(12,2) NOT NULL DEFAULT 0.00,
             gateway varchar(32) NOT NULL DEFAULT '',
             gateway_intent_id varchar(255) NULL,

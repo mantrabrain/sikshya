@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.13
+Stable tag: 1.0.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,6 +416,12 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.14 - 2026-10-15 =
+**Tax now works, and audio lessons are finished.**
+* **Tax was a setting that did nothing.** Settings → Commerce has offered a tax rate and a "prices already include tax" switch, and neither was read anywhere — you could configure 8.25% and the store charged nothing extra. Tax is now applied to the amount after any discount, shown on the checkout quote, and recorded on the order. Both modes work: exclusive tax is added on top, and an inclusive price stays exactly what the customer was shown. A rate of 0, which is the default, changes nothing for existing stores.
+* **Audio lessons could not be created.** The lesson player already handled them, but the type was missing from the picker and the server turned an audio lesson into a text one. You can now pick "Audio lesson", paste a direct link to an .mp3, .m4a, .ogg or .wav file, and learners get a player — with the existing transcript field alongside it for accessibility.
+* Requires Sikshya Pro 1.0.9.
 
 = 1.0.13 - 2026-10-15 =
 **Compliance & mandatory training (new, Scale).**

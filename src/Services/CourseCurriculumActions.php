@@ -97,7 +97,7 @@ final class CourseCurriculumActions
             // Free kinds always allowed; "live" / "scorm" / "h5p" are accepted here so the
             // course-builder picker can create them in one step. The renderer + lesson editor
             // separately enforce that the matching Pro addon is enabled.
-            $allowed_kinds = ['text', 'video', 'live', 'scorm', 'h5p'];
+            $allowed_kinds = ['text', 'video', 'audio', 'live', 'scorm', 'h5p'];
             $kind = in_array($lesson_type, $allowed_kinds, true) ? $lesson_type : 'text';
             update_post_meta($content_id, '_sikshya_lesson_type', $kind);
         }

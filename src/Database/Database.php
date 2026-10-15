@@ -28,7 +28,7 @@ class Database
     /**
      * Current DB schema version.
      */
-    public const SCHEMA_VERSION = '1.10.0';
+    public const SCHEMA_VERSION = '1.11.0';
 
     /**
      * Plugin instance
@@ -86,7 +86,41 @@ class Database
             $this->migrateTo1100QuizAutoSave();
         }
 
+        if (version_compare($current, '1.11.0', '<')) {
+            $this->migrateTo1110OrderTax();
+        }
+
         Settings::setRaw('sikshya_db_version', self::SCHEMA_VERSION);
+    }
+
+    /**
+     * Adds `tax_total` to the orders table.
+     *
+     * Additive and idempotent: the column is only created when absent, and
+     * every existing order keeps a tax of 0.00, which is correct — they were
+     * placed while the tax settings did nothing, so no tax was ever charged on
+     * them. Back-filling a rate retrospectively would misstate historic orders.
+     */
+    private function migrateTo1110OrderTax(): void
+    {
+        global $wpdb;
+
+        $table = \Sikshya\Database\Tables\OrdersTable::name();
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        $exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) === $table;
+        if (!$exists) {
+            return;
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL
+        $column = $wpdb->get_results("SHOW COLUMNS FROM {$table} LIKE 'tax_total'");
+        if (!empty($column)) {
+            return;
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL
+        $wpdb->query("ALTER TABLE {$table} ADD COLUMN tax_total decimal(12,2) NOT NULL DEFAULT 0.00 AFTER discount_total");
     }
 
     /**

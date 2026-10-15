@@ -192,6 +192,14 @@ class PostTypeManager
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_duration');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_type');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_video_url');
+        /*
+         * Audio lessons were two-thirds built: the learn shell already renders an
+         * `audio` lesson from this key (see LessonLearnContent::audioBlock()), but
+         * the key was never registered for REST and the type picker offered no
+         * such option, so an audio lesson could not be authored at all — and the
+         * server allowlist turned one into a text lesson if anything tried.
+         */
+        $str_meta(PostTypes::LESSON, '_sikshya_lesson_audio_url');
         // Lesson: free preview toggle.
         $str_meta(PostTypes::LESSON, '_sikshya_is_free');
         // Lesson: optional transcript (URL or rich text) shown beside the

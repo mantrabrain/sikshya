@@ -85,10 +85,12 @@ and Webex are all present in `LiveProviderCatalog`.
 
 Both verified by reading the code, neither fixed yet:
 
-1. **`tax_rate` is a no-op setting.** Same class of problem as the advertised-but-unbuilt wishlist: the
-   UI implies a capability that does not exist. Either wire it into order totals or remove it.
-2. **The `audio` lesson type is inconsistent across layers.** Dead UI code for a type the server
-   rejects. Either finish it or remove the branch.
+1. ~~**`tax_rate` is a no-op setting.**~~ **Fixed.** Wired through `TaxService` into the quote and the
+   order, with a `tax_total` column and a versioned migration. Exclusive and inclusive modes are both
+   implemented; a rate of 0 (the shipped default) leaves every existing store untouched.
+2. ~~**The `audio` lesson type is inconsistent across layers.**~~ **Fixed.** The meta is now
+   REST-registered, the type picker offers it, the server allowlist accepts it, and the renderer that
+   already worked is finally reachable.
 
 ## Tier 3 — commercial polish
 
@@ -181,10 +183,22 @@ were previously vacuous was not measured and is not claimed.
   outlasts its wait. It passes on retry. Worth hardening with a bounded re-check
   of `/users/me` before it throws.
 
-Still missing from the list under "What enterprise-level testing has to mean":
-load and scale with asserted query budgets, accessibility with a publishable
-VPAT, REST role-matrix fuzzing, upgrade on real data, and i18n pseudolocale
-rendering. None of those exist yet.
+Progress against the list under "What enterprise-level testing has to mean":
+
+- **Load and scale with asserted query budgets** — started. The first budget
+  gate is `ComplianceQueryBudgetTest`, which asserts the compliance sync's cost
+  does not grow per learner. It was written after that sync shipped with an N+1
+  measuring 17,481 queries over 6.6 seconds on a real 2,913-learner dataset while
+  every behaviour test passed. Reverting the fix makes the budget fail with
+  "243 queries against 64 for 10 — cost is growing per learner". The pattern now
+  exists and should be extended to the course archive, the learner dashboard and
+  the reporting endpoints.
+- **Accessibility with a publishable VPAT** — not started.
+- **REST role-matrix fuzzing** — not started.
+- **Upgrade on real data** — partially. The `tax_total` migration was verified on
+  a real MySQL install (1.10.0 with the column absent, upgraded, then re-run for
+  idempotency) rather than only under the temporary-table harness.
+- **i18n pseudolocale rendering** — not started.
 
 ## Caveats
 

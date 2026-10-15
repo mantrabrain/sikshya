@@ -315,6 +315,7 @@ export function LessonEditor(props: ContentEditorProps) {
   const [durationUnit, setDurationUnit] = useState<'min' | 'hr'>('min');
   const [lessonType, setLessonType] = useState('text');
   const [videoUrl, setVideoUrl] = useState('');
+  const [audioUrl, setAudioUrl] = useState('');
   // Optional transcript shown beside the player on the Learn page — keep
   // both an external file URL (downloadable) and a paste-in text (inline
   // disclosure) for flexibility. Either, both, or neither may be set.
@@ -345,7 +346,8 @@ export function LessonEditor(props: ContentEditorProps) {
       setDurationUnit('min');
       setLessonType('text');
       setVideoUrl('');
-        setTranscriptUrl('');
+      setAudioUrl('');
+      setTranscriptUrl('');
       setTranscriptText('');
       setAttachmentIds([]);
       setProValues(PRO_LESSON_DEFAULTS);
@@ -377,6 +379,7 @@ export function LessonEditor(props: ContentEditorProps) {
     }
     setLessonType(String(readMeta(m, '_sikshya_lesson_type') ?? 'text') || 'text');
     setVideoUrl(String(readMeta(m, '_sikshya_lesson_video_url') ?? ''));
+    setAudioUrl(String(readMeta(m, '_sikshya_lesson_audio_url') ?? ''));
     setTranscriptUrl(String(readMeta(m, '_sikshya_lesson_transcript_url') ?? ''));
     setTranscriptText(String(readMeta(m, '_sikshya_lesson_transcript_text') ?? ''));
     const rawAttachments = readMeta(m, '_sikshya_lesson_attachments');
@@ -408,6 +411,7 @@ export function LessonEditor(props: ContentEditorProps) {
         _sikshya_lesson_duration: duration,
         _sikshya_lesson_type: kind,
         _sikshya_lesson_video_url: kind === 'video' ? videoUrl.trim() : '',
+        _sikshya_lesson_audio_url: kind === 'audio' ? audioUrl.trim() : '',
         _sikshya_lesson_transcript_url: transcriptUrl.trim(),
         _sikshya_lesson_transcript_text: transcriptText,
         _sikshya_lesson_attachments: attachmentIds,
@@ -553,6 +557,7 @@ export function LessonEditor(props: ContentEditorProps) {
                 >
                   <option value="text">{__('Text lesson', 'sikshya')}</option>
                   <option value="video">{__('Video lesson', 'sikshya')}</option>
+                  <option value="audio">{__('Audio lesson', 'sikshya')}</option>
                   {liveOffered ? (
                     <option value="live">
                       {liveReady
@@ -588,6 +593,23 @@ export function LessonEditor(props: ContentEditorProps) {
                 onAttachmentIdChange={setFeatured}
                 description={__('Optional cover image for lesson lists and course outlines when your theme supports featured images.', 'sikshya')}
               />
+              {lessonType === 'audio' ? (
+                <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                  <label className={LABEL} htmlFor="sik-lesson-audio-url">
+                    {__('Audio URL', 'sikshya')}
+                  </label>
+                  <p className={HINT}>
+                    {__('Paste a direct link to an .mp3, .m4a, .ogg or .wav file. Learners play this as the main lesson, and the transcript field below keeps it accessible.', 'sikshya')}
+                  </p>
+                  <input
+                    id="sik-lesson-audio-url"
+                    className={FIELD}
+                    value={audioUrl}
+                    onChange={(e) => setAudioUrl(e.target.value)}
+                    placeholder="https://example.com/lesson.mp3"
+                  />
+                </div>
+              ) : null}
               {lessonType === 'video' ? (
                 <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/30">
                   <label className={LABEL} htmlFor="sik-lesson-video-url-inline">
