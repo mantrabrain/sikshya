@@ -137,6 +137,7 @@ class Admin
         add_action('admin_footer', [$this, 'addAdminFooter']);
         add_filter('admin_body_class', [$this, 'filterAdminBodyClass']);
         add_action('admin_init', [self::class, 'redirectLegacySikshyaReactMenus'], 0);
+        add_action('admin_init', [self::class, 'redirectRetiredReactViews'], 0);
         add_filter('show_admin_bar', [self::class, 'hideAdminBarOnSikshyaApp']);
         add_action('admin_enqueue_scripts', [self::class, 'dequeueWordPressUiOnSikshyaApp'], 10000);
         add_action('admin_head', [self::class, 'printSikshyaReactShellHead'], 1);
@@ -275,6 +276,53 @@ class Admin
     /**
      * Redirect old per-screen menu slugs to the unified app (`page=sikshya&view=…`).
      */
+    /**
+     * Redirect retired `view=` aliases, on `admin_init`.
+     *
+     * This has to happen before any output. The alias below used to be handled
+     * inside {@see self::renderSikshyaApp()}, which is the page *render*
+     * callback — it runs long after `admin_head` has emitted markup, so the
+     * redirect could never send its header. The result was two "Cannot modify
+     * header information" warnings printed into the page and a learner or admin
+     * left sitting on a broken screen instead of arriving at the email hub.
+     * Seventy of those warnings were logged in a single day.
+     *
+     * @return void
+     */
+    public static function redirectRetiredReactViews(): void
+    {
+        if (!is_user_logged_in() || wp_doing_ajax()) {
+            return;
+        }
+
+        if (empty($_GET['page']) || !is_string($_GET['page'])) {
+            return;
+        }
+        if (sanitize_key(wp_unslash($_GET['page'])) !== AdminPages::DASHBOARD) {
+            return;
+        }
+
+        $view = isset($_GET['view']) ? sanitize_key(wp_unslash((string) $_GET['view'])) : '';
+
+        /** Retired view => its replacement query args. */
+        $aliases = [
+            // Transactional templates now live as a tab of the email hub.
+            'email-templates' => ['view' => 'email-hub', 'tab' => 'templates'],
+        ];
+
+        if (!isset($aliases[$view])) {
+            return;
+        }
+
+        wp_safe_redirect(
+            add_query_arg(
+                array_merge(['page' => AdminPages::DASHBOARD], $aliases[$view]),
+                admin_url('admin.php')
+            )
+        );
+        exit;
+    }
+
     public static function redirectLegacySikshyaReactMenus(): void
     {
         if (!is_user_logged_in() || wp_doing_ajax()) {
@@ -388,11 +436,11 @@ class Admin
 
         $view = isset($_GET['view']) ? sanitize_key(wp_unslash((string) $_GET['view'])) : 'dashboard';
 
-        // Centralize transactional templates under Email → Templates (hub tab).
-        if ($view === 'email-templates') {
-            wp_safe_redirect(admin_url('admin.php?page=sikshya&view=email-hub&tab=templates'));
-            exit;
-        }
+        /*
+         * The `email-templates` alias is redirected on `admin_init` by
+         * {@see self::redirectRetiredReactViews()}. Doing it here could not
+         * work: this is the render callback, so headers are long gone.
+         */
 
         $allowed = [
             'dashboard',
