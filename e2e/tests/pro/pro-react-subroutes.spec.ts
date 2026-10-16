@@ -37,6 +37,17 @@ const IGNORE_PATTERNS: RegExp[] = [
   /Astra/i,
   /wp-emoji/i,
   /third[- ]party/i,
+  // Network failures reaching *outside* the site. An admin screen pulls a font
+  // or a dashboard widget from a third party, and when the machine running the
+  // suite loses connectivity every one of those becomes a console error: one
+  // dropped wifi connection turned a clean segment into 19 "product failures"
+  // that had nothing to do with the product. A 404 on one of our own assets
+  // still fails, because that is a real defect and names a path.
+  /net::ERR_INTERNET_DISCONNECTED/i,
+  /net::ERR_NAME_NOT_RESOLVED/i,
+  /net::ERR_NETWORK_CHANGED/i,
+  /net::ERR_CONNECTION_TIMED_OUT/i,
+  /NS_ERROR_(?:OFFLINE|UNKNOWN_HOST|NET_TIMEOUT)/i,
 ];
 const shouldIgnore = (msg: string) => IGNORE_PATTERNS.some((re) => re.test(msg));
 

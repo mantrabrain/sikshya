@@ -32,6 +32,21 @@ final class SessionTimeoutIntegrationTest extends WP_UnitTestCase
         parent::tearDown();
     }
 
+    public function testAnInstallThatNeverSetTheTimeoutKeepsTheHistoricalWindow(): void
+    {
+        // The state every existing site is in after updating: the option was
+        // never written, so the default decides how long their logins last.
+        // Settings::get() reads the option directly, so removing it is enough
+        // to reproduce an install that never configured this.
+        delete_option(Settings::PREFIX . 'session_timeout');
+
+        self::assertSame(
+            120 * MINUTE_IN_SECONDS,
+            GlobalSettingsBootstrap::sessionTimeoutSeconds(),
+            'Moving this default would silently change how long every existing site’s logins last, which an update has no business doing.'
+        );
+    }
+
     public function testAnOrdinaryLoginIsCappedToTheConfiguredTimeout(): void
     {
         Settings::set('session_timeout', 30);
