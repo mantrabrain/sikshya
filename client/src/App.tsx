@@ -19,6 +19,9 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage').then((m) => ({ de
 const ContentDripPage = lazy(() =>
   import('./pages/ContentDripPage').then((m) => ({ default: m.ContentDripPage }))
 );
+const GroupsPage = lazy(() =>
+  import('./pages/GroupsPage').then((m) => ({ default: m.GroupsPage }))
+);
 const ContentPostEditorPage = lazy(() =>
   import('./pages/ContentPostEditorPage').then((m) => ({ default: m.ContentPostEditorPage }))
 );
@@ -371,6 +374,14 @@ function RoutedApp() {
             T.instructor
           )}
           variant="instructors"
+        />
+      );
+    case 'groups':
+      return (
+        <GroupsPage
+          embedded
+          config={config}
+          title={__('Groups & seats', 'sikshya')}
         />
       );
     case 'instructor-applications':

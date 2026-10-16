@@ -60,6 +60,7 @@ MAP = {
  'admin/react-subroutes': ['_platform'],
  'admin/reports-snapshot': ['basic_reports'],
  'admin/rest-api': ['_platform'],
+ 'admin/groups-admin-ui': ['groups_seats'],
  'admin/screen-health-sweep': ['_platform'],
  'admin/settings-save': ['_platform'],
  'admin/setup-wizard-steps': ['_platform'],

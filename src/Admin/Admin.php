@@ -471,6 +471,7 @@ class Admin
             'students',
             'instructors',
             'enrollments',
+            'groups',
             'reports',
             'payments',
             'orders',

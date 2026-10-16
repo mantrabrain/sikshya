@@ -39,6 +39,44 @@ export const SIKSHYA_ENDPOINTS = {
     enrollments: '/admin/enrollments',
     /** Single enrollment detail (learner + course + progress + payment). */
     enrollmentDetail: (id: number) => `/admin/enrollments/${encodeURIComponent(String(id))}`,
+    /** Groups & seat licensing (Scale). */
+    groups: (params?: { per_page?: number; offset?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.per_page) q.set('per_page', String(params.per_page));
+      if (params?.offset) q.set('offset', String(params.offset));
+      const s = q.toString();
+      return s ? `/pro/groups?${s}` : '/pro/groups';
+    },
+    group: (id: number) => `/pro/groups/${encodeURIComponent(String(id))}`,
+    groupMembers: (id: number) => `/pro/groups/${encodeURIComponent(String(id))}/members`,
+    groupMember: (id: number, userId: number) =>
+      `/pro/groups/${encodeURIComponent(String(id))}/members/${encodeURIComponent(String(userId))}`,
+    groupCourses: (id: number) => `/pro/groups/${encodeURIComponent(String(id))}/courses`,
+    groupCourse: (id: number, courseId: number) =>
+      `/pro/groups/${encodeURIComponent(String(id))}/courses/${encodeURIComponent(String(courseId))}`,
+
+    /** Cohorts — scheduled intakes (Pro). */
+    cohorts: (params?: { course_id?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.course_id) q.set('course_id', String(params.course_id));
+      const s = q.toString();
+      return s ? `/pro/cohorts?${s}` : '/pro/cohorts';
+    },
+    cohort: (id: number) => `/pro/cohorts/${encodeURIComponent(String(id))}`,
+    cohortMembers: (id: number) => `/pro/cohorts/${encodeURIComponent(String(id))}/members`,
+    cohortMember: (id: number, userId: number) =>
+      `/pro/cohorts/${encodeURIComponent(String(id))}/members/${encodeURIComponent(String(userId))}`,
+
+    /** Compliance & mandatory training (Scale). */
+    complianceRequirements: '/pro/compliance/requirements',
+    complianceRequirement: (id: number) =>
+      `/pro/compliance/requirements/${encodeURIComponent(String(id))}`,
+    complianceRequirementSync: (id: number) =>
+      `/pro/compliance/requirements/${encodeURIComponent(String(id))}/sync`,
+    complianceAssignmentWaive: (id: number) =>
+      `/pro/compliance/assignments/${encodeURIComponent(String(id))}/waive`,
+    complianceReport: '/pro/compliance/report',
+
     /** POST: manually enroll a learner into a course. */
     enrollmentsManual: '/admin/enrollments/manual',
     /** Instructor application queue (user meta). Requires manage_sikshya or manage_options. */

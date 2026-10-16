@@ -309,6 +309,16 @@ final class ReactAdminConfig
                 'href' => self::reactAppUrl('enrollments'),
                 'cap' => 'sikshya_enrollments_nav',
             ],
+            self::withNavGate(
+                [
+                    'id' => 'groups',
+                    'label' => __('Groups & seats', 'sikshya'),
+                    'icon' => 'users',
+                    'href' => self::reactAppUrl('groups'),
+                    'cap' => 'sikshya_staff',
+                ],
+                'groups_seats'
+            ),
         ];
         $people_children = self::filterPeopleNavChildren($people_children);
         if ($people_children !== []) {
