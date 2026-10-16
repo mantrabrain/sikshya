@@ -20,6 +20,20 @@ if (!defined('ABSPATH')) {
 
 final class SampleDataImportService
 {
+    /**
+     * Marks a post as created by the sample importer, and which pack course it came from.
+     *
+     * Without it the importer had no idea what it had already done, so running
+     * it twice — the Tools button, or the setup wizard after a first attempt —
+     * produced a second copy of every course, and a run cut short by
+     * `max_execution_time` left a half-finished pack that a retry duplicated
+     * rather than completed.
+     */
+    public const META_SOURCE = '_sikshya_sample_source';
+
+    /** Marks whether that post's import finished. */
+    public const META_SOURCE_STATE = '_sikshya_sample_source_state';
+
     private SampleDataPackRepository $packRepository;
 
     private CurriculumService $curriculum;
@@ -90,6 +104,20 @@ final class SampleDataImportService
             'categories' => 0,
         ];
 
+        // Importing a pack copies and resizes a bundled image per course and
+        // writes a few hundred posts. On a shared host the default 30s limit
+        // can cut that off part-way, which used to leave a half-built pack
+        // behind; the work is bounded and admin-initiated, so lift the ceiling
+        // the way core's own importers do.
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(0);
+        }
+        if (function_exists('wp_raise_memory_limit')) {
+            wp_raise_memory_limit('image');
+        }
+
+        $counts['skipped'] = 0;
+
         $packCategories = $pack['course_categories'] ?? [];
         if (is_array($packCategories) && $packCategories !== []) {
             foreach ($packCategories as $catDef) {
@@ -105,15 +133,43 @@ final class SampleDataImportService
                 continue;
             }
 
+            $source = self::sourceKeyFor($courseDef);
+
+            // Already imported and finished: leave it alone. Re-importing would
+            // give the site a second copy of a course it already has, which is
+            // what the Tools button used to do every time it was pressed.
+            if ($source !== '' && self::findFinishedImport($source) > 0) {
+                ++$counts['skipped'];
+                continue;
+            }
+
+            // Started but never finished — a previous run was cut off. Its
+            // posts are the importer's own, seconds old and carrying its
+            // marker, so they are removed and the course is built again rather
+            // than left as a half-course beside a duplicate.
+            if ($source !== '') {
+                self::discardUnfinishedImport($source);
+            }
+
             $courseId = $this->createCourse($courseDef);
             if ($courseId <= 0) {
                 continue;
+            }
+
+            if ($source !== '') {
+                update_post_meta($courseId, self::META_SOURCE, $source);
+                update_post_meta($courseId, self::META_SOURCE_STATE, 'importing');
             }
 
             ++$counts['courses'];
 
             $chapters = $courseDef['chapters'] ?? [];
             if (!is_array($chapters)) {
+                // No curriculum to build, so this course is already as complete
+                // as the pack describes it.
+                if ($source !== '') {
+                    update_post_meta($courseId, self::META_SOURCE_STATE, 'done');
+                }
                 continue;
             }
 
@@ -162,6 +218,24 @@ final class SampleDataImportService
             }
 
             $this->invalidateCourseCurriculumCache($courseId, $chapterIds);
+
+            // Marked complete last, so an interruption anywhere above leaves
+            // the course identifiable as unfinished.
+            if ($source !== '') {
+                update_post_meta($courseId, self::META_SOURCE_STATE, 'done');
+            }
+        }
+
+        // Nothing created *because it was already there* is not a failure. The
+        // guard below is for a genuinely broken import, and telling an admin
+        // who pressed the button twice to check their file permissions would
+        // send them looking for a problem that is not there.
+        if ($counts['courses'] === 0 && $counts['skipped'] > 0) {
+            return [
+                'success' => true,
+                'message' => __('Sample data is already imported.', 'sikshya'),
+                'counts' => $counts,
+            ];
         }
 
         if ($counts['courses'] === 0) {
@@ -180,6 +254,91 @@ final class SampleDataImportService
             'message' => __('Sample data imported.', 'sikshya'),
             'counts' => $counts,
         ];
+    }
+
+
+    /**
+     * Stable identity for a pack course: what makes a re-import recognisable.
+     *
+     * The pack's slugs are unique, so the slug is the identity, falling back to
+     * the title for a pack that omits one.
+     *
+     * @param array<string, mixed> $courseDef
+     */
+    private static function sourceKeyFor(array $courseDef): string
+    {
+        $slug = sanitize_title((string) ($courseDef['slug'] ?? ''));
+        if ($slug !== '') {
+            return $slug;
+        }
+
+        return sanitize_title((string) ($courseDef['title'] ?? ''));
+    }
+
+    /**
+     * The id of a finished import of this pack course, or 0.
+     */
+    private static function findFinishedImport(string $source): int
+    {
+        foreach (self::findImports($source) as $id) {
+            if ((string) get_post_meta($id, self::META_SOURCE_STATE, true) === 'done') {
+                return $id;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Remove courses from an interrupted import of this pack course.
+     *
+     * Deliberately narrow: only a course post carrying this importer's marker
+     * for this source and *not* marked done. A course the site has finished
+     * importing, or any course a human made, is never matched.
+     */
+    private static function discardUnfinishedImport(string $source): void
+    {
+        foreach (self::findImports($source) as $id) {
+            if ((string) get_post_meta($id, self::META_SOURCE_STATE, true) === 'done') {
+                continue;
+            }
+
+            // Chapters are the course's own children, so they go with it.
+            $children = get_posts([
+                'post_parent' => $id,
+                'post_type' => 'any',
+                'post_status' => 'any',
+                'numberposts' => -1,
+                'fields' => 'ids',
+            ]);
+            foreach ($children as $childId) {
+                wp_delete_post((int) $childId, true);
+            }
+
+            wp_delete_post($id, true);
+        }
+    }
+
+    /**
+     * Course ids previously imported for this pack course.
+     *
+     * @return int[]
+     */
+    private static function findImports(string $source): array
+    {
+        if ($source === '') {
+            return [];
+        }
+
+        return array_map('intval', get_posts([
+            'post_type' => PostTypes::COURSE,
+            'post_status' => 'any',
+            'numberposts' => 20,
+            'fields' => 'ids',
+            'meta_key' => self::META_SOURCE,
+            'meta_value' => $source,
+            'suppress_filters' => true,
+        ]));
     }
 
     /**
