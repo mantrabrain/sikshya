@@ -72,7 +72,32 @@ async function reauthenticate(page: Page): Promise<boolean> {
   return /wp-admin/.test(page.url());
 }
 
+/**
+ * One nonce per page, not one per fixture.
+ *
+ * Every helper that builds a fixture calls getAdminNonce(), and it used to
+ * navigate to /wp-admin/index.php each time: addon-course-bundles-purchase
+ * makes eight such calls and addon-content-drip-enforcement seven, so a single
+ * spec loaded the whole admin dashboard eight times over to read a value that
+ * does not change within a session. With two PHP-FPM workers that is where the
+ * 120-second test timeouts came from — the specs that timed out were the
+ * heaviest fixture builders in the suite.
+ *
+ * Keyed on the Page so each context keeps its own, and dropped whenever we
+ * sign in again, because the nonce is derived from the session token.
+ */
+const nonceByPage = new WeakMap<Page, string>();
+
+export function forgetAdminNonce(page: Page): void {
+  nonceByPage.delete(page);
+}
+
 export async function getAdminNonce(page: Page): Promise<string> {
+  const cached = nonceByPage.get(page);
+  if (cached) {
+    return cached;
+  }
+
   await page.goto('/wp-admin/index.php', { waitUntil: 'domcontentloaded' });
   let nonce = await readNonce(page);
 
@@ -86,6 +111,9 @@ export async function getAdminNonce(page: Page): Promise<string> {
   }
 
   if (!nonce) throw new Error('No wpApiSettings.nonce found on /wp-admin/index.php');
+
+  nonceByPage.set(page, nonce);
+
   return nonce;
 }
 
@@ -107,10 +135,22 @@ export async function createCourseViaRest(
   if (input.authorId !== undefined && Number(input.authorId) > 0) {
     courseData.author = Number(input.authorId);
   }
-  const res = await request.post('/wp-json/wp/v2/sik_course', {
+  let res = await request.post('/wp-json/wp/v2/sik_course', {
     headers: { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' },
     data: courseData,
   });
+
+  // A rejected nonce means the session moved on under us; drop the cached one
+  // and try once more, so caching cannot turn a recoverable 403 into a failure.
+  if (res.status() === 403) {
+    forgetAdminNonce(page);
+    const fresh = await getAdminNonce(page);
+    res = await request.post('/wp-json/wp/v2/sik_course', {
+      headers: { 'X-WP-Nonce': fresh, 'Content-Type': 'application/json' },
+      data: courseData,
+    });
+  }
+
   const body = await res.json().catch(() => ({}));
   if (!res.ok()) {
     throw new Error(`createCourseViaRest failed ${res.status()}: ${JSON.stringify(body)}`);
