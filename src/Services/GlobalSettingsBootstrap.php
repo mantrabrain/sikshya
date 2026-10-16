@@ -155,7 +155,53 @@ final class GlobalSettingsBootstrap
             return;
         }
 
-        wp_set_auth_cookie(get_current_user_id(), false);
+        self::extendSession();
+    }
+
+    /**
+     * Re-issue the current session's cookie with a later expiry.
+     *
+     * The existing session token is passed back deliberately. Leaving it out
+     * makes WordPress mint a *new* token, and a REST or AJAX nonce is derived
+     * from the token — so the nonce already rendered into the page stops
+     * matching the cookie the browser has just been given, and the next action
+     * fails with "Cookie check failed". A learner pressing "Mark as complete",
+     * or an admin saving a course, would hit that at the moment their session
+     * rolled over. Reusing the token updates the expiry in place: same session,
+     * same nonces, no extra rows in the user's session list.
+     */
+    public static function extendSession(): void
+    {
+        $user_id = get_current_user_id();
+        $token = wp_get_session_token();
+
+        if ($user_id <= 0 || $token === '') {
+            return;
+        }
+
+        $manager = \WP_Session_Tokens::get_instance($user_id);
+        $session = $manager->get($token);
+        if ($session === null) {
+            return;
+        }
+
+        $expiration = time() + self::sessionTimeoutSeconds();
+
+        /*
+         * The session's own expiry has to move, not just the cookie's.
+         * `wp_set_auth_cookie()` only asks the session manager for a new token
+         * when it is given none — hand it an existing one and it re-issues the
+         * cookie while leaving that session's recorded expiry where it was, so
+         * the cookie outlives the session it points at and the user is logged
+         * out on the original schedule anyway. The first version of this did
+         * exactly that, and the test for it is the only reason it was noticed.
+         *
+         * Merged into the stored session rather than replacing it, so the
+         * recorded login time, IP and user agent survive.
+         */
+        $manager->update($token, array_merge($session, ['expiration' => $expiration]));
+
+        wp_set_auth_cookie($user_id, false, '', $token);
     }
 
     /**
