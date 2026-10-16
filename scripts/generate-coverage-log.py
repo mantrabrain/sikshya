@@ -61,6 +61,8 @@ MAP = {
  'admin/reports-snapshot': ['basic_reports'],
  'admin/rest-api': ['_platform'],
  'admin/groups-admin-ui': ['groups_seats'],
+ 'admin/cohorts-admin-ui': ['cohorts'],
+ 'admin/compliance-admin-ui': ['compliance_training'],
  'admin/screen-health-sweep': ['_platform'],
  'admin/settings-save': ['_platform'],
  'admin/setup-wizard-steps': ['_platform'],

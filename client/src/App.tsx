@@ -19,6 +19,12 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage').then((m) => ({ de
 const ContentDripPage = lazy(() =>
   import('./pages/ContentDripPage').then((m) => ({ default: m.ContentDripPage }))
 );
+const CompliancePage = lazy(() =>
+  import('./pages/CompliancePage').then((m) => ({ default: m.CompliancePage }))
+);
+const CohortsPage = lazy(() =>
+  import('./pages/CohortsPage').then((m) => ({ default: m.CohortsPage }))
+);
 const GroupsPage = lazy(() =>
   import('./pages/GroupsPage').then((m) => ({ default: m.GroupsPage }))
 );
@@ -376,6 +382,10 @@ function RoutedApp() {
           variant="instructors"
         />
       );
+    case 'compliance':
+      return <CompliancePage embedded config={config} title={__('Compliance training', 'sikshya')} />;
+    case 'cohorts':
+      return <CohortsPage embedded config={config} title={__('Cohorts', 'sikshya')} />;
     case 'groups':
       return (
         <GroupsPage

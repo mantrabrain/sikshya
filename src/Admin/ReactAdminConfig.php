@@ -319,6 +319,26 @@ final class ReactAdminConfig
                 ],
                 'groups_seats'
             ),
+            self::withNavGate(
+                [
+                    'id' => 'cohorts',
+                    'label' => __('Cohorts', 'sikshya'),
+                    'icon' => 'schedule',
+                    'href' => self::reactAppUrl('cohorts'),
+                    'cap' => 'sikshya_staff',
+                ],
+                'cohorts'
+            ),
+            self::withNavGate(
+                [
+                    'id' => 'compliance',
+                    'label' => __('Compliance training', 'sikshya'),
+                    'icon' => 'badge',
+                    'href' => self::reactAppUrl('compliance'),
+                    'cap' => 'sikshya_staff',
+                ],
+                'compliance_training'
+            ),
         ];
         $people_children = self::filterPeopleNavChildren($people_children);
         if ($people_children !== []) {
