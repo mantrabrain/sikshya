@@ -45,5 +45,74 @@ export default async function globalSetup(_config: FullConfig) {
   }
 
   await ctx.storageState({ path: storagePath });
+
+  await retireWebhookDebris(page);
+
   await browser.close();
+}
+
+/**
+ * Deactivate webhook endpoints left behind by earlier runs.
+ *
+ * The webhook specs each create an endpoint pointing at a host that does not
+ * resolve, and nothing removes them, so every run leaves more active endpoints
+ * and more undeliverable queued deliveries than the last. wp-cron then spends
+ * each page load attempting them, every attempt waiting out the full HTTP
+ * timeout, and the whole suite slows down until unrelated specs start timing
+ * out. That is what made the same suite pass on the first browser and fail
+ * progressively on the second and third — not any browser difference.
+ *
+ * An inactive endpoint resolves its queued deliveries immediately as disabled
+ * instead of waiting on the network, which drains the backlog cheaply. Specs
+ * that need a live endpoint create their own, so nothing here takes anything
+ * away from them.
+ *
+ * Best effort by design: on a site without the Webhooks addon, or an
+ * unlicensed one, the route is absent and there is nothing to clean.
+ */
+async function retireWebhookDebris(page: import('@playwright/test').Page): Promise<void> {
+  try {
+    const nonce = await page.evaluate(
+      () => (window as unknown as { wpApiSettings?: { nonce?: string } }).wpApiSettings?.nonce ?? '',
+    );
+    if (!nonce) {
+      return;
+    }
+
+    const headers = { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' };
+    const list = await page.request.get(
+      '/wp-json/sikshya/v1/scale/webhooks/v2/endpoints?per_page=200',
+      { headers },
+    );
+    if (!list.ok()) {
+      return;
+    }
+
+    const body = (await list.json().catch(() => ({}))) as {
+      endpoints?: Array<{ id?: number; is_active?: boolean }>;
+      items?: Array<{ id?: number; is_active?: boolean }>;
+    };
+    const rows = body.endpoints ?? body.items ?? [];
+
+    let retired = 0;
+    for (const row of rows) {
+      const id = Number(row?.id ?? 0);
+      if (id <= 0 || row?.is_active === false) {
+        continue;
+      }
+      const res = await page.request.patch(`/wp-json/sikshya/v1/scale/webhooks/v2/endpoints/${id}`, {
+        headers,
+        data: { is_active: false },
+      });
+      if (res.ok()) {
+        retired++;
+      }
+    }
+
+    if (retired > 0) {
+      console.log(`globalSetup: deactivated ${retired} webhook endpoint(s) left by earlier runs.`);
+    }
+  } catch {
+    // Never fail the run over housekeeping.
+  }
 }
