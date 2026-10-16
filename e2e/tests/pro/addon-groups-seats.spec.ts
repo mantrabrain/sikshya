@@ -26,6 +26,21 @@ test.describe('addon: groups and seat licensing', () => {
     browser,
     baseURL,
   }) => {
+    /*
+     * Three separate learners sign in here through the real login form — the
+     * leader, a learner who gets a seat, and one who is refused — because the
+     * cap can only be proven from three different identities. Each sign-in is
+     * its own browser context and its own round trip, and the test needs 57
+     * seconds of its 120-second budget on an idle machine. That leaves no room
+     * for a loaded one: it is the only spec in the suite that signs in three
+     * times, and it was the only failure in an otherwise clean cross-browser
+     * run, passing on its own immediately afterwards.
+     *
+     * Tripling the budget rather than trimming the test, because all three
+     * identities are the point of it.
+     */
+    test.slow();
+
     const nonce = await getAdminNonce(page);
     const enable = await request.post('/wp-json/sikshya/v1/admin/addons/groups_seats/enable', {
       headers: { 'X-WP-Nonce': nonce, 'Content-Type': 'application/json' },

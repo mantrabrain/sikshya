@@ -110,7 +110,13 @@ async function retireWebhookDebris(page: import('@playwright/test').Page): Promi
     }
 
     if (retired > 0) {
-      console.log(`globalSetup: deactivated ${retired} webhook endpoint(s) left by earlier runs.`);
+      // stderr, not stdout: `--reporter=json` writes the report to stdout, so a
+      // line printed there lands inside the JSON and makes it unparseable. The
+      // first segmented run hit exactly that — the `public` report had this
+      // sentence glued to the front of it and could not be read.
+      process.stderr.write(
+        `globalSetup: deactivated ${retired} webhook endpoint(s) left by earlier runs.\n`,
+      );
     }
   } catch {
     // Never fail the run over housekeeping.
