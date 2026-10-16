@@ -26,9 +26,8 @@ export const slug = (prefix: string) =>
  * Pulls wpApiSettings.nonce out of any wp-admin page so we can call admin REST
  * routes that gate on a CookieAuth nonce.
  */
-export async function getAdminNonce(page: Page): Promise<string> {
-  await page.goto('/wp-admin/index.php', { waitUntil: 'domcontentloaded' });
-  const nonce = await page.evaluate(() => {
+function readNonce(page: Page): Promise<string> {
+  return page.evaluate(() => {
     const w = window as unknown as {
       wpApiSettings?: { nonce?: string };
       sikshyaAdminConfig?: { nonce?: string; restNonce?: string };
@@ -40,6 +39,52 @@ export async function getAdminNonce(page: Page): Promise<string> {
       ''
     );
   });
+}
+
+/**
+ * Sign in again in this context, reusing the credentials global setup used.
+ *
+ * The admin session is established once, in global setup, and the site's own
+ * "log out inactive users after (minutes)" setting caps it — 120 minutes by
+ * default. A full cross-browser run takes longer than that, so the session
+ * expired partway through and every later admin spec failed on a login screen:
+ * forty cascading failures that said nothing about the product. Signing in
+ * again is the honest fix; suppressing the symptom by lengthening the timeout
+ * would hide the same thing happening to a real site owner.
+ */
+async function reauthenticate(page: Page): Promise<boolean> {
+  const user = process.env.WP_ADMIN_USER;
+  const pass = process.env.WP_ADMIN_PASS;
+  if (!user || !pass) {
+    return false;
+  }
+
+  await page.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
+  if (/wp-admin/.test(page.url())) {
+    return true;
+  }
+
+  await page.locator('#user_login').fill(user);
+  await page.locator('#user_pass').fill(pass);
+  await page.locator('#wp-submit').click();
+  await page.waitForURL(/wp-admin|wp-login\.php/, { timeout: 60_000 }).catch(() => undefined);
+
+  return /wp-admin/.test(page.url());
+}
+
+export async function getAdminNonce(page: Page): Promise<string> {
+  await page.goto('/wp-admin/index.php', { waitUntil: 'domcontentloaded' });
+  let nonce = await readNonce(page);
+
+  if (!nonce) {
+    // Most likely the session timed out mid-run rather than anything being
+    // wrong with the page.
+    if (await reauthenticate(page)) {
+      await page.goto('/wp-admin/index.php', { waitUntil: 'domcontentloaded' });
+      nonce = await readNonce(page);
+    }
+  }
+
   if (!nonce) throw new Error('No wpApiSettings.nonce found on /wp-admin/index.php');
   return nonce;
 }

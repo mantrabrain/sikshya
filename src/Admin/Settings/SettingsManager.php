@@ -2713,7 +2713,10 @@ class SettingsManager
                         'key' => 'session_timeout',
                         'type' => 'number',
                         'label' => __('Log out inactive users after (minutes)', 'sikshya'),
-                        'description' => __('For shared computers, shorter times are safer; longer times are more convenient at home.', 'sikshya'),
+                        'description' => __(
+                            'Idle time only — someone still working is kept signed in. Shorter is safer on shared computers. Does not apply to “Remember Me” logins.',
+                            'sikshya'
+                        ),
                         'placeholder' => __('e.g. 120', 'sikshya'),
                         'default' => 120,
                         'min' => 15,

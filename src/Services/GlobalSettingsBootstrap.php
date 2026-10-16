@@ -20,6 +20,9 @@ final class GlobalSettingsBootstrap
         add_filter('document_title_parts', [self::class, 'filterDocumentTitleParts'], 20);
         add_action('wp_head', [self::class, 'outputHeadMetaAndTags'], 2);
         add_filter('auth_cookie_expiration', [self::class, 'filterAuthCookieExpiration'], 20, 3);
+        // Keeps the idle timeout honest: an active session is extended, so only
+        // an idle one runs out. See extendSessionWhileActive().
+        add_action('init', [self::class, 'extendSessionWhileActive'], 20);
         add_action('save_post', [self::class, 'maybeInvalidateCurriculumCache'], 20, 2);
     }
 
@@ -83,7 +86,30 @@ final class GlobalSettingsBootstrap
         }
     }
 
+    /** Lower and upper bounds for the idle timeout, in minutes. */
+    private const SESSION_MIN_MINUTES = 15;
+    private const SESSION_MAX_MINUTES = 1440;
+
     /**
+     * The configured idle timeout, in seconds.
+     */
+    public static function sessionTimeoutSeconds(): int
+    {
+        $mins = (int) Settings::get('session_timeout', 120);
+        $mins = max(self::SESSION_MIN_MINUTES, min(self::SESSION_MAX_MINUTES, $mins));
+
+        return $mins * 60;
+    }
+
+    /**
+     * Shorten the login cookie to the configured idle timeout.
+     *
+     * Only for an ordinary login. A "Remember Me" login is an explicit request
+     * for a long-lived session, and WordPress promises fourteen days for it;
+     * shortening that to the idle timeout — which this filter used to do, by
+     * discarding `$remember` — broke that promise with nothing in the UI to
+     * explain why the site owner kept being signed out.
+     *
      * @param int $length
      * @param int $user_id
      * @param bool $remember
@@ -91,17 +117,105 @@ final class GlobalSettingsBootstrap
      */
     public static function filterAuthCookieExpiration($length, $user_id, $remember)
     {
-        unset($remember, $user_id);
-        $mins = (int) Settings::get('session_timeout', 120);
-        if ($mins < 15) {
-            $mins = 15;
-        }
-        if ($mins > 1440) {
-            $mins = 1440;
-        }
-        $custom = $mins * 60;
+        unset($user_id);
 
-        return (int) min((int) $length, $custom);
+        if ($remember) {
+            return (int) $length;
+        }
+
+        return (int) min((int) $length, self::sessionTimeoutSeconds());
+    }
+
+    /**
+     * Extend the current session while the user is active.
+     *
+     * The setting is labelled "log out inactive users after", and until this
+     * existed it did no such thing: it capped the absolute life of the login
+     * cookie, so somebody halfway through marking a batch of assignments was
+     * signed out mid-task at the two-hour mark whatever they were doing. An
+     * idle timeout that logs out busy people is both the wrong behaviour and
+     * the opposite of what its own label promises.
+     *
+     * So an authenticated, cookie-based request past the halfway point of its
+     * window re-issues the cookie. Activity keeps a session alive; silence
+     * still ends it on schedule. The old cookie's token stays valid until it
+     * expires, so other tabs and in-flight requests are unaffected.
+     */
+    public static function extendSessionWhileActive(): void
+    {
+        // A cookie cannot be set once output has begun. Kept separate from the
+        // decision below so the decision stays testable: under PHPUnit output
+        // has always started, so a check in there would make every test of the
+        // happy path pass for the wrong reason.
+        if (headers_sent()) {
+            return;
+        }
+
+        if (!self::shouldExtendSession()) {
+            return;
+        }
+
+        wp_set_auth_cookie(get_current_user_id(), false);
+    }
+
+    /**
+     * Whether the current request should have its session extended.
+     */
+    public static function shouldExtendSession(): bool
+    {
+        if (wp_doing_cron()) {
+            return false;
+        }
+
+        $user_id = get_current_user_id();
+        if ($user_id <= 0) {
+            return false;
+        }
+
+        // Cookie sessions only. A request authenticated by an application
+        // password or a bearer token has no cookie to extend, and re-issuing
+        // one would hand it a browser session it never asked for.
+        if (!isset($_COOKIE[LOGGED_IN_COOKIE])) {
+            return false;
+        }
+
+        $expiration = self::cookieExpiration((string) $_COOKIE[LOGGED_IN_COOKIE]);
+        if ($expiration <= 0) {
+            return false;
+        }
+
+        $window = self::sessionTimeoutSeconds();
+        $remaining = $expiration - time();
+
+        // Nothing to do while there is plenty left. Anything longer than the
+        // window is a remembered session, which is not ours to shorten.
+        if ($remaining <= 0 || $remaining > (int) floor($window / 2)) {
+            return false;
+        }
+
+        /**
+         * Whether to extend this session because the user is active.
+         *
+         * @param bool $extend
+         * @param int $user_id
+         * @param int $remaining
+         */
+        return (bool) apply_filters('sikshya_extend_active_session', true, $user_id, $remaining);
+    }
+
+    /**
+     * The expiry timestamp inside a WordPress auth cookie, or 0 if unreadable.
+     */
+    private static function cookieExpiration(string $cookie): int
+    {
+        $parts = explode('|', $cookie);
+
+        // `username|expiration|token|hmac`. Anything else is not ours to read.
+        if (count($parts) !== 4) {
+            return 0;
+        }
+
+        return (int) $parts[1];
     }
 
     /**
