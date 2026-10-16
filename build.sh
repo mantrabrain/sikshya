@@ -91,6 +91,7 @@ phpcs.xml.dist
 phpunit.xml
 phpunit.xml.dist
 phpunit.integration.xml
+phpunit.multisite.xml
 .phpunit.result.cache
 .phpunit-integration.result.cache
 
