@@ -1,207 +1,174 @@
 # Sikshya vs the market — verified gap analysis
 
+Reviewed **2026-10-27**, against Sikshya 1.0.14 / Pro 1.0.10.
+
 Goal: Sikshya Free + Pro + addons at enterprise grade.
 
 ## How this was produced
 
-- **Our inventory** is the 48 ids in `Sikshya\Licensing\FeatureRegistry`, not marketing copy.
-- **Every "we don't have this" line was grepped against `sikshya/src` and `sikshya-pro/src`** before being
-  written down. Where a grep hit turned out to be an incidental substring match it is called out.
-- **Competitor inventories** come from vendor pages (LearnDash on liquidweb.com, the LifterLMS store,
-  Themeum's Tutor LMS addon docs, StyleMix's MasterStudy feature pages, the LearnPress add-ons page),
-  not from comparison blogs. Treat competitor *pricing* and tier placement as unverified — it moved
-  between sources.
-- **The first version of this document was incomplete.** It covered LearnDash, LifterLMS and Tutor
-  only. MasterStudy and LearnPress were added later and produced a dozen gaps this file had missed,
-  listed under "Second pass" below. Breadth of catalogue is MasterStudy's strength and it is where we
-  are furthest behind.
-- **Enterprise requirements** are the recurring items across buyer checklists and RFP guides. No
-  authoritative standard defines "enterprise LMS", so these are market expectations, not a spec.
+- **Our column is grepped from `sikshya/src` and `sikshya-pro/src`**, never from marketing copy, and
+  every grep hit was opened to check it was not an incidental substring. The inventory baseline is the
+  **51 feature ids** in `Sikshya\Licensing\FeatureRegistry` (free 17, starter 6, pro 17, scale 11).
+- **Competitor claims come from vendor pricing and feature pages fetched on 2026-10-27**, not from
+  comparison blogs: tutorlms.com, liquidweb.com/software/learndash, lifterlms.com,
+  stylemixthemes.com/masterstudy. Where a vendor page was truncated or a tier table did not render, that
+  is said rather than guessed.
+- **"Enterprise requirements" are recurring items across 2026 buyer checklists and RFP templates.** No
+  standard defines "enterprise LMS". Most of those checklists are vendor-authored, so they indicate
+  market expectation, not a specification.
 
-Corrections found while verifying, worth keeping:
+### Corrections to the previous version of this file
 
-- **Weighted grading is already implemented** (`GradebookCalculationService::weightedQuizPercent()` and
-  friends). LearnDash markets it as a Pro differentiator; we have it.
-- **Learner notes already exist** in the learn shell. LifterLMS sells this as an addon.
-- `cohort`, `ceu` and `group_` all appear in our code only as substring matches or unrelated comments.
-  They are genuine gaps despite the grep hits.
+The previous version was written before Groups, Cohorts and Compliance shipped, and several of its
+"None" entries were already wrong by the time it was read. Recording them because a stale gap list is
+worse than none — it misdirects a roadmap.
 
-## Tier 1 — the gaps that actually block enterprise deals
+| Previous claim | Reality on 2026-10-27 |
+|---|---|
+| Groups / B2B seat sales: **None** — "the single largest enterprise gap" | **Shipped.** `groups_seats` (scale), with seat caps, group leaders, self-service roster and an admin screen |
+| Cohorts: **None** | **Shipped.** `cohorts` (pro), drip anchored on the intake, with an admin screen |
+| Compliance / mandatory training: **None** | **Shipped.** `compliance_training` (scale) — audience by role/group/cohort, deadlines, recurrence, waivers, audit reporting, admin screen |
+| Payment gateways: "Offline, PayPal, Stripe, Paystack" | **Nine**: offline, bank transfer, PayPal, Stripe, Razorpay, Mollie, Paystack, Square, Authorize.Net. Authorize.Net was listed as a LifterLMS-only gap; we have it, including recurring |
+| Memberships: **None**, "subscriptions only" | **Capability exists.** A plan is attached per course via `_sikshya_required_plan_id`, and `SubscriptionAccessGate` grants every course requiring that plan. What is missing is the *product surface* — no membership level entity, no membership landing page, configured per course instead |
+| Audio lessons: "half-wired" / Tax: "a setting that does nothing" | Both fixed in 1.0.14 |
 
-These are the ones that lose a procurement conversation outright.
+Gaps confirmed as genuine despite a grep hit, after opening each file: **Divi/WPBakery** (the matches
+are `individual`, `divider`), **PDF lessons** (the one hit serves PDFs from inside a SCORM package),
+**course collections** (`RestCollectionQueryService` is REST pagination), **direct messages** and
+**public profiles** (description text and an OAuth `profile` scope), **OIDC** (the hit is Google
+sign-in requesting `openid email profile` — consumer OAuth, not enterprise SSO).
 
-| Gap | Who has it | Our status | Why it blocks |
+## The strategic question the last version skipped
+
+Every 2026 enterprise checklist asks for **SOC 2 Type II or ISO 27001**, with the report date.
+**A self-hosted plugin vendor cannot answer that**, because the infrastructure being certified is the
+customer's own. No amount of feature work changes it. The same is true of uptime SLAs and DPAs for a
+processor relationship that does not exist.
+
+So "enterprise" has to be read as two different markets:
+
+- **The RFP market** (Docebo, Cornerstone, SAP SuccessFactors, TalentLMS). Entry requires vendor
+  certifications we structurally cannot hold. Chasing it with features is a trap: we would build SCIM
+  and still lose on the security questionnaire.
+- **The self-hosted / data-sovereignty market.** Organisations that already run WordPress, must keep
+  learner data on their own infrastructure, have internal IT, and answer their *own* SOC 2 scope.
+  Universities, government agencies, regulated SMEs, franchise and association networks. For them our
+  architecture is the *reason* to buy, and the certification question lands on their host, not on us.
+
+Everything below is prioritised for the second market. Worth saying in marketing too: "your data never
+leaves your infrastructure" is a feature for this buyer, not an apology.
+
+## The identity finding — do not rebuild the protocol
+
+The previous version called SAML 2.0 and SCIM 2.0 Tier 1 blockers to build. Research says otherwise:
+**miniOrange already ships generic SAML 2.0 SSO and SCIM provisioning for WordPress**, 50+ IdPs, with
+Okta and Entra guides and a LearnDash-specific walkthrough. Any customer can bolt it onto any WP LMS
+today. Building our own SAML would duplicate a mature plugin and win nothing.
+
+What those plugins **cannot** do is map identity onto LMS meaning. That is the real gap, and it is
+much cheaper than a protocol implementation:
+
+- An IdP group should land a learner in a **Sikshya group** (seats, leader, roster), not just a WP role.
+- Deprovisioning should **close enrolments and record the compliance outcome**, not only delete a user.
+- The HR attribute an auditor cares about — department, job code, hire date — should drive a
+  **compliance audience**, and the assignment should be in the audit trail.
+
+Two thirds of this already works by composition and nobody has written it down: miniOrange SCIM creates
+the user with a role, and `compliance_training` assigns by role on its daily sync, so a new hire
+inherits their mandatory training with no manual step. **That is a verifiable end-to-end enterprise
+story available today**, and it is undocumented and untested. Writing and testing that recipe is worth
+more than a quarter of protocol work.
+
+## Tier 1 — what actually blocks a deal now
+
+| Gap | Who has it | Our status | Why it matters |
 |---|---|---|---|
-| **Groups / B2B seat sales** | LearnDash Elite (Groups Plus, "sell seats"), LifterLMS (Groups + group leader) | **None.** No group entity, no seat pool, no group leader role | A company cannot buy 50 seats and self-administer them. This is the single largest enterprise gap and a direct revenue lever |
-| **Cohorts** | LifterLMS (Course Cohorts, cohort reporting) | **None** | Scheduled intakes progressing together — the norm for corporate and academic programmes |
-| **SAML 2.0 SSO** | Enterprise baseline; neither WP competitor does it well | **None.** `social_login` is OAuth only | No SAML means no Okta/Entra/Ping. Usually a hard requirement |
-| **SCIM 2.0 provisioning** | Enterprise baseline | **None** | Without it, deprovisioning a leaver is manual — an audit finding |
-| **Compliance / mandatory training** | Enterprise baseline; absent from WP competitors | **None.** No assignment-by-role, due dates, recertification, or audit-ready reporting | Regulated industries buy an LMS *for* this. Biggest differentiation opportunity |
-| **xAPI / LRS** | LearnDash (via addons) | **None.** We have SCORM + H5P only | Named in nearly every checklist alongside SCORM |
-| **WCAG 2.1 AA + VPAT** | Enterprise baseline | A11y polish shipped; **no audit, no VPAT** | Public sector and universities cannot buy without a VPAT/OpenACR |
+| **xAPI / LRS, and cmi5** | Nobody natively. MasterStudy points customers at third-party Grassblade | **None** (0 files). SCORM + H5P only | Named in nearly every checklist alongside SCORM. The only remaining *standards* gap, and the one place we could be the only WP LMS that answers it natively |
+| **WCAG 2.1/2.2 AA + VPAT / OpenACR** | Nobody publishes one | A11y work shipped; **no audit, no VPAT** | Public sector and universities are procedurally barred from buying without it. Long lead time — start before it is asked for |
+| **IdP → LMS semantics bridge** | Nobody | Composable today, **undocumented and untested** | See above. Cheapest credible enterprise win available |
+| **Identity audit trail** | Nobody | `activity_log` exists; does not record provisioning or SSO events | "Show me who was deprovisioned and when" is an audit question we half-answer |
 
-## Tier 2 — ecosystem and adoption levers
+## Tier 2 — where we are behind the WordPress market
 
-| Gap | Who has it | Our status |
-|---|---|---|
-| **WooCommerce integration** | LearnDash, LifterLMS, Tutor | **None.** Our checkout is native-only |
-| **Migration importers** (LearnDash / LifterLMS / Tutor) | LearnDash markets "Migrations" | **None** — nothing references a competitor schema |
-| **AI course outline + quiz authoring** | LearnDash Pro | **None** |
-| **Gamification points + leaderboards** | LearnDash (badges *and* points) | Badges/achievements only; **no points, no leaderboard** |
-| **Membership plugin bridges** (MemberPress, PMPro, Restrict Content Pro) | LearnDash | **None** |
-| **Form plugin bridges** (Gravity, WPForms, Ninja, Formidable) | LifterLMS (4 addons) | **None** |
-| **Community bridges** (BuddyPress / bbPress) | LearnDash, Tutor | **None.** We have our own discussions |
-| **SMS / Twilio notifications** | LifterLMS (incl. enrol-by-text) | **None** |
-| **Quiz export / import** | Tutor | **None** |
-| **Shared course steps** (reuse a lesson across courses) | LearnDash | **None** |
-
-## Second pass — gaps found only after adding MasterStudy and LearnPress
-
-MasterStudy publishes by far the widest catalogue of the five. Each line below was
-grepped against both plugins before being written down.
+This is the list that loses a comparison table, and the first row is now urgent.
 
 | Gap | Who has it | Our status |
 |---|---|---|
-| **Taxes on checkout** | MasterStudy | **A setting that does nothing.** `tax_rate` exists in `SettingsManager` and is read nowhere in `Commerce/` or `Services/` — an administrator can set a rate and no total changes |
-| **Audio lessons** | MasterStudy | **Half-wired.** The lesson editor has a branch for `lessonType === 'audio'`, but the type picker offers no such option and the server allowlist is `['text','video','live','scorm','h5p']`, so an audio lesson silently becomes a text one |
-| **PDF lessons** | MasterStudy | None |
-| **Question media** (image/audio inside a question) | MasterStudy, LearnDash (audio clip) | None |
-| **Gamification points + leaderboard** | MasterStudy, LearnDash | None. `points_earned` is quiz scoring, not a points economy |
-| **Trial courses** | MasterStudy | None |
-| **Memberships** (access by membership level, distinct from subscriptions) | MasterStudy, LifterLMS, LearnPress (PMPro) | Subscriptions only |
-| **Course collections** | LearnPress | None (bundles are a purchase unit, not a browse grouping) |
-| **Upsell / bonus coupons at checkout** | LearnPress | None |
-| **Direct messages between users** | MasterStudy | None. Discussions are per-course, not person-to-person |
-| **Public instructor / student profiles** | MasterStudy | None |
-| **Divi and WPBakery support** | MasterStudy | Gutenberg and basic widgets only |
-| **Ready-made starter site templates** (~20) | MasterStudy | None. A significant adoption lever rather than a capability |
-| **Wishlist** | LearnPress ships it **free** | Removed from our catalogue in 1.0.10 because it had no implementation. Correct as an honesty fix, but the competitive answer is to build it |
-| **LMS migration importers** | MasterStudy imports from Tutor, LearnDash, LearnPress, LifterLMS and Masteriyo | None |
+| **AI authoring** | **All three majors.** Tutor "AI Studio" (outline, lesson, quiz, feature image) in every paid tier; LearnDash AI course builder; MasterStudy "AI Lab" builds a course from one prompt | **None** (0 files). `docs/AI_ADDON_PREMIUM_UX_IMPLEMENTATION_BLUEPRINT.md` is a plan, not code. **This has become table stakes, not a differentiator** |
+| **Migration importers** | MasterStudy imports from Tutor, LearnDash, LearnPress, LifterLMS, Masteriyo | **None.** The only grep hit is the word "Masteriyo" in a feature description |
+| **WooCommerce bridge** | LearnDash, LifterLMS, Tutor | **None** (0 files). Native checkout only |
+| **Content bank / shared course steps** | Tutor "Content Bank"; LearnDash shared steps | **None.** A lesson belongs to one course |
+| **Gamification points + leaderboard** | MasterStudy "Point System", LearnDash | **None.** `points_earned` is quiz scoring, not an economy |
+| **Membership product surface** | Tutor, MasterStudy, LifterLMS | Capability exists, no membership entity or landing page (see corrections) |
+| **PDF lessons** | MasterStudy | **None.** Lesson kinds are text, video, audio, live, scorm, h5p |
+| **Question media** (image/audio in a question) | MasterStudy, LearnDash | **None.** 8 question types, none carry media |
+| **Starter site templates** (~20) | MasterStudy | **None.** Adoption lever, not a capability |
+| **Divi / WPBakery** | MasterStudy | **None.** Gutenberg and basic widgets |
+| **BuddyPress / bbPress, SMS/Twilio, wishlist, trial courses, direct messages, public profiles, CEU/credits** | Various | **None** — each verified at 0 real hits |
 
-Our live-class provider coverage is better than the gap list above implies: Zoom, Google Meet, Jitsi
-and Webex are all present in `LiveProviderCatalog`.
+## Where we are ahead — and should say so
 
-### Two bugs this research surfaced
-
-Both verified by reading the code, neither fixed yet:
-
-1. ~~**`tax_rate` is a no-op setting.**~~ **Fixed.** Wired through `TaxService` into the quote and the
-   order, with a `tax_total` column and a versioned migration. Exclusive and inclusive modes are both
-   implemented; a rate of 0 (the shipped default) leaves every existing store untouched.
-2. ~~**The `audio` lesson type is inconsistent across layers.**~~ **Fixed.** The meta is now
-   REST-registered, the type picker offers it, the server allowlist accepts it, and the renderer that
-   already worked is finally reachable.
-
-## Tier 3 — commercial polish
-
-| Gap | Who has it | Our status |
-|---|---|---|
-| Gifting a course | LifterLMS | None |
-| Name-your-price / donations | LifterLMS | None |
-| Cart abandonment recovery | LifterLMS | None |
-| Private Site (whole site behind login) | LifterLMS | None — cheap win for internal training |
-| Private 1:1 areas | LifterLMS | None |
-| Order / grade PDFs | LifterLMS (PDFs addon) | Certificate PDFs only |
-| Continuing education units (CEU/credits/hours) | LifterLMS | None |
-| Video progression (force full watch) | LearnDash | None |
-| Plagiarism detection | LearnDash | None |
-| Content integrity (copy/spam protection) | LearnDash | None |
-| Custom report cards | LearnDash | None |
-| Authorize.Net | LifterLMS | Offline, PayPal, Stripe, Paystack |
-
-## Where we are already ahead
-
-Worth defending, and worth saying out loud in marketing:
-
-- **Marketplace / multivendor** with vendor scoping — Tutor's strength, absent from LearnDash and LifterLMS.
-- **White label** with per-course overrides.
-- **Webhooks + Zapier + public API keys** — a real integration surface; the WP competitors have none.
-- **Multisite network licensing**, enterprise reports, multilingual enterprise.
+- **Compliance & mandatory training.** Nothing in the WordPress market competes. Audience by
+  role/group/cohort, derived overdue, recurrence dated from actual certification, waivers recorded
+  separately, late completion reported apart from compliant.
+- **Groups + seats + cohorts as one system**, with self-service rosters. LearnDash sells seats;
+  LifterLMS sells groups; neither joins them to compliance.
+- **Integration surface:** webhooks, Zapier, public API keys. The WP competitors have none — GetApp
+  even lists Tutor LMS as having no API.
+- **Marketplace / multivendor** with vendor scoping, **white label** with per-course overrides,
+  **multisite network licensing**, **multilingual enterprise**.
 - **Per-learner signed attachment URLs.** Competitors serve course files from unprotected uploads.
-- **Activity log** — maps directly to the audit-log requirement, which most WP LMS plugins cannot answer.
+- **Activity log** — the closest thing in this market to an audit log.
+- **Nine payment gateways**, including Authorize.Net and Square with recurring support.
+- **Test depth.** 876 browser tests across Chromium, WebKit and Firefox; Free 147 integration + 27 unit
+  + 12 uninstall + 21 migration + 4 multisite; Pro 721 + 9 + 5; green on PHP 7.4 and 8.4.
 
 ## Recommended sequencing
 
-Rationale: do the things that *unblock a deal* before the things that *win a comparison table*.
+Reasoning: close the thing that is now *table stakes* before the things that differentiate, because a
+missing checkbox everyone else ticks loses the comparison before our strengths are read.
 
-1. **Groups, seats and cohorts.** Unlocks B2B. Everything else in Tier 1 is easier once a group entity exists.
-2. **Compliance pack** — assignment by role, due dates, recertification, audit-ready reports, CEU. Highest
-   differentiation per unit of effort; nothing in the WP market competes.
-3. **Enterprise identity** — SAML 2.0, then SCIM 2.0.
-4. **Accessibility programme** — WCAG 2.1 AA audit, fixes, published VPAT. Long lead time, so start early.
-5. **WooCommerce bridge + migration importers.** Adoption, not capability.
-6. **xAPI/LRS**, then Tier 2 bridges, then Tier 3 polish.
+1. **AI authoring.** All three majors ship it; we have a blueprint and no code. Biggest single
+   competitive hole, and the cheapest to narrow because the market has settled on the same shape
+   (outline → lesson → quiz, bring your own API key).
+2. **Document and test the IdP → Sikshya recipe** — miniOrange SAML + SCIM, role to compliance audience,
+   deprovisioning to enrolment closure. A tested recipe and a page of documentation, not a protocol.
+   Then extend `activity_log` to record provisioning and SSO events.
+3. **Accessibility programme.** axe-core gate per template, manual keyboard and screen-reader pass,
+   remediation, published VPAT. Start now; it cannot be compressed.
+4. **xAPI/LRS, then cmi5.** The one standards gap, and a genuine first in this market.
+5. **Migration importers**, starting with Tutor and LearnDash by install base. Pure acquisition.
+6. **WooCommerce bridge.** Adoption, not capability.
+7. **Membership surface, content bank, points/leaderboard, PDF lessons, question media.** Comparison-table
+   parity, in that order.
 
-## What "enterprise-level testing" has to mean
+Deliberately **not** recommended: building our own SAML or SCIM server, and pursuing SOC 2-gated RFPs.
 
-Current state: Free 165 PHPUnit, Pro 615 PHPUnit (PHP 7.4 + 8.4), 243 browser tests on Chromium +
-WebKit + Firefox, all green. That is a solid functional gate and **not yet** an enterprise gate. Missing:
+## What "enterprise-level testing" still has to mean
 
-- **Accessibility**: automated axe-core pass per template, plus a manual keyboard and screen-reader pass.
-  Required before a VPAT can honestly be published.
-- **Load and scale**: the 35s archive regression was found by accident on a 3,900-course dataset. Needs a
-  seeded large-dataset fixture (50k learners / 5k courses) with asserted query budgets and page-time
-  ceilings, run as a gate. A correctness suite cannot catch a performance regression.
-- **Security**: authenticated role-matrix fuzzing across every REST route, not the hand-written probes we
-  have now; dependency and CVE scanning.
-- **Upgrade**: migration from each supported prior version on real data, plus the interrupted-migration case.
-- **Multi-tenancy**: network-install suite (currently 4 multisite tests).
-- **i18n**: pseudolocale rendering pass to catch hardcoded strings and layout breakage at 1.4x text length.
-- **Data protection**: GDPR export and erase correctness per learner.
+Shipped since the last review: query-budget gates (compliance sync, list endpoints, admin lists),
+upgrade verification on real data (1.0.9 → 1.0.14 on a throwaway install, content and settings
+preserved), and a 42-screen admin health sweep.
 
-## Measured findings worth acting on
+Still missing, in priority order:
 
-Both found while testing, both recorded rather than hotfixed.
-
-**Sample import is a ~17-second synchronous request.** The setup wizard's sample
-pack inserts about 375 posts (7 courses, 131 lessons, 42 quizzes, 126 questions,
-42 assignments) and measured 16.8–17.8 seconds server-side. Re-measured while
-adding ~1,100 posts to the site and the time stayed flat, so it is the insert
-cost itself, not something that scales with existing data — it is not the same
-class of bug as the 34-second archive query. It still matters: plenty of shared
-hosts cap `max_execution_time` at 30 seconds, so on a slower host this can die
-part-way and leave half-imported sample data behind. It should be batched with
-progress reporting rather than left as one blocking call.
-
-**The test suite had a systemic identity leak.** `browser.newContext()` inherits
-the project's `storageState`, which is the administrator's session. Sixteen call
-sites across ten specs created "another user" contexts that silently carried the
-admin cookie — and they were disproportionately the permission and isolation
-specs (vendor scoping, multi-instructor stranger checks, auditor read-only,
-instructor-versus-student). Fixed with two helpers, `freshContext()` and
-`adminContext()`, so intent is explicit at the call site. How many assertions
-were previously vacuous was not measured and is not claimed.
-
-## Current test baseline
-
-- PHP: Free 128 (27 unit, 101 integration) plus 12 uninstall, 21 migration, 4
-  multisite; Pro 625 integration and 9 unit. Green on PHP 7.4 and 8.4.
-- Browser: 244 tests per engine. Chromium 241 passed / 3 skipped / 0 flaky;
-  WebKit 239 / 3 / 2 flaky; Firefox 240 / 3 / 1 flaky. No hard failures.
-- Known flake: `studentSession` can still report no authenticated session under
-  load, because a real `wp-login.php` POST against two PHP workers occasionally
-  outlasts its wait. It passes on retry. Worth hardening with a bounded re-check
-  of `/users/me` before it throws.
-
-Progress against the list under "What enterprise-level testing has to mean":
-
-- **Load and scale with asserted query budgets** — started. The first budget
-  gate is `ComplianceQueryBudgetTest`, which asserts the compliance sync's cost
-  does not grow per learner. It was written after that sync shipped with an N+1
-  measuring 17,481 queries over 6.6 seconds on a real 2,913-learner dataset while
-  every behaviour test passed. Reverting the fix makes the budget fail with
-  "243 queries against 64 for 10 — cost is growing per learner". The pattern now
-  exists and should be extended to the course archive, the learner dashboard and
-  the reporting endpoints.
-- **Accessibility with a publishable VPAT** — not started.
-- **REST role-matrix fuzzing** — not started.
-- **Upgrade on real data** — partially. The `tax_total` migration was verified on
-  a real MySQL install (1.10.0 with the column absent, upgraded, then re-run for
-  idempotency) rather than only under the temporary-table harness.
-- **i18n pseudolocale rendering** — not started.
+- **Accessibility:** automated axe-core per template plus a manual keyboard and screen-reader pass.
+  Required before a VPAT can honestly be published. **Not started.**
+- **Security:** authenticated role-matrix fuzzing across every REST route, rather than hand-written
+  probes; dependency and CVE scanning in CI. **Not started.**
+- **i18n:** pseudolocale rendering pass to catch hardcoded strings and layout breakage at 1.4x text
+  length. **Not started.**
+- **Load and scale:** the budget pattern exists but covers three areas. Extend to the course archive,
+  the learner dashboard and the reporting endpoints, on a seeded 50k-learner / 5k-course fixture, as a
+  gate. A correctness suite cannot catch a performance regression — the 35-second archive and the
+  534-second webhook backlog were both found by accident.
+- **Data protection:** GDPR export and erase correctness per learner.
+- **Multi-tenancy:** 4 multisite tests is a smoke test, not a suite.
 
 ## Caveats
 
-Competitor feature lists are from vendor marketing pages and may overstate depth or be out of date;
-tier placement and pricing were inconsistent across sources and are not relied on here. Our own column
-is grepped from source and is the trustworthy half of this document.
+Competitor feature lists come from vendor pages and may overstate depth. LifterLMS's tier comparison
+table did not render in the fetched page, so which tier includes Groups is unconfirmed. The LearnPress
+pricing page 404'd, so LearnPress is carried over from the previous review and is the weakest column
+here. Tier placement and pricing move; our own column is grepped from source and is the trustworthy
+half of this document.
