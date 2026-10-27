@@ -85,7 +85,7 @@ more than a quarter of protocol work.
 
 | Gap | Who has it | Our status | Why it matters |
 |---|---|---|---|
-| **xAPI / LRS, and cmi5** | Nobody natively. MasterStudy points customers at third-party Grassblade | **None** (0 files). SCORM + H5P only | Named in nearly every checklist alongside SCORM. The only remaining *standards* gap, and the one place we could be the only WP LMS that answers it natively |
+| **xAPI / LRS, and cmi5** | Nobody natively. MasterStudy points customers at third-party Grassblade | **xAPI shipped 2026-10-27** — `xapi_lrs` add-on: 7 event types as xAPI 1.0.3 statements to any conformant LRS, queue with budgeted drain, 409-aware retry, three learner-identification modes, `docs/XAPI.md`. **cmi5 still absent** — it is a launch spec (packaging, course structure, AU sessions, State API), not a subset of xAPI | Named in nearly every checklist alongside SCORM. The only remaining *standards* gap, and the one place we could be the only WP LMS that answers it natively |
 | **WCAG 2.1/2.2 AA + VPAT / OpenACR** | Nobody publishes one | **Gated 2026-10-27.** axe-core WCAG 2.1 AA gates over 43 admin screens + 13 learner pages, a static label gate, a dialog focus-trap spec, 14 defect classes fixed, and a **draft** conformance report (`docs/ACCESSIBILITY-CONFORMANCE-REPORT.md`). **Still no screen-reader pass, so no signed VPAT** | Public sector and universities are procedurally barred from buying without it. Long lead time — start before it is asked for |
 | **IdP → LMS semantics bridge** | Nobody | **Documented and tested 2026-10-27** — `docs/ENTERPRISE-IDENTITY.md`, with the new-hire-inherits-training path covered end to end. Departure now releases the group seat, closes open enrolments, and stops counting the person against compliance. Still not automatic: group membership by role |
 | **Identity audit trail** | Nobody | **Shipped 2026-10-27**: account created / role changed / account removed, each carrying the identity and the actor, plus opt-in sign-ins. Sign-in *method* is still unknowable without the identity plugin declaring it |
@@ -154,7 +154,7 @@ missing checkbox everyone else ticks loses the comparison before our strengths a
    half that cannot be automated is still open — no screen reader has been used, the course builder's
    drag-and-drop curriculum has no keyboard test, and reflow/zoom is untested — so the report is a
    draft, not a VPAT. See `docs/ACCESSIBILITY.md`.
-4. **xAPI/LRS, then cmi5.** The one standards gap, and a genuine first in this market.
+4. ~~**xAPI/LRS, then cmi5.** The one standards gap, and a genuine first in this market.~~ **Half done, 2026-10-27:** xAPI reporting ships; cmi5 does not, and the doc says so rather than letting "xAPI" answer a cmi5 question. cmi5 needs content packaging, a course structure, AU launch and the State API — a separate piece of work, and the next one worth doing here.
 5. **Migration importers**, starting with Tutor and LearnDash by install base. Pure acquisition.
 6. **WooCommerce bridge.** Adoption, not capability.
 7. **Membership surface, content bank, points/leaderboard, PDF lessons, question media.** Comparison-table

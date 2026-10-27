@@ -138,12 +138,18 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | `/scale/public-api/keys` | GET, POST | `public_api_keys` |
 | `/scale/public-api/keys/(?P<id>\d+)` | DELETE | `public_api_keys` |
 | `/scale/public-api/ping` | GET | `public_api_keys` (validated inside callback; unauthenticated ping with Bearer key) |
+| `/scale/xapi/status` | GET | `xapi_lrs` (queue counts and last failure; never returns the LRS key or secret) |
+| `/scale/xapi/statements` | GET | `xapi_lrs` (the statement log, without statement bodies) |
+| `/scale/xapi/test` | POST | `xapi_lrs` (**sends**: one real statement down the production path) |
+| `/scale/xapi/drain` | POST | `xapi_lrs` (**sends**: runs one budgeted drain of the queue) |
 
 **Course bundles extension (Pro):** My Account strip on `sikshya_account_dashboard_after` (`CourseBundlesAccountPanel` when **Show bundle packs on My Account** is on); filter `sikshya_course_bundles_account_panel_bundles`. Hooks include `sikshya_bundle_pricing_resolved`, `sikshya_course_bundles_after_create`, `sikshya_course_bundles_allow_trash`.
 
 **Advanced coupons extension (Pro):** Global settings via `/pro/addons/coupons_advanced/settings`; storefront hooks on cart, checkout, single course (`sikshya_pro_single_course_price_after`), learn sidebar, account payments. Checkout filters `sikshya_coupon_blocked_message` (5 args), `sikshya_coupon_discount_amount`, `sikshya_coupons_advanced_blocked_message`, `sikshya_coupons_advanced_normalize_save_meta`.
 
 **AI authoring extension (Pro):** generation routes are read-only against the database; the three `/pro/ai/apply/*` routes are the only ones that write, and they are applied one chapter or one quiz at a time so a large outline cannot land in a single request. Any `course_id`, `chapter_id`, `lesson_id` or `quiz_id` in the request is checked with `InstructorPermissions::canEditObject()`, and non-administrators are refused entirely unless **Let instructors generate** is on. Filters: `sikshya_ai_authoring_http_timeout`, `sikshya_ai_authoring_hourly_user_cap`, `sikshya_ai_authoring_provider_client`, `sikshya_ai_authoring_anthropic_endpoint`, `sikshya_ai_authoring_openai_endpoint`, `sikshya_ai_authoring_system_prompt`, `sikshya_ai_authoring_outline_prompt`, `sikshya_ai_authoring_lesson_prompt`, `sikshya_ai_authoring_quiz_prompt`.
+
+**xAPI / LRS extension (Pro):** outbound only — Sikshya reports to your LRS and is not one. Statements are queued (`wp_sikshya_xapi_statements`) and drained by `sikshya_xapi_drain_queue` every five minutes under a count and wall-clock budget; `sikshya_xapi_prune_statements` prunes *sent* rows daily, and only when retention is set. Each row carries the statement's own UUID from the moment it is queued, which is why a 409 from the LRS counts as sent rather than as a failure. Filters: `sikshya_xapi_statement`, `sikshya_xapi_actor`, `sikshya_xapi_verb_iri`, `sikshya_xapi_activity_type_iri`, `sikshya_xapi_activity_iri_base`, `sikshya_xapi_statements_per_run`, `sikshya_xapi_time_budget`, `sikshya_xapi_retry_backoff`. See `docs/XAPI.md`.
 
 **Activity log extension (Pro):** filters `sikshya_activity_log_action_label`, `sikshya_activity_log_allow_insert`, `sikshya_activity_log_scope_course_ids`, `sikshya_activity_log_show_learn_sidebar`; hook `sikshya_activity_log_recorded` after a row is stored. Learn UI: `sikshya_learn_sidebar_footer` (see `ActivityLogLearnTouchpoints`).
 

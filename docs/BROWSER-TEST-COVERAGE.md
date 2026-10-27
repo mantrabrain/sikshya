@@ -123,7 +123,7 @@ browser and a real server — re-verify only if you changed that area.
 Auth, roles and capabilities, the React admin shell and every one of its screens, global
 search, settings, setup wizard, tools, REST surface, licence-tier gating, and smoke.
 
-- 233 tests across 30 specs:
+- 236 tests across 31 specs:
   - `admin/addons-docs-url` — 1 passed
   - `admin/auditor-readonly-enforcement` — 1 passed
   - `admin/auditor-role` — 1 passed
@@ -148,6 +148,7 @@ search, settings, setup wizard, tools, REST surface, licence-tier gating, and sm
   - `learner/registration` — 1 passed
   - `learner/single-course-student-count` — 1 passed
   - `pro/addon-rest-smokes` — 11 passed
+  - `pro/addon-xapi-flow` — 3 passed (status never leaks credentials; queue rows carry their own statement id; the Integrations panel renders)
   - `pro/addon-tier-gating` — 2 skipped
   - `pro/pro-addon-settings` — 31 passed
   - `pro/pro-detection` — 2 passed
@@ -187,3 +188,4 @@ test.
 - **`multilingual_enterprise`** (scale) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`scorm_h5p_pro`** (pro) — Browser spec exists only as a REST smoke; covered by Pro PHPUnit.
 - **`zapier`** (scale) — No dedicated browser spec; covered by Pro PHPUnit (shared with webhooks).
+- **`xapi_lrs`** (scale) — The browser spec covers the admin surface only. Statement *shape* and delivery semantics — the 409-counts-as-sent rule, the retry taxonomy, actor modes, the drain budget, retention — are 42 Pro PHPUnit tests, because they need a fake LRS answering with specific status codes, which a browser test cannot arrange.

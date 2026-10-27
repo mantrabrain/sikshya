@@ -455,6 +455,19 @@ final class FeatureRegistry
                     'sikshya'
                 ),
             ],
+            'xapi_lrs' => [
+                'label' => __('xAPI / Learning Record Store', 'sikshya'),
+                'tier' => 'scale',
+                'group' => 'integrations',
+                'description' => __(
+                    "Send learning records to your own Learning Record Store in xAPI (Tin Can) format—enrollments, lesson and course completions, quiz results with scores, assignments and certificates.\n\nTurn on when your organisation reports learning from more than one system and needs it in one place.\n\nTurn off when Sikshya is the only place learning happens.",
+                    'sikshya'
+                ),
+                'detail_description' => __(
+                    "What you get: A statement queue that posts xAPI 1.0.3 statements to any conformant LRS, with retries, a log of what was accepted, and a choice of how learners are identified—email address, hashed email, or an account id with no email at all.\n\nTurn it on when: You already run an LRS (Watershed, Learning Locker, Veracity, SCORM Cloud), or a tender asks for xAPI.\n\nTurn it off when: You have no LRS—statements with nowhere to go are queued and never sent.\n\nPlan: Scale tier (paid plans).",
+                    'sikshya'
+                ),
+            ],
             'webhooks' => [
                 'label' => __('Webhooks', 'sikshya'),
                 'tier' => 'scale',

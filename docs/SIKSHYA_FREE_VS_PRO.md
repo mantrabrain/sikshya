@@ -53,7 +53,7 @@ Everything in Free, plus (non-exhaustive; implement incrementally):
 - **Engagement:** announcements, automation emails, richer templates.
 - **Integrations:** Elementor/Divi widgets, ESP/CRM, Zapier/Make via webhooks.
 - **Security & ops:** 2FA (LMS flows), session tools, white label, full REST + API keys, webhooks.
-- **Enterprise:** SCORM/xAPI (module), SSO (future phase).
+- **Enterprise:** SCORM and H5P content; **xAPI reporting to your own LRS** (`xapi_lrs`, Scale — see [XAPI.md](XAPI.md); cmi5 is *not* included and is a separate specification); identity lifecycle for SAML/SCIM deployments (see [ENTERPRISE-IDENTITY.md](ENTERPRISE-IDENTITY.md)).
 
 ## Implementation waves (engineering)
 

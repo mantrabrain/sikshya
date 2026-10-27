@@ -1,13 +1,14 @@
 import { useCallback, useId, useMemo, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
+import { AddonSettingsPage } from './AddonSettingsPage';
 import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { FeaturePreviewSkeleton } from '../components/FeaturePreviewSkeleton';
 import { PlanUpgradeOverlay } from '../components/PlanUpgradeOverlay';
 import { PREMIUM_GATE_VIEWPORT_MIN_H, PremiumGatedSurface } from '../components/PremiumGatedSurface';
 import { SIKSHYA_ADMIN_PAGE_FULL_WIDTH } from '../constants/shellLayout';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
-import { ButtonPrimary } from '../components/shared/buttons';
+import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListPanelSkeleton } from '../components/shared/Skeleton';
@@ -18,7 +19,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { appViewHref } from '../lib/appUrl';
 import { getLicensing, isFeatureEnabled } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
-import { __ } from '../lib/i18n';
+import { __, sprintf } from '../lib/i18n';
 
 type WebhookEndpointRowV2 = {
   id: number;
@@ -46,6 +47,31 @@ type ApiKeyRow = {
   last_used_at?: string | null;
   created_at: string;
 };
+
+type XapiStatus = {
+  ok?: boolean;
+  configured?: boolean;
+  endpoint?: string;
+  actor_mode?: string;
+  xapi_version?: string;
+  counts?: { queued?: number; retrying?: number; sent?: number; failed?: number };
+  last_failure?: { event_key?: string; status_code?: number; error?: string; at?: string } | null;
+  next_drain?: number;
+};
+
+type XapiStatementRow = {
+  id: number;
+  event_key: string;
+  verb: string;
+  status: string;
+  attempt_count: number;
+  last_status_code: number | null;
+  last_error?: string;
+  created_at: string;
+  sent_at?: string;
+};
+
+type XapiTestResult = { ok?: boolean; code?: number; message?: string; outcome?: string };
 
 type OAuthAppRow = {
   id: number;
@@ -181,9 +207,11 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
   const whFeature = isFeatureEnabled(config, 'webhooks') || isFeatureEnabled(config, 'zapier');
   const keyFeature = isFeatureEnabled(config, 'public_api_keys');
+  const xapiFeature = isFeatureEnabled(config, 'xapi_lrs');
   const whAddon = useAddonEnabled('webhooks');
   const zapierAddon = useAddonEnabled('zapier');
   const keyAddon = useAddonEnabled('public_api_keys');
+  const xapiAddon = useAddonEnabled('xapi_lrs');
 
   const webhooksOn = whFeature && (Boolean(whAddon.enabled) || Boolean(zapierAddon.enabled));
   const keysOn = keyFeature && Boolean(keyAddon.enabled);
@@ -199,6 +227,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   const [keyExpiryDays, setKeyExpiryDays] = useState(90);
   const [keyBusy, setKeyBusy] = useState(false);
   const [freshKey, setFreshKey] = useState<string | null>(null);
+  const [xapiTesting, setXapiTesting] = useState(false);
+  const [xapiTestResult, setXapiTestResult] = useState<string | null>(null);
+
   const [pingToken, setPingToken] = useState('');
   const [pingBusy, setPingBusy] = useState(false);
   const [pingResult, setPingResult] = useState<string | null>(null);
@@ -242,6 +273,53 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   }, [keysOn]);
 
   const apps = useAsyncData(appsLoader, [keysOn]);
+
+  const xapiOn = xapiFeature && Boolean(xapiAddon.enabled);
+
+  const xapiStatusLoader = useCallback(async () => {
+    if (!xapiOn) {
+      return { ok: true } as XapiStatus;
+    }
+    return getSikshyaApi().get<XapiStatus>(SIKSHYA_ENDPOINTS.scale.xapiStatus);
+  }, [xapiOn]);
+
+  const xapiLogLoader = useCallback(async () => {
+    if (!xapiOn) {
+      return { ok: true, rows: [] as XapiStatementRow[] };
+    }
+    return getSikshyaApi().get<{ ok?: boolean; rows?: XapiStatementRow[] }>(
+      `${SIKSHYA_ENDPOINTS.scale.xapiStatements}?per_page=10`
+    );
+  }, [xapiOn]);
+
+  const xapiStatus = useAsyncData(xapiStatusLoader, [xapiOn]);
+  const xapiLog = useAsyncData(xapiLogLoader, [xapiOn]);
+
+  const sendXapiTest = useCallback(async () => {
+    setXapiTesting(true);
+    setXapiTestResult(null);
+    try {
+      const res = await getSikshyaApi().post<XapiTestResult>(SIKSHYA_ENDPOINTS.scale.xapiTest, {});
+      // The server has already redacted its own credentials out of this
+      // message, so an LRS that echoes the request back cannot put the secret
+      // on screen.
+      setXapiTestResult(
+        res?.ok
+          ? sprintf(__('Accepted by your LRS (HTTP %d).', 'sikshya'), Number(res?.code ?? 200))
+          : sprintf(
+              __('Not accepted (HTTP %1$d). %2$s', 'sikshya'),
+              Number(res?.code ?? 0),
+              String(res?.message ?? '')
+            )
+      );
+    } catch (e) {
+      setXapiTestResult(e instanceof Error ? e.message : String(e));
+    } finally {
+      setXapiTesting(false);
+      xapiStatus.refetch();
+      xapiLog.refetch();
+    }
+  }, [xapiStatus, xapiLog]);
 
   const addonsHref = useMemo(() => appViewHref(config, 'addons'), [config]);
 
@@ -1022,6 +1100,182 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                 </div>
               </>
             )}
+        </section>
+
+        {/* xAPI / LRS — full width */}
+        <section
+          data-sikshya-xapi-card
+          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        >
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            {__('xAPI / Learning Record Store', 'sikshya')}
+          </h2>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            {__(
+              'Send learning records — enrollments, completions, quiz scores, certificates — to your own LRS in xAPI format. Connect it below; the counts show whether statements are arriving.',
+              'sikshya'
+            )}
+          </p>
+
+          {!xapiFeature ? (
+            <div className={`relative isolate mt-4 w-full ${PREMIUM_GATE_VIEWPORT_MIN_H}`}>
+              <div className={`pointer-events-none opacity-70 ${PREMIUM_GATE_VIEWPORT_MIN_H}`} aria-hidden>
+                <FeaturePreviewSkeleton variant="generic" />
+              </div>
+              <PlanUpgradeOverlay
+                config={config}
+                featureId="xapi_lrs"
+                featureTitle={__('xAPI / Learning Record Store', 'sikshya')}
+                description={__(
+                  'Report learning to any conformant LRS, with retries, a log of what was accepted, and a choice of how much about a learner leaves your site.',
+                  'sikshya'
+                )}
+              />
+            </div>
+          ) : !xapiAddon.enabled ? (
+            <div className={`relative isolate mt-4 w-full ${PREMIUM_GATE_VIEWPORT_MIN_H}`}>
+              <div className={`pointer-events-none select-none opacity-[0.72] ${PREMIUM_GATE_VIEWPORT_MIN_H}`} aria-hidden>
+                <FeaturePreviewSkeleton variant="generic" />
+              </div>
+              <PremiumGatedSurface>
+                <AddonEnablePanel
+                  variant="premium"
+                  title={__('Turn on xAPI reporting', 'sikshya')}
+                  description={__(
+                    'Enable the add-on, then add your LRS endpoint and credentials in its settings. Nothing is queued or sent until those exist.',
+                    'sikshya'
+                  )}
+                  canEnable={Boolean(xapiAddon.licenseOk)}
+                  enableBusy={xapiAddon.loading}
+                  onEnable={() => xapiAddon.enable()}
+                  upgradeUrl={lic?.upgradeUrl}
+                  error={xapiAddon.error}
+                />
+              </PremiumGatedSurface>
+            </div>
+          ) : (
+            <>
+              {!xapiStatus.data?.configured ? (
+                <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+                  {__(
+                    'No LRS endpoint and credentials yet. Add them under Add-ons → xAPI / Learning Record Store → Settings. Until then nothing is queued, so enabling this early cannot build a backlog that floods your LRS later.',
+                    'sikshya'
+                  )}
+                </div>
+              ) : (
+                <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-4">
+                  {([
+                    ['Queued', xapiStatus.data?.counts?.queued ?? 0],
+                    ['Retrying', xapiStatus.data?.counts?.retrying ?? 0],
+                    ['Accepted', xapiStatus.data?.counts?.sent ?? 0],
+                    ['Failed', xapiStatus.data?.counts?.failed ?? 0],
+                  ] as Array<[string, number]>).map(([label, value]) => (
+                    <div
+                      key={label}
+                      className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60"
+                    >
+                      <dt className="text-xs uppercase tracking-wide text-slate-600 dark:text-slate-300">{label}</dt>
+                      <dd
+                        className="mt-0.5 text-xl font-semibold tabular-nums text-slate-900 dark:text-white"
+                        data-sikshya-xapi-count={label.toLowerCase()}
+                      >
+                        {value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+
+              {xapiStatus.data?.last_failure ? (
+                <p className="mt-3 text-xs text-red-700 dark:text-red-300">
+                  {sprintf(
+                    __('Last failure: %1$s — HTTP %2$d. %3$s', 'sikshya'),
+                    String(xapiStatus.data.last_failure.event_key ?? ''),
+                    Number(xapiStatus.data.last_failure.status_code ?? 0),
+                    String(xapiStatus.data.last_failure.error ?? '')
+                  )}
+                </p>
+              ) : null}
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span data-sikshya-xapi-test>
+                  <ButtonPrimary type="button" disabled={xapiTesting} onClick={() => void sendXapiTest()}>
+                    {xapiTesting ? __('Sending…', 'sikshya') : __('Send a test statement', 'sikshya')}
+                  </ButtonPrimary>
+                </span>
+                <ButtonSecondary
+                  type="button"
+                  onClick={() => {
+                    xapiStatus.refetch();
+                    xapiLog.refetch();
+                  }}
+                >
+                  {__('Refresh', 'sikshya')}
+                </ButtonSecondary>
+                {xapiStatus.data?.endpoint ? (
+                  <span className="text-xs text-slate-600 dark:text-slate-400">
+                    {sprintf(
+                      __('xAPI %1$s → %2$s', 'sikshya'),
+                      String(xapiStatus.data.xapi_version ?? ''),
+                      String(xapiStatus.data.endpoint ?? '')
+                    )}
+                  </span>
+                ) : null}
+              </div>
+
+              {xapiTestResult ? (
+                <p className="mt-2 text-sm text-slate-800 dark:text-slate-200" data-sikshya-xapi-test-result>
+                  {xapiTestResult}
+                </p>
+              ) : null}
+
+              {/* The endpoint, credentials and event switches live right here
+                  rather than on a screen of their own: the first thing anyone
+                  does after reading "0 accepted" is go looking for the
+                  endpoint, and the status above is how you tell whether what
+                  you just typed works. */}
+              <div className="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800">
+                <AddonSettingsPage
+                  embedded
+                  showSettingsScopeCallout={false}
+                  config={config}
+                  addonId="xapi_lrs"
+                  title={__('LRS connection', 'sikshya')}
+                  subtitle={__('Endpoint, credentials, how learners are identified, and which events to send.', 'sikshya')}
+                  featureTitle={__('xAPI / Learning Record Store', 'sikshya')}
+                  featureDescription={__('Statements are queued and sent in the background; nothing is queued until an endpoint and credentials exist.', 'sikshya')}
+                />
+              </div>
+
+              <div className="mt-5">
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                  {__('Last 10 statements', 'sikshya')}
+                </h3>
+                <ListPanel className="p-4">
+                  {xapiLog.loading ? (
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{__('Loading…', 'sikshya')}</p>
+                  ) : (xapiLog.data?.rows ?? []).length === 0 ? (
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {__('Nothing yet. A statement appears here the moment a learner enrolls or completes something.', 'sikshya')}
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
+                      {(xapiLog.data?.rows ?? []).map((row) => (
+                        <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                          <span className="font-medium text-slate-900 dark:text-white">{row.event_key}</span>
+                          <span className="text-xs text-slate-600 dark:text-slate-400">
+                            {row.status}
+                            {row.last_status_code ? ` · HTTP ${row.last_status_code}` : ''}
+                            {row.attempt_count > 1 ? ` · ${row.attempt_count} attempts` : ''}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </ListPanel>
+              </div>
+            </>
+          )}
         </section>
       </div>
     </EmbeddableShell>

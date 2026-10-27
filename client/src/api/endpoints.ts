@@ -499,6 +499,15 @@ export const SIKSHYA_ENDPOINTS = {
     publicApiPing: '/scale/public-api/ping',
     publicApiApps: '/scale/public-api/apps',
     publicApiApp: (id: number) => `/scale/public-api/apps/${encodeURIComponent(String(id))}`,
+    /**
+     * xAPI / LRS (Pro `xapi_lrs` addon). `status` never returns the LRS
+     * credentials, and `test` posts a real statement down the production path
+     * rather than a special-cased ping.
+     */
+    xapiStatus: '/scale/xapi/status',
+    xapiStatements: '/scale/xapi/statements',
+    xapiTest: '/scale/xapi/test',
+    xapiDrain: '/scale/xapi/drain',
   },
   /**
    * AI authoring (Pro `ai_authoring` addon). The generate routes write nothing;
