@@ -83,11 +83,18 @@
   --sik-acc-surface-muted: var(--sik-acc-slate-50);
   --sik-acc-border: var(--sik-acc-slate-200);
   --sik-acc-text: var(--sik-acc-slate-900);
-  --sik-acc-muted: var(--sik-acc-slate-500);
+  /* slate-600, not slate-500. Every one of this token's ~40 uses is body or
+   * secondary copy, and slate-500 measured 4.39:1 on the page background
+   * (#f4f6f9) and 4.11:1 on the tinted rows — under the 4.5:1 that text at
+   * these sizes needs. The scale values above are untouched; only the role
+   * token moved one step darker. */
+  --sik-acc-muted: var(--sik-acc-slate-600);
   --sik-acc-brand: var(--sik-acc-brand-500);
   --sik-acc-brand-hover: var(--sik-acc-brand-700);
   --sik-acc-sidebar: #ffffff;
-  --sik-acc-success: var(--sik-acc-success-600);
+  /* emerald-700. The 600 step is a fine badge *fill* but fails as text:
+   * 3.76:1 on white for a passing quiz score, 3.57:1 on the tinted badge. */
+  --sik-acc-success: var(--sik-acc-success-700);
   --sik-acc-success-bg: var(--sik-acc-success-50);
 
   /* =====================================================================

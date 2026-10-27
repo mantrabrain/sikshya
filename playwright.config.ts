@@ -21,8 +21,8 @@ const baseURL = process.env.WP_BASE_URL ?? 'http://sikshya.local';
  */
 const crossBrowser = process.env.PW_CROSS_BROWSER === '1';
 
-const adminMatch = /tests\/(smoke|admin|pro)\/.*\.spec\.ts$/;
-const publicMatch = /tests\/(learner|checkout)\/.*\.spec\.ts$/;
+const adminMatch = /tests\/(smoke|admin|pro|a11y\/admin)\/.*\.spec\.ts$/;
+const publicMatch = /tests\/(learner|checkout|a11y\/public)\/.*\.spec\.ts$/;
 const storageState = 'e2e/.auth/admin.json';
 
 export default defineConfig({

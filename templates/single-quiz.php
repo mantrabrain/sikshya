@@ -81,7 +81,22 @@ while (have_posts()) {
                             data-sikshya-progress-btn
                             aria-haspopup="dialog"
                             aria-expanded="false"
-                            aria-label="<?php echo esc_attr(sprintf(__('%s progress', 'sikshya'), $label_course)); ?>"
+                            <?php
+                            /*
+                             * The counts are spelled into the name on purpose.
+                             * "Course progress" alone did not contain the
+                             * "3/10 40%" on the button face, which fails WCAG
+                             * 2.5.3 Label in Name — and a screen reader was
+                             * told the button's subject but never its value.
+                             */
+                            ?>
+                            aria-label="<?php echo esc_attr(sprintf(
+                                /* translators: 1: course label, 2: completed/total e.g. "3/10", 3: percentage e.g. "40%" */
+                                __('%1$s progress: %2$s %3$s', 'sikshya'),
+                                $label_course,
+                                $done . '/' . $total,
+                                $pct . '%'
+                            )); ?>"
                         >
                             <span class="sikshya-learnHeader__progressBar" aria-hidden="true">
                                 <span class="sikshya-learnHeader__progressFill" style="<?php echo esc_attr('width:' . max(0, min(100, $pct)) . '%'); ?>"></span>

@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { useId, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi } from '../../api';
 import { SIKSHYA_ENDPOINTS } from '../../api/endpoints';
 import { useAddonEnabled } from '../../hooks/useAddons';
@@ -379,6 +379,8 @@ export function ProLessonScormBlock(props: {
   onChange: (v: ProLessonValues) => void;
 }) {
   const { values, onChange } = props;
+  // Base for this component's form-field ids, so every label can point at its control.
+  const a11yId = useId();
   const addon = useAddonEnabled('scorm_h5p_pro');
   const ready = Boolean(addon.enabled && addon.licenseOk);
   const set = <K extends keyof ProLessonValues>(k: K, val: ProLessonValues[K]) => onChange({ ...values, [k]: val });
@@ -446,12 +448,13 @@ export function ProLessonScormBlock(props: {
       description={__('This lesson step loads one SCORM player (packages attach per lesson — same mental model as a Moodle SCORM activity or Canvas placement). Course-wide defaults for attempts and completion live under Course builder → Interactive content. One zip can contain multiple SCOs; navigation between them stays inside the package.', 'sikshya')}
     >
       <div>
-        <label className={LABEL}>{__('Managed package', 'sikshya')}</label>
+        <label htmlFor={`${a11yId}-managed-package`} className={LABEL}>{__('Managed package', 'sikshya')}</label>
         <p className={HINT}>
           Upload zipped packages on the SCORM / H5P workspace, then attach here. Multiple curriculum lessons may reuse the same library package (lesson attempts are tracked per learner per lesson).
         </p>
         <div className="space-y-2">
           <input
+            id={`${a11yId}-managed-package`}
             type="search"
             className={FIELD}
             value={search}
@@ -547,6 +550,8 @@ export function ProLessonH5pBlock(props: {
   onChange: (v: ProLessonValues) => void;
 }) {
   const { values, onChange } = props;
+  // Base for this component's form-field ids, so every label can point at its control.
+  const a11yId = useId();
   const addon = useAddonEnabled('scorm_h5p_pro');
   const ready = Boolean(addon.enabled && addon.licenseOk);
   const set = <K extends keyof ProLessonValues>(k: K, val: ProLessonValues[K]) => onChange({ ...values, [k]: val });
@@ -621,10 +626,11 @@ export function ProLessonH5pBlock(props: {
     >
       {available ? (
         <div>
-          <label className={LABEL}>{__('H5P content', 'sikshya')}</label>
+          <label htmlFor={`${a11yId}-h5p-content`} className={LABEL}>{__('H5P content', 'sikshya')}</label>
           <p className={HINT}>Selecting content auto-renders it via the H5P shortcode and tracks results in reports.</p>
           <div className="space-y-2">
             <input
+              id={`${a11yId}-h5p-content`}
               type="search"
               className={FIELD}
               value={search}

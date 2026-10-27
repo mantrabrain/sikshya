@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useId, useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
@@ -46,6 +46,8 @@ const STAFF_SEARCH_ROLES = ['administrator', 'editor', 'author', 'sikshya_instru
 
 export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  // Base for this component's form-field ids, so every label can point at its control.
+  const a11yId = useId();
   const dialog = useSikshyaDialog();
   const featureOk = isFeatureEnabled(config, 'multi_instructor');
   const addon = useAddonEnabled('multi_instructor');
@@ -498,10 +500,11 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
             </div>
             <div className="grid gap-6 p-6 lg:grid-cols-12">
               <div className="lg:col-span-5" data-course-picker="1">
-                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <label htmlFor={`${a11yId}-course`} className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Course
                 </label>
                 <input
+                  id={`${a11yId}-course`}
                   type="text"
                   value={courseQuery}
                   onChange={(e) => setCourseQuery(e.target.value)}
@@ -544,10 +547,11 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                 ) : null}
               </div>
               <div className="lg:col-span-4" data-instructor-picker="1">
-                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <label htmlFor={`${a11yId}-instructor`} className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Instructor
                 </label>
                 <input
+                  id={`${a11yId}-instructor`}
                   type="text"
                   value={userQuery}
                   onChange={(e) => setUserQuery(e.target.value)}
@@ -665,10 +669,11 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
               <div className="overflow-x-auto">
                 <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-100 bg-slate-50/50 px-5 py-3 dark:border-slate-800 dark:bg-slate-900/40">
                   <div className="min-w-[min(100%,340px)] flex-1">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <label htmlFor={`${a11yId}-filter-staff`} className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Filter staff
                     </label>
                     <input
+                      id={`${a11yId}-filter-staff`}
                       type="text"
                       value={staffFilter}
                       onChange={(e) => setStaffFilter(e.target.value)}
@@ -842,10 +847,11 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
             </p>
             <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
               <div className="min-w-[min(100%,280px)] flex-1" data-ledger-instructor-picker="1">
-                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <label htmlFor={`${a11yId}-instructor-2`} className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Instructor
                 </label>
                 <input
+                  id={`${a11yId}-instructor-2`}
                   type="text"
                   value={ledgerUserQuery}
                   onChange={(e) => {

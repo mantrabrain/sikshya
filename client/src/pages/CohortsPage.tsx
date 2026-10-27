@@ -275,7 +275,7 @@ export function CohortsPage(props: {
                       {c.starts_at ? (
                         c.starts_at.slice(0, 10)
                       ) : (
-                        <span className="text-xs text-amber-600">
+                        <span className="text-xs text-amber-800 dark:text-amber-300">
                           {__('not set — drip falls back to each learner’s own date', 'sikshya')}
                         </span>
                       )}

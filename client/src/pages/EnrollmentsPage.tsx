@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useId, useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
@@ -42,6 +42,8 @@ type ListResponse = {
 type UserOpt = { id: number; name: string; email?: string };
 export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  // Base for this component's form-field ids, so every label can point at its control.
+  const a11yId = useId();
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
   const course = term(config, 'course');
   const courseLower = termLower(config, 'course');
@@ -224,10 +226,11 @@ export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReac
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div data-manual-enroll-user="1">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <label htmlFor={`${a11yId}-student`} className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 {student}
               </label>
               <input
+                id={`${a11yId}-student`}
                 type="text"
                 value={userQuery}
                 onChange={(e) => {

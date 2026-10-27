@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
@@ -246,6 +246,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
   const notifyQ = useAsyncData(notifyLoader, [notifyEnabled]);
 
   const [dripEmailMode, setDripEmailMode] = useState<'per_lesson' | 'digest'>('per_lesson');
+  const dripEmailModeId = useId();
   const [modeSaving, setModeSaving] = useState(false);
 
   useEffect(() => {
@@ -718,9 +719,16 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                     </div>
                   ) : (
                     <div className="flex min-h-0 flex-col sm:col-span-2">
-                      <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">{__('Unlock date', 'sikshya')}</label>
+                      {/* The field renders its own label and wraps the input in
+                          it, which is what associates the two. A separate
+                          `<label>` out here named nothing at all. */}
                       <div className="mt-1 shrink-0">
-                        <DateTimePickerField kind="date" value={editorUnlockDate} onChange={setEditorUnlockDate} />
+                        <DateTimePickerField
+                          kind="date"
+                          label={__('Unlock date', 'sikshya')}
+                          value={editorUnlockDate}
+                          onChange={setEditorUnlockDate}
+                        />
                       </div>
                       <FieldHint />
                     </div>
@@ -931,7 +939,18 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                 ) : notifyQ.loading ? (
                   <div className="mt-3"><SkeletonCard rows={4} /></div>
                 ) : (
-                  <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                  <div
+                    /*
+                     * The status tiles are a description list; the mode control
+                     * and the two notes underneath are not. Keeping them inside
+                     * the `<dl>` made it invalid — a screen reader announces a
+                     * description list and then reads a form control that
+                     * belongs to no term — so the list now holds only the
+                     * term/definition pairs and the rest sits beside it.
+                     */
+                    className="mt-4 space-y-3"
+                  >
+                  <dl className="grid gap-3 text-sm sm:grid-cols-2">
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
                       <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         Next run
@@ -990,11 +1009,20 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                               : 'Off (plan)'}
                       </dd>
                     </div>
-                    <div className="sm:col-span-2 rounded-lg border border-slate-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                  </dl>
+                    <div className="rounded-lg border border-slate-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
                       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                        <label className="block text-sm text-slate-800 dark:text-slate-100">
-                          Lesson unlock emails
+                        <div className="text-sm text-slate-800 dark:text-slate-100">
+                          {/* The explanation used to sit *inside* the `<label>`,
+                              which made the field's accessible name the whole
+                              two-sentence paragraph. It is a description, so it
+                              is wired up as one. */}
+                          <label htmlFor={dripEmailModeId} className="block">
+                            Lesson unlock emails
+                          </label>
                           <select
+                            id={dripEmailModeId}
+                            aria-describedby={`${dripEmailModeId}-help`}
                             className="mt-1.5 block w-full max-w-md rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                             value={dripEmailMode}
                             onChange={(e) => setDripEmailMode(e.target.value === 'digest' ? 'digest' : 'per_lesson')}
@@ -1003,11 +1031,11 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                             <option value="per_lesson">{__('One email per unlocked lesson (classic)', 'sikshya')}</option>
                             <option value="digest">{__('Digest: one email per cron pass (recommended)', 'sikshya')}</option>
                           </select>
-                          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                          <p id={`${dripEmailModeId}-help`} className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                             Digest uses the <strong className="font-medium">{__('Drip: lessons unlocked (digest)', 'sikshya')}</strong> template.
                             Per-lesson uses <strong className="font-medium">{__('Drip: lesson unlocked', 'sikshya')}</strong>.
                           </p>
-                        </label>
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           <ButtonSecondary type="button" disabled={modeSaving} onClick={() => void notifyQ.refetch()}>
                             Refresh status
@@ -1019,15 +1047,15 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                       </div>
                     </div>
                     {notifyQ.data?.note ? (
-                      <p className="sm:col-span-2 text-xs text-slate-500 dark:text-slate-400">{notifyQ.data.note}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{notifyQ.data.note}</p>
                     ) : null}
                     {!notifyQ.data?.drip_addon_enabled ? (
-                      <p className="sm:col-span-2 text-xs text-amber-700 dark:text-amber-300">
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
                         Notifications only fire when Scheduled access is also enabled above. Without it, nothing actually
                         unlocks for learners and there is nothing to email about.
                       </p>
                     ) : null}
-                  </dl>
+                  </div>
                 )}
               </ListPanel>
             </GatedFeatureWorkspace>

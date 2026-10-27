@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useId, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
@@ -64,6 +64,8 @@ type PrereqCourseListResp = {
 
 export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
   const { config, title, embedded } = props;
+  // Base for this component's form-field ids, so every label can point at its control.
+  const a11yId = useId();
   const dialog = useSikshyaDialog();
   const featureOk = isFeatureEnabled(config, 'prerequisites');
   const addon = useAddonEnabled('prerequisites');
@@ -792,8 +794,9 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
           >
             <div className="grid gap-4 lg:grid-cols-[340px_1fr] lg:items-stretch">
               <div className="flex min-h-0 flex-col">
-                <label className="block shrink-0 text-sm font-medium text-slate-800 dark:text-slate-200">{__('Lesson', 'sikshya')}</label>
+                <label htmlFor={`${a11yId}-lesson`} className="block shrink-0 text-sm font-medium text-slate-800 dark:text-slate-200">{__('Lesson', 'sikshya')}</label>
                 <select
+                  id={`${a11yId}-lesson`}
                   value={modalLessonId}
                   onChange={(e) => setModalLessonId(Number(e.target.value))}
                   className="mt-1 block w-full shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
@@ -811,12 +814,17 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
 
               <div className="flex min-h-0 flex-col">
                 <div className="flex shrink-0 items-center justify-between gap-2">
-                  <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Required lessons', 'sikshya')}</label>
+                  <p id={`${a11yId}-required-lessons`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">
+                    {__('Required lessons', 'sikshya')}
+                  </p>
                   {modalLessonId > 0 ? (
                     <span className="text-xs text-slate-500 dark:text-slate-400">{modalLessonPrereqs.length} selected</span>
                   ) : null}
                 </div>
-                <div className="mt-2 min-h-[12rem] max-h-[360px] flex-1 overflow-auto rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-950">
+                <div
+                  role="group"
+                  aria-labelledby={`${a11yId}-required-lessons`}
+                  className="mt-2 min-h-[12rem] max-h-[360px] flex-1 overflow-auto rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-950">
                   {modalLessonId <= 0 ? (
                     <div className="p-3 text-sm text-slate-500 dark:text-slate-400">{__('Pick a lesson to edit prerequisites.', 'sikshya')}</div>
                   ) : modalLessonQ.loading ? (

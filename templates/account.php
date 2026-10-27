@@ -148,6 +148,18 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
 
                 <div class="sik-acc-user-menu">
                     <button class="sik-acc-user-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <?php
+                        /*
+                         * Named here rather than with `aria-label`, because the
+                         * name and email below are hidden on narrow layouts: an
+                         * `aria-label` that repeated them would contradict what
+                         * is on screen when they are shown, and the button was
+                         * left with no name at all when they are not. A
+                         * visually hidden word works in both states and still
+                         * contains the visible text.
+                         */
+                        ?>
+                        <span class="sik-acc-sr-only"><?php esc_html_e('Account menu', 'sikshya'); ?></span>
                         <span class="sik-acc-user">
                             <?php if ($page_model->getAvatarUrl() !== '') : ?>
                                 <img src="<?php echo esc_url($page_model->getAvatarUrl()); ?>" width="36" height="36" alt="" loading="lazy" decoding="async">

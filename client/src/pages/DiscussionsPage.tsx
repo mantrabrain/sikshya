@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useId, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
@@ -1171,6 +1171,8 @@ function ModerationThreadPanel(props: {
     onReplyDraftChange,
     submitReply,
   } = props;
+  // Base for this component's form-field ids, so every label can point at its control.
+  const a11yId = useId();
 
   if (collapsed && collapsibleRail) {
     return (
@@ -1414,10 +1416,11 @@ function ModerationThreadPanel(props: {
       {detailRow?.can_moderate ? (
         <footer className="shrink-0 border-t border-slate-200/90 bg-white/95 px-4 py-3 dark:border-slate-700 dark:bg-slate-950/95">
           <div className="rounded-[22px] border border-slate-200/80 bg-slate-50/90 p-2 dark:border-slate-600 dark:bg-slate-900/50">
-            <label className="mb-2 block px-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <label htmlFor={`${a11yId}-reply-as-instructor`} className="mb-2 block px-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Reply as instructor
             </label>
             <textarea
+              id={`${a11yId}-reply-as-instructor`}
               rows={3}
               value={replyDraft}
               onChange={(e) => onReplyDraftChange(e.target.value)}
@@ -1446,9 +1449,16 @@ function SummaryTile({ label, value, accent }: { label: string; value: number; a
     accent === 'amber'
       ? 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100'
       : 'border-slate-200 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+  /*
+   * `opacity-70` on 12px text is what failed contrast here: amber-900 faded
+   * over amber-50 measures 4.08:1 where 4.5:1 is required. Fading a label is a
+   * visual intention, so it is expressed as a dimmer *colour* that still
+   * passes, rather than by making the real colour translucent.
+   */
+  const labelCls = accent === 'amber' ? 'text-amber-800 dark:text-amber-200' : 'text-slate-600 dark:text-slate-300';
   return (
     <div className={`rounded-xl border px-4 py-3 shadow-sm ${accentCls}`}>
-      <div className="text-xs font-semibold uppercase tracking-wide opacity-70">{label}</div>
+      <div className={`text-xs font-semibold uppercase tracking-wide ${labelCls}`}>{label}</div>
       <div className="mt-1 text-2xl font-semibold tabular-nums">{value.toLocaleString()}</div>
     </div>
   );

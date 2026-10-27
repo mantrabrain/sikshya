@@ -441,8 +441,16 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                   </select>
                 </div>
                 <div>
-                  <label className={LABEL}>{__('Featured image', 'sikshya')}</label>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-3">
+                  {/* Buttons, not a form control, so this is a named group
+                      rather than a `<label>` pointing at nothing. */}
+                  <p id="sikshya-category-featured-image-label" className={LABEL}>
+                    {__('Featured image', 'sikshya')}
+                  </p>
+                  <div
+                    role="group"
+                    aria-labelledby="sikshya-category-featured-image-label"
+                    className="mt-1.5 flex flex-wrap items-center gap-3"
+                  >
                     <button
                       type="button"
                       onClick={() => {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { NavIcon } from './NavIcon';
 import { __ } from '../lib/i18n';
+import { focusReturner, trapTab } from '../lib/focusTrap';
 
 type Hit = {
   id: number;
@@ -65,20 +66,29 @@ export function GlobalSearchPalette() {
       }
       if (e.key === 'Escape' && open) {
         setOpen(false);
+        return;
+      }
+      if (open && trapTab(panelRef.current, e)) {
+        return;
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
 
-  // Focus the input when the palette opens.
+  // Focus the input when the palette opens, and hand focus back to whatever
+  // opened it when it closes — which, with ⌘K, may be anywhere on the page.
   useEffect(() => {
-    if (open) {
-      requestAnimationFrame(() => inputRef.current?.focus());
-    } else {
+    if (!open) {
       setQ('');
       setHits({ users: [], courses: [], orders: [] });
+      return;
     }
+
+    const restoreFocus = focusReturner();
+    requestAnimationFrame(() => inputRef.current?.focus());
+
+    return restoreFocus;
   }, [open]);
 
   // Close on outside click while open.
@@ -175,7 +185,24 @@ export function GlobalSearchPalette() {
         type="button"
         onClick={() => setOpen(true)}
         title={__('Search (⌘K)', 'sikshya')}
-        aria-label={__('Open global search', 'sikshya')}
+        /*
+         * No `aria-label` here on purpose. It used to say "Open global search"
+         * while the button showed "Search", and an accessible name that does
+         * not contain the visible text fails WCAG 2.5.3 Label in Name — the
+         * felt consequence being that a voice-control user saying "click
+         * Search" is not understood. The name now comes from the button's own
+         * text, so the two cannot drift apart again.
+         *
+         * That is also why the ⌘K badge is *not* `aria-hidden`: it is on
+         * screen, so hiding it from assistive tech would recreate the same
+         * mismatch from the other side. Below the `sm` breakpoint both the
+         * word and the badge are `display:none`, which contributes nothing to
+         * either the visible text or the name, so the two stay in step — and
+         * `aria-keyshortcuts` states the shortcut either way.
+         */
+        aria-keyshortcuts="Meta+K Control+K"
+        aria-haspopup="dialog"
+        aria-expanded={open}
         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
         data-testid="topbar-global-search-trigger"
       >

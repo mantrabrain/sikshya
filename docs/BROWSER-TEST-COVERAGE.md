@@ -123,7 +123,7 @@ browser and a real server — re-verify only if you changed that area.
 Auth, roles and capabilities, the React admin shell and every one of its screens, global
 search, settings, setup wizard, tools, REST surface, licence-tier gating, and smoke.
 
-- 173 tests across 27 specs:
+- 233 tests across 30 specs:
   - `admin/addons-docs-url` — 1 passed
   - `admin/auditor-readonly-enforcement` — 1 passed
   - `admin/auditor-role` — 1 passed
@@ -137,6 +137,9 @@ search, settings, setup wizard, tools, REST surface, licence-tier gating, and sm
   - `admin/rest-api` — 2 passed
   - `admin/ai-studio-admin-ui` — 3 passed
   - `admin/screen-health-sweep` — 43 passed
+  - `a11y/admin/admin-screens-a11y` — 43 passed (WCAG 2.1 AA, every admin screen)
+  - `a11y/admin/keyboard-and-focus` — 4 passed (dialog focus trap + focus return)
+  - `a11y/public/public-pages-a11y` — 13 passed (WCAG 2.1 AA, learner-facing pages)
   - `admin/settings-save` — 1 passed
   - `admin/setup-wizard` — 1 passed
   - `admin/setup-wizard-steps` — 2 passed
@@ -152,6 +155,27 @@ search, settings, setup wizard, tools, REST surface, licence-tier gating, and sm
   - `smoke/admin-dashboard` — 1 passed
   - `smoke/admin-login` — 1 passed
   - `smoke/frontend-home` — 1 passed
+
+## Accessibility
+
+Three gates, described in full in [ACCESSIBILITY.md](ACCESSIBILITY.md):
+
+- the two axe-core specs above, scanning **only** Sikshya's own markup over 43
+  admin screens and 13 learner pages, at WCAG 2.1 AA;
+- `npm run a11y:labels`, a static check for `<label>`s that name no control —
+  it found 36 where the browser gate saw 2, because a scan only ever sees a
+  screen's landing state;
+- the keyboard spec, which covers what no scan can: that Tab stays inside an
+  open dialog and that closing one returns focus to the control that opened it.
+
+Both axe specs were mutation-tested in this repo: reverting one colour fix and
+removing one `aria-label` each turned the relevant test red, and removing the
+focus trap turned the keyboard spec red.
+
+What is **not** covered is listed under *Not yet evaluated* in
+[ACCESSIBILITY.md](ACCESSIBILITY.md) — most importantly, no screen reader has
+been used, and the course builder's drag-and-drop curriculum has no keyboard
+test.
 
 ## Not covered by a browser test
 

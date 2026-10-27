@@ -208,8 +208,8 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                             <a href="<?php echo esc_url($course_url); ?>"><?php echo esc_html($brow->getTitle()); ?></a>
                                         </h2>
                                         <?php if ($enrolled) : ?>
-                                            <div class="sikshya-learnHubCard__progress" aria-label="<?php echo esc_attr__('Progress', 'sikshya'); ?>">
-                                                <div class="sikshya-learnHubCard__bar" role="progressbar" aria-valuenow="<?php echo esc_attr((string) $progress); ?>" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="sikshya-learnHubCard__progress">
+                                                <div class="sikshya-learnHubCard__bar" role="progressbar" aria-label="<?php echo esc_attr__('Course progress', 'sikshya'); ?>" aria-valuenow="<?php echo esc_attr((string) $progress); ?>" aria-valuemin="0" aria-valuemax="100">
                                                     <span style="<?php echo esc_attr('width:' . $progress . '%'); ?>"></span>
                                                 </div>
                                                 <span class="sikshya-learnHubCard__pct"><?php echo esc_html($progress . '%'); ?></span>
@@ -308,8 +308,8 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                             <h2 class="sikshya-learnHubCard__title">
                                                 <a href="<?php echo esc_url($hcourse_url); ?>"><?php echo esc_html($brow->getTitle()); ?></a>
                                             </h2>
-                                            <div class="sikshya-learnHubCard__progress" aria-label="<?php echo esc_attr__('Progress', 'sikshya'); ?>">
-                                                <div class="sikshya-learnHubCard__bar" role="progressbar" aria-valuenow="<?php echo esc_attr((string) $hprogress); ?>" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="sikshya-learnHubCard__progress">
+                                                <div class="sikshya-learnHubCard__bar" role="progressbar" aria-label="<?php echo esc_attr__('Course progress', 'sikshya'); ?>" aria-valuenow="<?php echo esc_attr((string) $hprogress); ?>" aria-valuemin="0" aria-valuemax="100">
                                                     <span style="<?php echo esc_attr('width:' . $hprogress . '%'); ?>"></span>
                                                 </div>
                                                 <span class="sikshya-learnHubCard__pct"><?php echo esc_html($hprogress . '%'); ?></span>

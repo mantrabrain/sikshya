@@ -662,6 +662,16 @@ jobs:
           }
           echo "No TypeScript errors found" > typescript-errors.txt
           
+      # A real gate, unlike the two below: it needs no extra tooling and it
+      # catches a defect the browser suite structurally cannot see. The axe
+      # specs only ever scan a screen's landing state, so a field behind a tab,
+      # an accordion or an unopened modal is never looked at — reading the
+      # source found 36 unassociated labels where the browser gate found 2.
+      - name: Accessibility — every <label> names a control
+        id: a11ylabels
+        if: always()
+        run: npm run a11y:labels
+
       # ESLint / Prettier are optional style gates. The `lint` and
       # `format:check` npm scripts reference `eslint` and `prettier`
       # binaries, but neither package is declared in devDependencies

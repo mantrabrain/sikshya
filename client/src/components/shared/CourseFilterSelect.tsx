@@ -314,7 +314,14 @@ export function CourseFilterSelect(props: {
           id={triggerId}
           type="button"
           disabled={disabled}
-          aria-labelledby={`${triggerId}-label`}
+          /*
+           * Label *and* value, like a native `<select>`. Pointing only at the
+           * label made the button announce "Course" while the screen showed
+           * "All courses" — WCAG 2.5.3 Label in Name — and left the current
+           * selection unannounced, which is the thing a person most needs to
+           * know before changing it.
+           */
+          aria-labelledby={`${triggerId}-label ${triggerId}-value`}
           aria-describedby={hintForA11y ? hintDescId : undefined}
           aria-haspopup="listbox"
           aria-expanded={open}
@@ -328,7 +335,7 @@ export function CourseFilterSelect(props: {
             labelSrOnly ? 'min-w-[12rem] sm:min-w-[14rem]' : ''
           }`}
         >
-          <span className="min-w-0 flex-1 truncate">{disabled ? '…' : displayLabel}</span>
+          <span id={`${triggerId}-value`} className="min-w-0 flex-1 truncate">{disabled ? '…' : displayLabel}</span>
           <span className="shrink-0 text-xs text-slate-400" aria-hidden>
             ▾
           </span>

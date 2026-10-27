@@ -190,7 +190,9 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
               placeholder={__('e.g. Post-enrollment tips', 'sikshya')}
             />
           </label>
-          <label className="block">
+          {/* `QuillField` renders its own label, so this wrapper named nothing
+              and only made every click inside the editor a click on a label. */}
+          <div className="block">
             <QuillField
               label={__('Description', 'sikshya')}
               value={description}
@@ -199,7 +201,7 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
               placeholder={__('Short note for admins: when this email should be used', 'sikshya')}
               minHeightPx={96}
             />
-          </label>
+          </div>
           <div>
             <span className={LB}>{__('Trigger Event', 'sikshya')}</span>
             {editing.template_type === 'system' ? (
@@ -410,7 +412,7 @@ export function EmailTemplateCreateForm(props: CreateProps) {
               placeholder={__('e.g. Re-engagement after enrollment', 'sikshya')}
             />
           </label>
-          <label className="block">
+          <div className="block">
             <QuillField
               label={__('Description', 'sikshya')}
               value={description}
@@ -418,7 +420,7 @@ export function EmailTemplateCreateForm(props: CreateProps) {
               placeholder={__('When to send this template (internal note)', 'sikshya')}
               minHeightPx={160}
             />
-          </label>
+          </div>
           <div>
             <span className={LB}>{__('Trigger Event', 'sikshya')}</span>
             <div className="mt-1.5">

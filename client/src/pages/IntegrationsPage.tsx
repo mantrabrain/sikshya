@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useId, useMemo, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { AddonEnablePanel } from '../components/AddonEnablePanel';
@@ -176,6 +176,8 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   const { config, title, embedded } = props;
   const lic = getLicensing(config);
   const dialog = useSikshyaDialog();
+  // Base for this screen's form-field ids, so every label can point at its control.
+  const fieldId = useId();
 
   const whFeature = isFeatureEnabled(config, 'webhooks') || isFeatureEnabled(config, 'zapier');
   const keyFeature = isFeatureEnabled(config, 'public_api_keys');
@@ -525,10 +527,11 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
               <>
                 <form onSubmit={addWebhook} className="mt-5 space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <label htmlFor={`${fieldId}-wh-event`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">
                       When should we notify your URL?
                     </label>
                     <select
+                      id={`${fieldId}-wh-event`}
                       value={whEvent}
                       onChange={(e) => setWhEvent(e.target.value)}
                       className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
@@ -542,10 +545,11 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{selectedEventHelp}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <label htmlFor={`${fieldId}-wh-url`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">
                       Webhook URL (HTTPS recommended)
                     </label>
                     <input
+                      id={`${fieldId}-wh-url`}
                       type="url"
                       value={whUrl}
                       onChange={(e) => setWhUrl(e.target.value)}
@@ -558,10 +562,11 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <label htmlFor={`${fieldId}-wh-secret`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">
                       Signing secret <span className="font-normal text-slate-500">(optional)</span>
                     </label>
                     <input
+                      id={`${fieldId}-wh-secret`}
                       type="password"
                       autoComplete="new-password"
                       value={whSecret}
@@ -760,10 +765,11 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
                 <form onSubmit={createKey} className="mt-5 space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <label htmlFor={`${fieldId}-key-label`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">
                       Friendly name
                     </label>
                     <input
+                      id={`${fieldId}-key-label`}
                       value={keyLabel}
                       onChange={(e) => setKeyLabel(e.target.value)}
                       placeholder={__('e.g. Zapier read-only', 'sikshya')}
@@ -771,8 +777,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Scopes', 'sikshya')}</label>
-                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {/* A `<label>` can name one control, not a set of them: this is a group. */}
+                    <p id={`${fieldId}-key-scopes`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Scopes', 'sikshya')}</p>
+                    <div role="group" aria-labelledby={`${fieldId}-key-scopes`} className="mt-2 grid gap-2 sm:grid-cols-2">
                       {API_SCOPES.map((s) => {
                         const checked = keyScopes.includes(s.value);
                         return (
@@ -799,8 +806,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Expiry (days)', 'sikshya')}</label>
+                    <label htmlFor={`${fieldId}-key-expiry`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Expiry (days)', 'sikshya')}</label>
                     <input
+                      id={`${fieldId}-key-expiry`}
                       type="number"
                       min={1}
                       max={3650}
@@ -930,8 +938,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
                       <form onSubmit={createApp} className="p-4 space-y-3">
                         <div>
-                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('App name', 'sikshya')}</label>
+                          <label htmlFor={`${fieldId}-app-name`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('App name', 'sikshya')}</label>
                           <input
+                            id={`${fieldId}-app-name`}
                             value={appName}
                             onChange={(e) => setAppName(e.target.value)}
                             placeholder={__('e.g. Mobile app', 'sikshya')}
@@ -939,8 +948,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Redirect URL', 'sikshya')}</label>
+                          <label htmlFor={`${fieldId}-app-redirect`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Redirect URL', 'sikshya')}</label>
                           <input
+                            id={`${fieldId}-app-redirect`}
                             value={appRedirect}
                             onChange={(e) => setAppRedirect(e.target.value)}
                             placeholder="https://yourapp.com/oauth/callback"
@@ -948,8 +958,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Scopes', 'sikshya')}</label>
-                          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          {/* A `<label>` can name one control, not a set of them: this is a group. */}
+                          <p id={`${fieldId}-app-scopes`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Scopes', 'sikshya')}</p>
+                          <div role="group" aria-labelledby={`${fieldId}-app-scopes`} className="mt-2 grid gap-2 sm:grid-cols-2">
                             {API_SCOPES.map((s) => {
                               const checked = appScopes.includes(s.value);
                               return (

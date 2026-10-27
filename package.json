@@ -14,6 +14,7 @@
     "i18n": "npm run makepot",
     "i18n:check": "node scripts/extract-admin-js-pot.mjs && node scripts/check-react-i18n-extraction.mjs",
     "type-check": "tsc",
+    "a11y:labels": "node scripts/check-a11y-form-labels.mjs",
     "lint": "eslint .",
     "format:check": "prettier -c \"**/*.{js,ts,tsx}\"",
     "test:e2e": "playwright test",
@@ -23,25 +24,26 @@
     "test:e2e:activate-pro": "tsx e2e/scripts/activate-pro.ts"
   },
   "dependencies": {
-    "@wordpress/i18n": "^6.19.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@wordpress/i18n": "^6.19.0",
     "quill": "^2.0.3",
     "react": "^18.3.1",
     "react-datepicker": "^9.1.0",
-    "react-quill": "^2.0.0",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-quill": "^2.0.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@babel/cli": "^7.28.3",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.29.2",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
+    "@playwright/test": "^1.50.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@playwright/test": "^1.50.0",
     "@vitejs/plugin-react": "^4.3.3",
     "@wordpress/babel-plugin-makepot": "^6.41.0",
     "autoprefixer": "^10.4.20",

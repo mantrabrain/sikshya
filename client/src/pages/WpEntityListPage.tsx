@@ -194,7 +194,11 @@ export function WpEntityListPage(props: {
                   ) : null}
                   {/* SECURITY: never dangerouslySetInnerHTML on `title.rendered` —
                       see wpTitle.ts for the XSS chain. */}
-                  <span>{decodeWpTitle(r.title.rendered)}</span>
+                  {/* A draft saved without a title rendered an empty link: nothing
+                      to read, nothing to click, and no way for a screen reader to
+                      tell one such row from the next. WordPress's own list tables
+                      say "(no title)" here, so we do too. */}
+                  <span>{decodeWpTitle(r.title.rendered).trim() || __('(no title)', 'sikshya')}</span>
                 </span>
               </a>
               {isCertificateList && orient ? (

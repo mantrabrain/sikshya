@@ -1038,7 +1038,20 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                   </div>
 
                   {enterpriseDash?.schedules?.length ? (
-                    <div className="mt-4 overflow-auto rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950">
+                    <div
+                      /*
+                       * A table wider than its box can only be reached by
+                       * dragging unless the box itself can take focus, which
+                       * leaves it unusable from the keyboard and unreadable to
+                       * anyone who cannot use a trackpad. `tabIndex` puts it in
+                       * the tab order so the arrow keys scroll it, and a region
+                       * needs a name to be worth landing on.
+                       */
+                      role="region"
+                      aria-label={__('Report schedules', 'sikshya')}
+                      tabIndex={0}
+                      className="mt-4 overflow-auto rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950"
+                    >
                       <table className="min-w-[980px] w-full border-collapse text-sm">
                         <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
                           <tr>
@@ -1088,7 +1101,12 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         Recent runs
                       </h4>
-                      <div className="mt-2 overflow-auto rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950">
+                      <div
+                        role="region"
+                        aria-label={__('Recent report runs', 'sikshya')}
+                        tabIndex={0}
+                        className="mt-2 overflow-auto rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950"
+                      >
                         <table className="min-w-[980px] w-full border-collapse text-sm">
                           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
                             <tr>

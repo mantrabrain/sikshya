@@ -12,6 +12,9 @@ This document defines the **Free** tier scope for Sikshya LMS (WordPress). It is
 - **No-addon maze**: Free should feel complete; Pro unlocks scaling.
 - **Performance-first**: pages and admin screens remain fast on shared hosting.
 - **Trust by default**: secure checkout, reliable enrollment, resilient email delivery.
+- **Usable without sight or a mouse**: WCAG 2.1 AA is a gate in the test suite, not an
+  aspiration — see [ACCESSIBILITY.md](../ACCESSIBILITY.md), which is equally explicit about
+  what has not been evaluated.
 
 ---
 

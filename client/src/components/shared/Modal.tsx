@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { OVERLAY_Z_MODAL } from '../../lib/overlayLayers';
 import { __ } from '../../lib/i18n';
+import { focusReturner, focusStops, trapTab } from '../../lib/focusTrap';
 
 type Props = {
   open: boolean;
@@ -44,15 +45,21 @@ export function Modal({ open, title, description, onClose, children, footer, siz
     modalEscapeStack.push(entry);
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') {
+      if (e.key !== 'Escape' && e.key !== 'Tab') {
         return;
       }
       const top = modalEscapeStack[modalEscapeStack.length - 1];
       if (!top || top.id !== id) {
         return;
       }
-      e.preventDefault();
-      top.close();
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        top.close();
+        return;
+      }
+
+      trapTab(panelRef.current, e);
     };
     document.addEventListener('keydown', onKey);
 
@@ -73,10 +80,24 @@ export function Modal({ open, title, description, onClose, children, footer, siz
     if (!open || !panelRef.current) {
       return;
     }
-    const focusable = panelRef.current.querySelector<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    focusable?.focus();
+
+    const panel = panelRef.current;
+    // Captured before focus moves into the dialog, so closing can give it back.
+    const restoreFocus = focusReturner();
+
+    /*
+     * Only reach for the first control if the content has not already chosen
+     * where to start. A form's own first field is a better landing place than
+     * this shell's close button, and the content's effects run before ours —
+     * so unconditionally focusing here undid a deliberate choice made one
+     * level down.
+     */
+    const active = document.activeElement as HTMLElement | null;
+    if (!active || !panel.contains(active)) {
+      focusStops(panel)[0]?.focus();
+    }
+
+    return restoreFocus;
   }, [open]);
 
   if (!open || typeof document === 'undefined') {

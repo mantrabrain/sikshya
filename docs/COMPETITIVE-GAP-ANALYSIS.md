@@ -86,7 +86,7 @@ more than a quarter of protocol work.
 | Gap | Who has it | Our status | Why it matters |
 |---|---|---|---|
 | **xAPI / LRS, and cmi5** | Nobody natively. MasterStudy points customers at third-party Grassblade | **None** (0 files). SCORM + H5P only | Named in nearly every checklist alongside SCORM. The only remaining *standards* gap, and the one place we could be the only WP LMS that answers it natively |
-| **WCAG 2.1/2.2 AA + VPAT / OpenACR** | Nobody publishes one | A11y work shipped; **no audit, no VPAT** | Public sector and universities are procedurally barred from buying without it. Long lead time — start before it is asked for |
+| **WCAG 2.1/2.2 AA + VPAT / OpenACR** | Nobody publishes one | **Gated 2026-10-27.** axe-core WCAG 2.1 AA gates over 43 admin screens + 13 learner pages, a static label gate, a dialog focus-trap spec, 14 defect classes fixed, and a **draft** conformance report (`docs/ACCESSIBILITY-CONFORMANCE-REPORT.md`). **Still no screen-reader pass, so no signed VPAT** | Public sector and universities are procedurally barred from buying without it. Long lead time — start before it is asked for |
 | **IdP → LMS semantics bridge** | Nobody | **Documented and tested 2026-10-27** — `docs/ENTERPRISE-IDENTITY.md`, with the new-hire-inherits-training path covered end to end. Departure now releases the group seat, closes open enrolments, and stops counting the person against compliance. Still not automatic: group membership by role |
 | **Identity audit trail** | Nobody | **Shipped 2026-10-27**: account created / role changed / account removed, each carrying the identity and the actor, plus opt-in sign-ins. Sign-in *method* is still unknowable without the identity plugin declaring it |
 
@@ -147,8 +147,13 @@ missing checkbox everyone else ticks loses the comparison before our strengths a
    their group **seat** for ever, and a departed employee counted against **compliance** for ever.
    What is still manual is group membership by role — SCIM says nothing about which group a seat
    comes from, and inventing a rule would be guessing.
-3. **Accessibility programme.** axe-core gate per template, manual keyboard and screen-reader pass,
-   remediation, published VPAT. Start now; it cannot be compressed.
+3. ~~**Accessibility programme.** axe-core gate per template, manual keyboard and screen-reader pass,
+   remediation, published VPAT. Start now; it cannot be compressed.~~ **Half done, 2026-10-27.** The
+   automatable half is in and enforced: gates on 56 pages, a static label check that found 36 fields
+   the scan could not reach, dialog focus behaviour under test, and every defect found fixed. The
+   half that cannot be automated is still open — no screen reader has been used, the course builder's
+   drag-and-drop curriculum has no keyboard test, and reflow/zoom is untested — so the report is a
+   draft, not a VPAT. See `docs/ACCESSIBILITY.md`.
 4. **xAPI/LRS, then cmi5.** The one standards gap, and a genuine first in this market.
 5. **Migration importers**, starting with Tutor and LearnDash by install base. Pure acquisition.
 6. **WooCommerce bridge.** Adoption, not capability.

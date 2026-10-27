@@ -20,9 +20,15 @@
   /* Utility “secondary” (amber) — featured badges, highlights. */
   --sikshya-secondary: #f59e0b;
   --sikshya-secondary-dark: #d97706;
-  --sikshya-success: #10b981;
-  --sikshya-warning: #f59e0b;
-  --sikshya-error: #ef4444;
+  /* Status colours carry text *and* get used as badge fills, so each one has
+   * to clear 4.5:1 against white in both directions. The previous set did not:
+   * #ef4444 measured 3.76:1, #10b981 2.4:1 and #f59e0b 2.15:1, which made a
+   * "Remove" link hard to read and the sale / featured badges' white text
+   * close to unreadable. These are the darkest step that keeps each hue
+   * recognisable while passing. */
+  --sikshya-success: #047857;
+  --sikshya-warning: #b45309;
+  --sikshya-error: #dc2626;
   /* `info` aliased to brand navy so any consumer of the token stays on-brand.
    * Previously `#3b82f6` (Tailwind blue-500), an off-brand colour. Today
    * no CSS reads `var(--sikshya-info)` — keep the token defined so the set

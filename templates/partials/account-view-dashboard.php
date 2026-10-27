@@ -191,7 +191,7 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                             <p class="sik-acc-dash-card__desc"><?php esc_html_e('See limits, usage, and which quizzes you have opened.', 'sikshya'); ?></p>
                             <span class="sik-acc-dash-card__cta"><?php esc_html_e('Open', 'sikshya'); ?><span aria-hidden="true"> →</span></span>
                         </a>
-                        <a class="sik-acc-dash-card" href="<?php echo esc_url($page_model->getUrls()->getLearnHubUrl()); ?>" role="listitem">
+                        <a class="sik-acc-dash-card" href="<?php echo esc_url($page_model->getUrls()->getLearnHubUrl()); ?>">
                             <div class="sik-acc-dash-card__top">
                                 <span class="sik-acc-dash-card__icon sik-acc-dash-card__icon--violet" aria-hidden="true">▶</span>
                             </div>

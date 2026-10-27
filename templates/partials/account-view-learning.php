@@ -81,6 +81,7 @@ $resume_card = $page_model->getResumeCard();
                         <?php endif; ?>
                         <?php if ($resume_total > 0) : ?>
                             <div class="sik-acc-resume__progress" role="progressbar"
+                                 aria-label="<?php esc_attr_e('Course progress', 'sikshya'); ?>"
                                  aria-valuemin="0" aria-valuemax="100" aria-valuenow="<?php echo esc_attr((string) $resume_pct); ?>">
                                 <div class="sik-acc-resume__progress-bar">
                                     <span class="sik-acc-resume__progress-fill" style="width: <?php echo esc_attr((string) $resume_pct); ?>%"></span>

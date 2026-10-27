@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useId, useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
@@ -179,6 +179,8 @@ export function GradebookPage(props: {
   uiMode?: 'default' | 'submissions';
 }) {
   const { config, title, uiMode = 'default' } = props;
+  // Base for this component's form-field ids, so every label can point at its control.
+  const a11yId = useId();
   const featureOk = isFeatureEnabled(config, 'gradebook');
   const addon = useAddonEnabled('gradebook');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
@@ -1353,8 +1355,9 @@ export function GradebookPage(props: {
                         </div>
                       ) : null}
                       <div>
-                        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Grade (%)</label>
+                        <label htmlFor={`${a11yId}-grade`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">Grade (%)</label>
                         <input
+                          id={`${a11yId}-grade`}
                           className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                           value={gradeInput}
                           onChange={(e) => setGradeInput(e.target.value)}
@@ -1394,8 +1397,9 @@ export function GradebookPage(props: {
                         </div>
                       ) : null}
                       <div className="sm:col-span-2">
-                        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Feedback', 'sikshya')}</label>
+                        <label htmlFor={`${a11yId}-feedback`} className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Feedback', 'sikshya')}</label>
                         <textarea
+                          id={`${a11yId}-feedback`}
                           className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                           rows={6}
                           value={feedbackInput}

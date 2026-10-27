@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../../api';
 import { ButtonPrimary, ButtonSecondary } from './buttons';
 import { FieldHint } from './FieldHint';
@@ -223,6 +223,8 @@ export function MultiCoursePicker({
   const padY = density === 'compact' ? 'py-2' : 'py-3';
   const showChips = selected.length > 0 && max !== 1;
 
+  const triggerId = useId();
+
   return (
     <div className={`space-y-2 ${className}`.trim()}>
       <button
@@ -234,12 +236,25 @@ export function MultiCoursePicker({
             ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400'
             : 'border-slate-200 bg-white text-slate-900 hover:border-brand-300 dark:border-slate-700 dark:bg-slate-950 dark:text-white'
         }`}
-        aria-label={title}
+        /*
+         * Named by the purpose *and* the current value, in that order, the way
+         * a native `<select>` is announced. `aria-label={title}` alone replaced
+         * the visible value with a phrase that is not on screen, which fails
+         * WCAG 2.5.3 Label in Name: the button read "Select a course" while
+         * showing the course already chosen, so a screen-reader user could not
+         * hear what the field was set to.
+         */
+        aria-labelledby={`${triggerId}-label ${triggerId}-value`}
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
-        <span className={`min-w-0 truncate ${selected.length === 0 ? 'text-slate-500 dark:text-slate-400' : ''}`}>
+        <span id={`${triggerId}-label`} className="sr-only">
+          {title}
+        </span>
+        <span id={`${triggerId}-value`} className={`min-w-0 truncate ${selected.length === 0 ? 'text-slate-500 dark:text-slate-400' : ''}`}>
           {fieldSummary}
         </span>
-        <span className="text-xs text-slate-400">▾</span>
+        <span className="text-xs text-slate-400" aria-hidden>▾</span>
       </button>
 
       {reserveHintSpace || (hint !== undefined && hint !== '') ? <FieldHint>{hint}</FieldHint> : null}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { __, sprintf } from '../../lib/i18n';
 
 export type DynamicCheckoutFieldType =
@@ -86,6 +86,8 @@ export function DynamicFieldsBuilder(props: {
   readOnly?: boolean;
 }) {
   const { value, onChange, readOnly } = props;
+  // Base for this component's form-field ids, so every label can point at its control.
+  const a11yId = useId();
   const schema = useMemo(() => safeJsonParseArray(value), [value]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [rawError, setRawError] = useState<string>('');
@@ -250,8 +252,9 @@ export function DynamicFieldsBuilder(props: {
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950/30">
           <div className="grid gap-3 lg:grid-cols-2">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Label', 'sikshya')}</label>
+              <label htmlFor={`${a11yId}-label`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Label', 'sikshya')}</label>
               <input
+                id={`${a11yId}-label`}
                 className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={newField.label || ''}
                 disabled={!!readOnly}
@@ -269,8 +272,9 @@ export function DynamicFieldsBuilder(props: {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('ID', 'sikshya')}</label>
+              <label htmlFor={`${a11yId}-id`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('ID', 'sikshya')}</label>
               <input
+                id={`${a11yId}-id`}
                 className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={newField.id || ''}
                 disabled={!!readOnly}
@@ -285,8 +289,9 @@ export function DynamicFieldsBuilder(props: {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Type', 'sikshya')}</label>
+              <label htmlFor={`${a11yId}-type`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Type', 'sikshya')}</label>
               <select
+                id={`${a11yId}-type`}
                 className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={newField.type}
                 disabled={!!readOnly}
@@ -302,8 +307,9 @@ export function DynamicFieldsBuilder(props: {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Placeholder', 'sikshya')}</label>
+              <label htmlFor={`${a11yId}-placeholder`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Placeholder', 'sikshya')}</label>
               <input
+                id={`${a11yId}-placeholder`}
                 className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={newField.placeholder || ''}
                 disabled={!!readOnly}
@@ -525,8 +531,9 @@ export function DynamicFieldsBuilder(props: {
 
               <div className="grid gap-3 lg:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('ID', 'sikshya')}</label>
+                  <label htmlFor={`${a11yId}-id-2`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('ID', 'sikshya')}</label>
                   <input
+                    id={`${a11yId}-id-2`}
                     className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={active.id}
                     disabled={!!readOnly}
@@ -539,8 +546,9 @@ export function DynamicFieldsBuilder(props: {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Label', 'sikshya')}</label>
+                  <label htmlFor={`${a11yId}-label-2`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Label', 'sikshya')}</label>
                   <input
+                    id={`${a11yId}-label-2`}
                     className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={active.label || ''}
                     disabled={!!readOnly}
@@ -550,8 +558,9 @@ export function DynamicFieldsBuilder(props: {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Placeholder', 'sikshya')}</label>
+                  <label htmlFor={`${a11yId}-placeholder-2`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Placeholder', 'sikshya')}</label>
                   <input
+                    id={`${a11yId}-placeholder-2`}
                     className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={active.placeholder || ''}
                     disabled={
@@ -572,8 +581,9 @@ export function DynamicFieldsBuilder(props: {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Type', 'sikshya')}</label>
+                  <label htmlFor={`${a11yId}-type-2`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Type', 'sikshya')}</label>
                   <select
+                    id={`${a11yId}-type-2`}
                     className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={active.type}
                     disabled={!!readOnly}
@@ -614,8 +624,9 @@ export function DynamicFieldsBuilder(props: {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Help text', 'sikshya')}</label>
+                <label htmlFor={`${a11yId}-help`} className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Help text', 'sikshya')}</label>
                 <textarea
+                  id={`${a11yId}-help`}
                   className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   rows={2}
                   value={active.help || ''}
@@ -668,10 +679,11 @@ export function DynamicFieldsBuilder(props: {
                 <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Visibility (optional)', 'sikshya')}</div>
                 <div className="mt-2 grid gap-3 lg:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    <label htmlFor={`${a11yId}-depends-on-field`} className="block text-xs font-semibold text-slate-600 dark:text-slate-300">
                       {__('Depends on field ID', 'sikshya')}
                     </label>
                     <input
+                      id={`${a11yId}-depends-on-field`}
                       className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       value={active.visibility?.depends_on || ''}
                       disabled={!!readOnly}
@@ -684,10 +696,11 @@ export function DynamicFieldsBuilder(props: {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    <label htmlFor={`${a11yId}-show-when-value`} className="block text-xs font-semibold text-slate-600 dark:text-slate-300">
                       {__('Show when value equals', 'sikshya')}
                     </label>
                     <input
+                      id={`${a11yId}-show-when-value`}
                       className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       value={active.visibility?.depends_value || ''}
                       disabled={!!readOnly}

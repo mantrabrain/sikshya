@@ -39,7 +39,10 @@
   --sikshya-learn-surface-2: #f8fafc;
   --sikshya-learn-surface-3: #e8f0fa;
   --sikshya-learn-text: #0f172a;
-  --sikshya-learn-muted: #64748b;
+  /* slate-600. slate-500 (#64748b) measured 4.11:1 on the curriculum
+   * outline's tinted rows and 4.46:1 on the inactive content tabs, both
+   * under the 4.5:1 these text sizes require. */
+  --sikshya-learn-muted: #475569;
   --sikshya-learn-border: #e2e8f0;
   /* Top bar — light surface (matches panels + public Sikshya aesthetic) */
   --sikshya-learn-topbar-bg: rgba(44, 91, 168, 0.08);
