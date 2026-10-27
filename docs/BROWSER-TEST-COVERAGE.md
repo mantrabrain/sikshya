@@ -88,6 +88,7 @@ browser and a real server — re-verify only if you changed that area.
 | `multi_instructor` | covered | 2 | `pro/addon-multi-instructor-flow`, `pro/addon-multi-instructor-staff` |
 | `reports_advanced` | covered | 2 | `pro/addon-reports-advanced-export`, `pro/addon-reports-advanced-flow` |
 | `gradebook` | covered | 2 | `pro/addon-gradebook-grading`, `pro/addon-gradebook-grid-flow` |
+| `ai_authoring` | covered | 3 | `admin/ai-studio-admin-ui` — the provider call is stubbed at the browser boundary (a real generation costs money and returns different words each run; the provider contract is pinned by `AiAuthoringGenerationTest`), but the apply calls are real and the result is read back from the curriculum API |
 | `cohorts` | covered | 3 | `admin/cohorts-admin-ui`, `pro/addon-cohorts-drip-anchor` |
 | `activity_log` | covered | 2 | `pro/addon-activity-log-flow`, `pro/addon-activity-log-recording` |
 | `certificates_advanced` | covered | 2 | `pro/addon-certificates-advanced-flow`, `pro/addon-certificates-advanced-public` |
@@ -134,7 +135,8 @@ search, settings, setup wizard, tools, REST surface, licence-tier gating, and sm
   - `admin/health-endpoint` — 1 passed
   - `admin/react-subroutes` — 39 passed
   - `admin/rest-api` — 2 passed
-  - `admin/screen-health-sweep` — 42 passed
+  - `admin/ai-studio-admin-ui` — 3 passed
+  - `admin/screen-health-sweep` — 43 passed
   - `admin/settings-save` — 1 passed
   - `admin/setup-wizard` — 1 passed
   - `admin/setup-wizard-steps` — 2 passed

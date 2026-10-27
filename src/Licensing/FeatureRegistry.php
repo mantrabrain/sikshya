@@ -141,6 +141,19 @@ final class FeatureRegistry
                 'description' => __('Elementor / block widgets where implemented.', 'sikshya'),
             ],
             // —— STARTER (EDD “Starter” yearly / lifetime) ——
+            'ai_authoring' => [
+                'label' => __('AI course authoring', 'sikshya'),
+                'tier' => 'starter',
+                'group' => 'course',
+                'description' => __(
+                    "Drafts a course outline, writes a lesson, or writes quiz questions with your own AI provider key, and shows you the draft before anything is created.\n\nTurn on to get past the blank page—an outline you can rearrange beats staring at an empty curriculum.\n\nTurn off if you do not want your course material sent to an AI provider, or you would rather not hold an API key.",
+                    'sikshya'
+                ),
+                'detail_description' => __(
+                    "What you get: An AI studio screen with three tools. Outline takes a topic and gives you chapters and lesson titles you can edit, reorder, and then create in a course in one step. Lesson writes the body of a single lesson, which you read and save onto that lesson. Quiz writes multiple-choice, true/false, and short-answer questions with explanations, and creates them as a real quiz in a chapter.\n\nNothing is written to your course until you press the button on a draft you have read. You bring your own key from Anthropic or OpenAI, and requests go from your server straight to that provider—never through MantraBrain. A monthly request limit is on by default so a mistake cannot run up a bill.\n\nTurn it on when: You author courses regularly and want a first draft to react to, or you are converting existing material into a curriculum.\n\nTurn it off when: Your content cannot be sent to a third-party provider, or you have no API key. With it off, nothing about authoring changes.\n\nPlan: Starter tier or higher (paid plans).",
+                    'sikshya'
+                ),
+            ],
             'content_drip' => [
                 'label' => __('Content drip & scheduled unlock', 'sikshya'),
                 'tier' => 'starter',

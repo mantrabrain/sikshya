@@ -474,6 +474,7 @@ class Admin
             'groups',
             'cohorts',
             'compliance',
+            'ai-studio',
             'reports',
             'payments',
             'orders',

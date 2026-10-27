@@ -417,6 +417,14 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 
 == Changelog ==
 
+= 1.0.15 - 2026-10-27 =
+**An AI studio for authoring: draft an outline, write a lesson, write quiz questions — with your own provider key, and nothing created until you have read the draft.**
+* **New: Course → AI studio.** Describe what a course should teach and get an outline of chapters and lessons you can rename, reorder and delete before anything exists. Pick a lesson and have its body written. Pick a chapter and have quiz questions written, with explanations learners see after grading. Then press a button to create it — generating and creating are deliberately two steps, so a draft you dislike costs you nothing but a click.
+* **Your key, your data.** Bring an API key from Anthropic or OpenAI. Requests go from your own server straight to that provider: no course material passes through MantraBrain, and nothing leaves your site until you have saved a key. A monthly request limit is set to 200 out of the box so a mistake cannot run up a provider bill, and it is checked before each request, so a refused one is free.
+* Applying an outline creates one chapter at a time with visible progress. If something fails halfway, the chapters already created are real and the rest are still on screen to retry — it never duplicates what already worked.
+* AI authoring is off until you enable the add-on, and inert until a key is saved. Updating from 1.0.14 changes nothing about an existing site.
+* Requires Sikshya Pro 1.0.11 for the generation itself (Starter tier and above). The studio screen lives in the free plugin so the add-on has somewhere to appear.
+
 = 1.0.14 - 2026-10-16 =
 **Groups, cohorts and compliance training get their screens. Tax works, audio lessons are finished, and the session timeout finally measures what it says.**
 * **Groups, cohorts and compliance training had no screens at all.** All three shipped as working APIs with nothing in the admin, so there was no way to sell a seat, run a scheduled intake, or read a compliance report anywhere in WordPress. Each now has a full screen under the Sikshya menu. Cohorts leads with the intake's start date, because drip schedules count from it — everyone in one intake reaches week two on the same day however late they joined — and it warns you when an intake has no date, since an undated intake anchors nothing and ordinary per-learner drip applies instead. Compliance shows "overdue" and "completed late" apart from the headline percentage, because an auditor asking whether training was done *on time* is not answered by a figure that counts a late completion as compliant.

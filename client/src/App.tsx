@@ -22,6 +22,9 @@ const ContentDripPage = lazy(() =>
 const CompliancePage = lazy(() =>
   import('./pages/CompliancePage').then((m) => ({ default: m.CompliancePage }))
 );
+const AiStudioPage = lazy(() =>
+  import('./pages/AiStudioPage').then((m) => ({ default: m.AiStudioPage }))
+);
 const CohortsPage = lazy(() =>
   import('./pages/CohortsPage').then((m) => ({ default: m.CohortsPage }))
 );
@@ -384,6 +387,8 @@ function RoutedApp() {
       );
     case 'compliance':
       return <CompliancePage embedded config={config} title={__('Compliance training', 'sikshya')} />;
+    case 'ai-studio':
+      return <AiStudioPage embedded config={config} title={__('AI studio', 'sikshya')} />;
     case 'cohorts':
       return <CohortsPage embedded config={config} title={__('Cohorts', 'sikshya')} />;
     case 'groups':

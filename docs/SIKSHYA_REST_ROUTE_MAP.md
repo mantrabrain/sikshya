@@ -123,6 +123,13 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | `/pro/bundles/(?P<id>\d+)/purchase-link` | GET | `course_bundles` (same) |
 | `/pro/coupons/(?P<id>\d+)/advanced` | GET, POST | `coupons_advanced` (`SikshyaPro\Addons\CouponsAdvanced\Controllers\CouponsAdvancedRestController` on `rest_api_init` priority 10; body `rules` object for POST) |
 | `/admin/coupons/(?P<id>\d+)` | PATCH | Core admin (`AdminRestRoutes::patchAdminCoupon`) — coupon basics; requires Sikshya admin app permission |
+| `/pro/ai/status` | GET | `ai_authoring` (`SikshyaPro\Addons\AiAuthoring\Rest\AiAuthoringRestController`; reports provider, model, language, question types and monthly usage — never the API key) |
+| `/pro/ai/outline` | POST | `ai_authoring` (body `topic`, `audience`, `chapters`, `lessons_per_chapter`, `notes`; returns a draft, writes nothing) |
+| `/pro/ai/lesson` | POST | `ai_authoring` (body `lesson_id` or `lesson_title`, `context`, `words`; returns `content_html`, writes nothing) |
+| `/pro/ai/quiz` | POST | `ai_authoring` (body `chapter_id` or `source_title`, `source_text`, `question_count`, `types`; returns questions, writes nothing) |
+| `/pro/ai/apply/chapter` | POST | `ai_authoring` (**writes**: one chapter plus its lessons, through `CurriculumService`) |
+| `/pro/ai/apply/lesson` | POST | `ai_authoring` (**writes**: replaces a lesson body) |
+| `/pro/ai/apply/quiz` | POST | `ai_authoring` (**writes**: a quiz plus its questions inside one chapter) |
 | `/scale/vendors` | GET, POST | `marketplace_multivendor` |
 | `/scale/withdrawals` | POST | `marketplace_multivendor` |
 | `/scale/reports/commissions` | GET | `marketplace_multivendor` |
@@ -135,6 +142,8 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 **Course bundles extension (Pro):** My Account strip on `sikshya_account_dashboard_after` (`CourseBundlesAccountPanel` when **Show bundle packs on My Account** is on); filter `sikshya_course_bundles_account_panel_bundles`. Hooks include `sikshya_bundle_pricing_resolved`, `sikshya_course_bundles_after_create`, `sikshya_course_bundles_allow_trash`.
 
 **Advanced coupons extension (Pro):** Global settings via `/pro/addons/coupons_advanced/settings`; storefront hooks on cart, checkout, single course (`sikshya_pro_single_course_price_after`), learn sidebar, account payments. Checkout filters `sikshya_coupon_blocked_message` (5 args), `sikshya_coupon_discount_amount`, `sikshya_coupons_advanced_blocked_message`, `sikshya_coupons_advanced_normalize_save_meta`.
+
+**AI authoring extension (Pro):** generation routes are read-only against the database; the three `/pro/ai/apply/*` routes are the only ones that write, and they are applied one chapter or one quiz at a time so a large outline cannot land in a single request. Any `course_id`, `chapter_id`, `lesson_id` or `quiz_id` in the request is checked with `InstructorPermissions::canEditObject()`, and non-administrators are refused entirely unless **Let instructors generate** is on. Filters: `sikshya_ai_authoring_http_timeout`, `sikshya_ai_authoring_hourly_user_cap`, `sikshya_ai_authoring_provider_client`, `sikshya_ai_authoring_anthropic_endpoint`, `sikshya_ai_authoring_openai_endpoint`, `sikshya_ai_authoring_system_prompt`, `sikshya_ai_authoring_outline_prompt`, `sikshya_ai_authoring_lesson_prompt`, `sikshya_ai_authoring_quiz_prompt`.
 
 **Activity log extension (Pro):** filters `sikshya_activity_log_action_label`, `sikshya_activity_log_allow_insert`, `sikshya_activity_log_scope_course_ids`, `sikshya_activity_log_show_learn_sidebar`; hook `sikshya_activity_log_recorded` after a row is stored. Learn UI: `sikshya_learn_sidebar_footer` (see `ActivityLogLearnTouchpoints`).
 

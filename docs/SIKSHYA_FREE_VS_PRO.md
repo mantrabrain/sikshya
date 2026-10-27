@@ -40,6 +40,9 @@ This document defines what ships in **Sikshya** (WordPress.org / free) versus **
 
 Everything in Free, plus (non-exhaustive; implement incrementally):
 
+- **Authoring:** AI drafting of outlines, lesson bodies and quiz questions (`ai_authoring`). The
+  generation and the provider key live in Pro; the AI studio screen lives in Free, like every
+  other add-on's admin UI.
 - **Automation:** content drip, prerequisites, learning paths, course clone, bundles.
 - **Commerce:** subscriptions, coupons, multiple gateways, invoices, deeper Woo/EDD/PMPro integration.
 - **Assessment:** assignments, question banks, timers, advanced question types, detailed attempt analytics.

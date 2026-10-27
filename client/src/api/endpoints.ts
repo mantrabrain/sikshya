@@ -500,6 +500,20 @@ export const SIKSHYA_ENDPOINTS = {
     publicApiApps: '/scale/public-api/apps',
     publicApiApp: (id: number) => `/scale/public-api/apps/${encodeURIComponent(String(id))}`,
   },
+  /**
+   * AI authoring (Pro `ai_authoring` addon). The generate routes write nothing;
+   * the apply routes are the ones that create content, one chapter or one quiz
+   * at a time so a large outline cannot land in a single request.
+   */
+  ai: {
+    status: '/pro/ai/status',
+    outline: '/pro/ai/outline',
+    lesson: '/pro/ai/lesson',
+    quiz: '/pro/ai/quiz',
+    applyChapter: '/pro/ai/apply/chapter',
+    applyLesson: '/pro/ai/apply/lesson',
+    applyQuiz: '/pro/ai/apply/quiz',
+  },
   curriculum: {
     chapters: '/curriculum/chapters',
     content: '/curriculum/content',

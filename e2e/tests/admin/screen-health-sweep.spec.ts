@@ -30,7 +30,7 @@ const ADMIN_VIEWS = [
   'learning-rules', 'reviews', 'discussions', 'course-team',
   'certificates-hub', 'assignment-submissions', 'grading', 'sales',
   'subscriptions', 'marketplace', 'branding', 'email-hub',
-  'integrations-hub', 'docs', 'groups', 'cohorts', 'compliance',
+  'integrations-hub', 'docs', 'groups', 'cohorts', 'compliance', 'ai-studio',
 ];
 
 /** Text that should never reach a rendered page. */

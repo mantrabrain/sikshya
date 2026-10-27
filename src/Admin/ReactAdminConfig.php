@@ -270,6 +270,14 @@ final class ReactAdminConfig
         }
 
         $course_children[] = self::withNavGate([
+            'id' => 'ai-studio',
+            'label' => __('AI studio', 'sikshya'),
+            'icon' => 'sparkles',
+            'href' => self::reactAppUrl('ai-studio'),
+            'cap' => 'sikshya_staff',
+        ], 'ai_authoring');
+
+        $course_children[] = self::withNavGate([
             'id' => 'course-team',
             'label' => __('Course staff', 'sikshya'),
             'icon' => 'course',

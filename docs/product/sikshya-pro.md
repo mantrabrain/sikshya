@@ -19,6 +19,20 @@ This document defines the **Pro** tier: features that improve outcomes, increase
   - bulk move content between chapters
   - draft/publish workflow improvements
 
+### AI course authoring (`ai_authoring`, Starter and above)
+Drafting help for the blank page, with the customer's own provider key (Anthropic or OpenAI):
+- **Outline** — a topic and audience in, chapters and lesson titles out, editable before anything exists
+- **Lesson body** — written onto a lesson you pick, from notes or a transcript you paste
+- **Quiz questions** — multiple choice, true/false and short answer, with answer keys the grader reads and explanations learners see after grading
+
+Product rules that are not negotiable, because they are the reason to trust it:
+- **Generation writes nothing.** Chapters, lessons and quizzes are created only by a second, explicit action on a draft the author has read and edited.
+- **The key is the customer's.** Requests go from their server to the provider; no course material passes through MantraBrain.
+- **Spending is capped before the call.** A site-wide monthly limit (200 by default) and an hourly per-user limit, both checked before the request, so a refusal is free.
+- **Instructors are off by default**, and when enabled are scoped to courses they may edit.
+
+---
+
 ---
 
 ## 2) Teach (advanced learning & assessment)

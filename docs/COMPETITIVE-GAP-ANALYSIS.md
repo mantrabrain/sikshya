@@ -1,6 +1,7 @@
 # Sikshya vs the market — verified gap analysis
 
-Reviewed **2026-10-27**, against Sikshya 1.0.14 / Pro 1.0.10.
+Reviewed **2026-10-27**, against Sikshya 1.0.14 / Pro 1.0.10, and amended the same day when AI
+authoring shipped (pending 1.0.15 / Pro 1.0.11).
 
 Goal: Sikshya Free + Pro + addons at enterprise grade.
 
@@ -31,6 +32,7 @@ worse than none — it misdirects a roadmap.
 | Payment gateways: "Offline, PayPal, Stripe, Paystack" | **Nine**: offline, bank transfer, PayPal, Stripe, Razorpay, Mollie, Paystack, Square, Authorize.Net. Authorize.Net was listed as a LifterLMS-only gap; we have it, including recurring |
 | Memberships: **None**, "subscriptions only" | **Capability exists.** A plan is attached per course via `_sikshya_required_plan_id`, and `SubscriptionAccessGate` grants every course requiring that plan. What is missing is the *product surface* — no membership level entity, no membership landing page, configured per course instead |
 | Audio lessons: "half-wired" / Tax: "a setting that does nothing" | Both fixed in 1.0.14 |
+| AI authoring: "`docs/AI_ADDON_PREMIUM_UX_IMPLEMENTATION_BLUEPRINT.md` is a plan, not code" | **That file is not an AI-authoring plan.** It is a blueprint *for AI coding agents* about addon gating and premium UX — the three-axis model, `GatedFeatureWorkspace`, the doc→feature matrix. There was no AI-authoring design at all. Corrected here because the earlier wording implied a head start that did not exist |
 
 Gaps confirmed as genuine despite a grep hit, after opening each file: **Divi/WPBakery** (the matches
 are `individual`, `divider`), **PDF lessons** (the one hit serves PDFs from inside a SCORM package),
@@ -94,7 +96,7 @@ This is the list that loses a comparison table, and the first row is now urgent.
 
 | Gap | Who has it | Our status |
 |---|---|---|
-| **AI authoring** | **All three majors.** Tutor "AI Studio" (outline, lesson, quiz, feature image) in every paid tier; LearnDash AI course builder; MasterStudy "AI Lab" builds a course from one prompt | **None** (0 files). `docs/AI_ADDON_PREMIUM_UX_IMPLEMENTATION_BLUEPRINT.md` is a plan, not code. **This has become table stakes, not a differentiator** |
+| **AI authoring** | **All three majors.** Tutor "AI Studio" (outline, lesson, quiz, feature image) in every paid tier; LearnDash AI course builder; MasterStudy "AI Lab" builds a course from one prompt | **Shipped** as `ai_authoring` (Starter and above): outline → chapters and lessons, lesson body, quiz questions with answer keys and explanations, bring-your-own key for Anthropic or OpenAI. Still missing against Tutor: AI feature images, and a content bank to reuse what it writes |
 | **Migration importers** | MasterStudy imports from Tutor, LearnDash, LearnPress, LifterLMS, Masteriyo | **None.** The only grep hit is the word "Masteriyo" in a feature description |
 | **WooCommerce bridge** | LearnDash, LifterLMS, Tutor | **None** (0 files). Native checkout only |
 | **Content bank / shared course steps** | Tutor "Content Bank"; LearnDash shared steps | **None.** A lesson belongs to one course |
@@ -120,6 +122,10 @@ This is the list that loses a comparison table, and the first row is now urgent.
 - **Per-learner signed attachment URLs.** Competitors serve course files from unprotected uploads.
 - **Activity log** — the closest thing in this market to an audit log.
 - **Nine payment gateways**, including Authorize.Net and Square with recurring support.
+- **AI authoring that cannot damage a course.** The three majors generate straight into the
+  curriculum; ours returns an editable draft and applies it only on a second, explicit action. And
+  because the key is the customer's, the AI feature does not break the "your data never leaves your
+  infrastructure" promise the rest of the product makes.
 - **Test depth.** 876 browser tests across Chromium, WebKit and Firefox; Free 147 integration + 27 unit
   + 12 uninstall + 21 migration + 4 multisite; Pro 721 + 9 + 5; green on PHP 7.4 and 8.4.
 
@@ -128,9 +134,12 @@ This is the list that loses a comparison table, and the first row is now urgent.
 Reasoning: close the thing that is now *table stakes* before the things that differentiate, because a
 missing checkbox everyone else ticks loses the comparison before our strengths are read.
 
-1. **AI authoring.** All three majors ship it; we have a blueprint and no code. Biggest single
-   competitive hole, and the cheapest to narrow because the market has settled on the same shape
-   (outline → lesson → quiz, bring your own API key).
+1. ~~**AI authoring.**~~ **Done 2026-10-27**, in the shape the market settled on (outline → lesson →
+   quiz, bring your own API key) plus two things the competitors do not do: generation never writes
+   to a course until a human applies a draft it can edit, and the key is the customer's own, so no
+   course material passes through the vendor. That last point is the data-sovereignty argument
+   applied to AI, and it is worth saying in marketing: Tutor, LearnDash and MasterStudy all route
+   generation through their own service.
 2. **Document and test the IdP → Sikshya recipe** — miniOrange SAML + SCIM, role to compliance audience,
    deprovisioning to enrolment closure. A tested recipe and a page of documentation, not a protocol.
    Then extend `activity_log` to record provisioning and SSO events.
