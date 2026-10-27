@@ -53,6 +53,13 @@ const ACTION_OPTIONS: { value: string; label: string }[] = [
   { value: 'assignment_submitted', label: 'Assignment submitted' },
   { value: 'order_fulfilled', label: 'Order fulfilled' },
   { value: 'certificate_issued', label: 'Certificate issued' },
+  // Account events, not learning events. Grouped last and labelled plainly
+  // because this is the half an auditor comes here for: who was given access,
+  // whose role changed, who was removed.
+  { value: 'user_provisioned', label: 'Account created' },
+  { value: 'user_role_changed', label: 'Role changed' },
+  { value: 'user_deprovisioned', label: 'Account removed' },
+  { value: 'signed_in', label: 'Signed in' },
 ];
 
 export function ActivityLogPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {

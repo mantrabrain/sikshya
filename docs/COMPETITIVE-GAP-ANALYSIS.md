@@ -87,8 +87,8 @@ more than a quarter of protocol work.
 |---|---|---|---|
 | **xAPI / LRS, and cmi5** | Nobody natively. MasterStudy points customers at third-party Grassblade | **None** (0 files). SCORM + H5P only | Named in nearly every checklist alongside SCORM. The only remaining *standards* gap, and the one place we could be the only WP LMS that answers it natively |
 | **WCAG 2.1/2.2 AA + VPAT / OpenACR** | Nobody publishes one | A11y work shipped; **no audit, no VPAT** | Public sector and universities are procedurally barred from buying without it. Long lead time — start before it is asked for |
-| **IdP → LMS semantics bridge** | Nobody | Composable today, **undocumented and untested** | See above. Cheapest credible enterprise win available |
-| **Identity audit trail** | Nobody | `activity_log` exists; does not record provisioning or SSO events | "Show me who was deprovisioned and when" is an audit question we half-answer |
+| **IdP → LMS semantics bridge** | Nobody | **Documented and tested 2026-10-27** — `docs/ENTERPRISE-IDENTITY.md`, with the new-hire-inherits-training path covered end to end. Departure now releases the group seat, closes open enrolments, and stops counting the person against compliance. Still not automatic: group membership by role |
+| **Identity audit trail** | Nobody | **Shipped 2026-10-27**: account created / role changed / account removed, each carrying the identity and the actor, plus opt-in sign-ins. Sign-in *method* is still unknowable without the identity plugin declaring it |
 
 ## Tier 2 — where we are behind the WordPress market
 
@@ -120,7 +120,8 @@ This is the list that loses a comparison table, and the first row is now urgent.
 - **Marketplace / multivendor** with vendor scoping, **white label** with per-course overrides,
   **multisite network licensing**, **multilingual enterprise**.
 - **Per-learner signed attachment URLs.** Competitors serve course files from unprotected uploads.
-- **Activity log** — the closest thing in this market to an audit log.
+- **Activity log** — the closest thing in this market to an audit log, and now the only one that
+  covers the accounts themselves: who was given access, whose role changed, who was removed, by whom.
 - **Nine payment gateways**, including Authorize.Net and Square with recurring support.
 - **AI authoring that cannot damage a course.** The three majors generate straight into the
   curriculum; ours returns an editable draft and applies it only on a second, explicit action. And
@@ -140,9 +141,12 @@ missing checkbox everyone else ticks loses the comparison before our strengths a
    course material passes through the vendor. That last point is the data-sovereignty argument
    applied to AI, and it is worth saying in marketing: Tutor, LearnDash and MasterStudy all route
    generation through their own service.
-2. **Document and test the IdP → Sikshya recipe** — miniOrange SAML + SCIM, role to compliance audience,
-   deprovisioning to enrolment closure. A tested recipe and a page of documentation, not a protocol.
-   Then extend `activity_log` to record provisioning and SSO events.
+2. ~~**Document and test the IdP → Sikshya recipe.**~~ **Done 2026-10-27.** The recipe is
+   `docs/ENTERPRISE-IDENTITY.md`; the audit trail and the departure path are code, not prose. Two
+   things found while doing it, both worse than the missing documentation: a deleted employee kept
+   their group **seat** for ever, and a departed employee counted against **compliance** for ever.
+   What is still manual is group membership by role — SCIM says nothing about which group a seat
+   comes from, and inventing a rule would be guessing.
 3. **Accessibility programme.** axe-core gate per template, manual keyboard and screen-reader pass,
    remediation, published VPAT. Start now; it cannot be compressed.
 4. **xAPI/LRS, then cmi5.** The one standards gap, and a genuine first in this market.

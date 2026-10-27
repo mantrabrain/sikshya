@@ -335,6 +335,12 @@ final class Plugin
         // `sikshya_course_deleted` action lets addons listen for the event.
         \Sikshya\Services\CourseDeleteCascade::init();
 
+        // User deprovisioning — one named event (`sikshya_user_deprovisioned`)
+        // for a person being removed, so open enrolments close, Pro can
+        // release their group seat, and the audit log can record who left and
+        // when. Without it a deleted employee kept their seat forever.
+        \Sikshya\Services\UserDeprovisionService::init();
+
         // Bust the cached single-course student count when enrollments change.
         $invalidateStudentCount = static function ($user_id, $course_id) {
             $cid = (int) $course_id;

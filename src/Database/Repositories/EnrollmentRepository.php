@@ -155,6 +155,43 @@ class EnrollmentRepository implements RepositoryInterface
         );
     }
 
+    /**
+     * Close every open enrolment a user still holds, in one statement.
+     *
+     * Used when a person is deprovisioned (see
+     * {@see \Sikshya\Services\UserDeprovisionService}). Only `enrolled` rows
+     * are touched: a `completed` enrolment is the record that the person did
+     * the training, and an auditor asking "was this course completed before
+     * they left" is answered by that row. Cancelling it would destroy the
+     * answer.
+     *
+     * Nothing is deleted. The row stays, with a status that says what happened.
+     *
+     * @return int Number of enrolments closed.
+     */
+    public function cancelOpenForUser(int $user_id): int
+    {
+        global $wpdb;
+
+        if ($user_id <= 0 || !$this->tableExists()) {
+            return 0;
+        }
+
+        $affected = $wpdb->query(
+            $wpdb->prepare(
+                // `updated_at` carries ON UPDATE CURRENT_TIMESTAMP, so the
+                // column stamps itself; writing it here would use a different
+                // clock from every other write to this table.
+                "UPDATE {$this->table_name}
+                 SET status = 'cancelled'
+                 WHERE user_id = %d AND status = 'enrolled'",
+                $user_id
+            )
+        );
+
+        return is_numeric($affected) ? max(0, (int) $affected) : 0;
+    }
+
     public function update(int $id, array $data): bool
     {
         global $wpdb;
