@@ -33,27 +33,6 @@ if (!defined('ABSPATH')) {
  */
 final class CourseWriter
 {
-    /**
-     * Tutor's question types, and what each becomes here.
-     *
-     * Anything absent from this map is **skipped and counted**, not guessed
-     * at. A matching question flattened into a multiple choice is a question
-     * that marks learners wrong for being right, and a quiz that silently
-     * lost its hardest question is worse than one that says so.
-     *
-     * @var array<string, string>
-     */
-    private const QUESTION_TYPES = [
-        'true_false' => 'true_false',
-        'single_choice' => 'multiple_choice',
-        'multiple_choice' => 'multiple_response',
-        'open_ended' => 'essay',
-        'short_answer' => 'short_answer',
-        'fill_in_the_blank' => 'fill_blank',
-        'ordering' => 'ordering',
-        'matching' => 'matching',
-    ];
-
     private ImportMap $map;
     private string $runId;
     private bool $dryRun;
@@ -101,7 +80,16 @@ final class CourseWriter
                 foreach ((array) ($chapter['contents'] ?? []) as $item) {
                     $this->count((string) ($item['kind'] ?? 'lesson'));
                     foreach ((array) ($item['questions'] ?? []) as $question) {
-                        $this->countQuestion((string) ($question['type'] ?? ''), (int) ($question['id'] ?? 0));
+                        $type = (string) ($question['type'] ?? '');
+                        $supported = QuestionTypes::isSupported($type);
+                        if ($supported) {
+                            $this->count('question');
+                        }
+                        $this->countQuestion(
+                            (string) ($question['source_type'] ?? $type),
+                            (int) ($question['id'] ?? 0),
+                            $supported
+                        );
                     }
                 }
             }
@@ -303,23 +291,29 @@ final class CourseWriter
     }
 
     /**
+     * Write one question that a source has already translated.
+     *
+     * The source speaks its own dialect and hands over a Sikshya type — or an
+     * empty one, meaning "there is no honest equivalent". That seam is why
+     * adding a second LMS is a reader class rather than a second importer.
+     *
      * @param array<string, mixed> $question
      */
     private function writeQuestion(array $question): int
     {
-        $sourceType = (string) ($question['type'] ?? '');
+        $type = (string) ($question['type'] ?? '');
+        $sourceType = (string) ($question['source_type'] ?? $type);
         $sourceId = (int) ($question['id'] ?? 0);
 
-        $type = self::QUESTION_TYPES[$sourceType] ?? '';
-        if ($type === '') {
-            $this->countQuestion($sourceType, $sourceId);
+        if (!QuestionTypes::isSupported($type)) {
+            $this->countQuestion($sourceType, $sourceId, false);
 
             return 0;
         }
 
         $options = [];
         $correct = [];
-        foreach ((array) ($question['options'] ?? []) as $index => $option) {
+        foreach (array_values((array) ($question['options'] ?? [])) as $index => $option) {
             if (!is_array($option)) {
                 continue;
             }
@@ -327,6 +321,20 @@ final class CourseWriter
             if (!empty($option['is_correct'])) {
                 $correct[] = (int) $index;
             }
+        }
+
+        $answers = array_values(array_filter(
+            array_map('strval', (array) ($question['answers'] ?? [])),
+            static fn($a) => trim($a) !== ''
+        ));
+
+        if (QuestionTypes::isTextAnswer($type) && $answers === []) {
+            // A short answer with no accepted answers can never be marked
+            // right, so importing it would hand every learner a question they
+            // must get wrong.
+            $this->countQuestion($sourceType, $sourceId, false, __('no accepted answers', 'sikshya'));
+
+            return 0;
         }
 
         $existing = $this->map->find('question', $sourceId);
@@ -353,20 +361,31 @@ final class CourseWriter
         }
 
         update_post_meta($questionId, '_sikshya_question_type', $type);
-        update_post_meta($questionId, '_sikshya_question_points', max(1, (int) round((float) ($question['mark'] ?? 1))));
+        update_post_meta($questionId, '_sikshya_question_points', max(1, (int) round((float) ($question['points'] ?? 1))));
 
         if ($options !== []) {
             update_post_meta($questionId, '_sikshya_question_options', array_map('strval', $options));
         }
 
-        // The encoding the grader reads: a single index as a string, several as
-        // a JSON array. Writing a label here instead of an index is the bug
-        // that marks every learner wrong.
-        if ($type === 'multiple_response' || count($correct) > 1) {
+        /*
+         * The exact encoding `QuizGrader` reads, per type. Getting this wrong
+         * does not break anything visibly — it marks learners wrong for being
+         * right, which is only discovered by a complaint.
+         */
+        if (QuestionTypes::isTextAnswer($type)) {
+            // A pipe-separated list of accepted strings, compared
+            // case-insensitively.
+            update_post_meta($questionId, '_sikshya_question_correct_answer', implode('|', $answers));
+        } elseif ($type === QuestionTypes::MULTIPLE) {
             update_post_meta($questionId, '_sikshya_question_correct_answer', (string) wp_json_encode($correct));
+        } elseif ($type === QuestionTypes::ESSAY) {
+            // Graded by a person; there is no key to store.
+            update_post_meta($questionId, '_sikshya_question_correct_answer', '');
         } elseif ($correct !== []) {
             update_post_meta($questionId, '_sikshya_question_correct_answer', (string) $correct[0]);
         }
+
+        $this->countQuestion($sourceType, $sourceId, true);
 
         return $questionId;
     }
@@ -556,21 +575,29 @@ final class CourseWriter
         $this->tally[$bucket] = ($this->tally[$bucket] ?? 0) + 1;
     }
 
-    private function countQuestion(string $sourceType, int $sourceId): void
+    private function countQuestion(string $sourceType, int $sourceId, bool $supported, string $because = ''): void
     {
-        if (isset(self::QUESTION_TYPES[$sourceType])) {
-            $this->count('question');
-
+        if ($supported) {
             return;
         }
 
         $this->count('question_skipped');
-        $note = sprintf(
-            /* translators: 1: source question type, 2: source question id */
-            __('Question type "%1$s" has no equivalent in Sikshya, so question #%2$d was skipped.', 'sikshya'),
-            $sourceType !== '' ? $sourceType : '(none)',
-            $sourceId
-        );
+
+        $note = $because !== ''
+            ? sprintf(
+                /* translators: 1: source question type, 2: source question id, 3: reason */
+                __('Question #%2$d ("%1$s") was skipped: %3$s.', 'sikshya'),
+                $sourceType !== '' ? $sourceType : '(none)',
+                $sourceId,
+                $because
+            )
+            : sprintf(
+                /* translators: 1: source question type, 2: source question id */
+                __('Question type "%1$s" has no equivalent in Sikshya, so question #%2$d was skipped.', 'sikshya'),
+                $sourceType !== '' ? $sourceType : '(none)',
+                $sourceId
+            );
+
         if (!in_array($note, $this->notes, true)) {
             $this->notes[] = $note;
         }

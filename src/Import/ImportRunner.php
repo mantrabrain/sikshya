@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Sikshya\Import;
 
+use Sikshya\Import\Sources\LearnDashSource;
 use Sikshya\Import\Sources\TutorSource;
 use Sikshya\Services\Settings;
 
@@ -45,7 +46,7 @@ final class ImportRunner
          *
          * @param array<int, ImportSourceInterface> $sources
          */
-        return (array) apply_filters('sikshya_import_sources', [new TutorSource()]);
+        return (array) apply_filters('sikshya_import_sources', [new TutorSource(), new LearnDashSource()]);
     }
 
     public static function source(string $id): ?ImportSourceInterface

@@ -182,12 +182,14 @@ test.
 ## Importing from another LMS
 
 The browser spec covers the panel and a preview. Everything that decides
-whether a migration is *correct* — the answer-key encoding, Tutor's enrolment
-status meaning "the enrolment went through" rather than "the learner finished",
-re-running without duplicating, reading terms while the old plugin is
-deactivated, the batch cursor — is 20 PHPUnit tests in
-`TutorImportIntegrationTest`, because they need a Tutor-shaped library with its
-own custom tables, which a browser test cannot seed.
+whether a migration is *correct* — the answer-key encoding per question type,
+Tutor's enrolment status meaning "the enrolment went through" rather than "the
+learner finished", LearnDash's three levels folding into two, reading ProQuiz's
+serialised answer objects without instantiating them, re-running without
+duplicating, reading terms while the old plugin is deactivated, the batch
+cursor — is **34 PHPUnit tests** across `TutorImportIntegrationTest` and
+`LearnDashImportIntegrationTest`, because they need the other plugin's own
+custom tables, which a browser test cannot seed.
 
 ## Not covered by a browser test
 

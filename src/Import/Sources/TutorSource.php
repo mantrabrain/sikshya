@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Sikshya\Import\Sources;
 
 use Sikshya\Import\ImportSourceInterface;
+use Sikshya\Import\QuestionTypes;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -38,6 +39,28 @@ final class TutorSource implements ImportSourceInterface
     public const CPT_LESSON = 'lesson';
     public const CPT_QUIZ = 'tutor_quiz';
     public const CPT_ENROLMENT = 'tutor_enrolled';
+
+    /**
+     * Tutor's question types, and what each becomes in Sikshya.
+     *
+     * Five of Tutor's eleven are absent on purpose. `image_matching`,
+     * `image_answering` and `h5p` have no equivalent at all; `matching` and
+     * `ordering` do, but a source stores their options already in the correct
+     * order, so importing them hands the learner the answer. Each absent type
+     * is named in the import report instead of being turned into the nearest
+     * thing — a question converted into something it is not marks learners
+     * wrong for being right.
+     *
+     * @var array<string, string>
+     */
+    private const QUESTION_TYPES = [
+        'true_false' => QuestionTypes::TRUE_FALSE,
+        'single_choice' => QuestionTypes::SINGLE,
+        'multiple_choice' => QuestionTypes::MULTIPLE,
+        'short_answer' => QuestionTypes::SHORT_ANSWER,
+        'fill_in_the_blank' => QuestionTypes::FILL_BLANK,
+        'open_ended' => QuestionTypes::ESSAY,
+    ];
 
     public function id(): string
     {
@@ -339,13 +362,24 @@ final class TutorSource implements ImportSourceInterface
                 }
             }
 
+            $sourceType = (string) $row['question_type'];
+            $type = self::QUESTION_TYPES[$sourceType] ?? '';
+
             $out[] = [
                 'id' => $questionId,
                 'title' => (string) $row['question_title'],
                 'description' => (string) ($row['question_description'] ?? ''),
-                'type' => (string) $row['question_type'],
-                'mark' => isset($row['question_mark']) ? (float) $row['question_mark'] : 1.0,
-                'options' => $options,
+                // Translated here, not in the writer: each source speaks its
+                // own dialect, and the writer only speaks Sikshya's.
+                'type' => $type,
+                'source_type' => $sourceType,
+                'points' => isset($row['question_mark']) ? (int) round((float) $row['question_mark']) : 1,
+                'options' => QuestionTypes::isTextAnswer($type) ? [] : $options,
+                // For a short answer or a fill-in-the-blank, Tutor keeps every
+                // accepted wording as an answer row.
+                'answers' => QuestionTypes::isTextAnswer($type)
+                    ? array_map(static fn($o) => (string) $o['title'], $options)
+                    : [],
             ];
         }
 

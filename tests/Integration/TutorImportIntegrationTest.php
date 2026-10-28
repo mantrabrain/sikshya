@@ -371,6 +371,89 @@ final class TutorImportIntegrationTest extends WP_UnitTestCase
         self::assertSame('2', (string) get_post_meta($questionId, '_sikshya_question_points', true));
     }
 
+    public function testAShortAnswerArrivesAsAcceptedWordingsNotAnOptionIndex(): void
+    {
+        global $wpdb;
+
+        $questions = $wpdb->prefix . 'tutor_quiz_questions';
+        $answers = $wpdb->prefix . 'tutor_quiz_question_answers';
+
+        $wpdb->insert($questions, [
+            'quiz_id' => $this->tutorQuiz,
+            'question_title' => 'Name the gas in a CO2 extinguisher',
+            'question_type' => 'short_answer',
+            'question_mark' => 1,
+            'question_order' => 3,
+        ]);
+        $shortId = (int) $wpdb->insert_id;
+        foreach (['Carbon dioxide', 'CO2'] as $i => $wording) {
+            $wpdb->insert($answers, [
+                'belongs_question_id' => $shortId,
+                'answer_title' => $wording,
+                'is_correct' => 1,
+                'answer_order' => $i,
+            ]);
+        }
+
+        ImportRunner::runBatch(TutorSource::ID);
+
+        $questionId = (new ImportMap(TutorSource::ID))->find('question', $shortId);
+        self::assertGreaterThan(0, $questionId);
+        self::assertSame('short_answer', get_post_meta($questionId, '_sikshya_question_type', true));
+        self::assertSame(
+            'Carbon dioxide|CO2',
+            (string) get_post_meta($questionId, '_sikshya_question_correct_answer', true),
+            'The grader compares a pipe-separated list of accepted wordings here; an option index would mark every answer wrong.'
+        );
+        self::assertSame(
+            '',
+            (string) get_post_meta($questionId, '_sikshya_question_options', true),
+            'A short answer has no options to choose from.'
+        );
+    }
+
+    public function testAShortAnswerWithNoAcceptedWordingsIsSkippedRatherThanUnanswerable(): void
+    {
+        global $wpdb;
+
+        $wpdb->insert($wpdb->prefix . 'tutor_quiz_questions', [
+            'quiz_id' => $this->tutorQuiz,
+            'question_title' => 'Anything at all?',
+            'question_type' => 'short_answer',
+            'question_mark' => 1,
+            'question_order' => 4,
+        ]);
+        $emptyId = (int) $wpdb->insert_id;
+
+        $result = ImportRunner::runBatch(TutorSource::ID);
+
+        self::assertSame(0, (new ImportMap(TutorSource::ID))->find('question', $emptyId));
+        self::assertStringContainsString('no accepted answers', implode(' ', $result['notes']));
+    }
+
+    public function testAnOrderingQuestionIsReportedRatherThanImportedWithItsAnswerShowing(): void
+    {
+        global $wpdb;
+
+        $wpdb->insert($wpdb->prefix . 'tutor_quiz_questions', [
+            'quiz_id' => $this->tutorQuiz,
+            'question_title' => 'Put the steps in order',
+            'question_type' => 'ordering',
+            'question_mark' => 1,
+            'question_order' => 5,
+        ]);
+        $orderingId = (int) $wpdb->insert_id;
+
+        $result = ImportRunner::runBatch(TutorSource::ID);
+
+        self::assertSame(
+            0,
+            (new ImportMap(TutorSource::ID))->find('question', $orderingId),
+            'A source stores the options already in the correct order, so importing one hands the learner the answer.'
+        );
+        self::assertStringContainsString('ordering', implode(' ', $result['notes']));
+    }
+
     public function testAnUnmappableQuestionTypeIsReportedRatherThanGuessedAt(): void
     {
         $result = ImportRunner::runBatch(TutorSource::ID);
