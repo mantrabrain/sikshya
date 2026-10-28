@@ -348,6 +348,10 @@ final class Plugin
             \Sikshya\Import\ImportCli::register();
         }
 
+        // Selling courses through WooCommerce. The hooks are WooCommerce's
+        // own, so on a site without it nothing here ever runs.
+        \Sikshya\Integrations\WooCommerce\WooCommerceBridge::register();
+
         // Bust the cached single-course student count when enrollments change.
         $invalidateStudentCount = static function ($user_id, $course_id) {
             $cid = (int) $course_id;

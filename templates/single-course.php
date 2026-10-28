@@ -647,6 +647,28 @@ while (have_posts()) :
                                 <a class="sikshya-btn sikshya-btn--sm sikshya-btn--primary sikshya-course-lp__btn-full" href="<?php echo esc_url($urls->getLearnFirstUrl() !== '' ? $urls->getLearnFirstUrl() : $urls->getLearnUrl()); ?>"><?php esc_html_e('Continue learning', 'sikshya'); ?></a>
                                 <a class="sikshya-btn sikshya-btn--sm sikshya-btn--ghost sikshya-course-lp__btn-full" href="<?php echo esc_url($urls->getAccountUrl()); ?>"><?php esc_html_e('My learning', 'sikshya'); ?></a>
                             <?php elseif ($page_model->isPaid()) : ?>
+                                <?php
+                                /**
+                                 * Let an integration own the purchase buttons.
+                                 *
+                                 * A course sold through WooCommerce must not also offer
+                                 * Sikshya's own cart: whichever the buyer pressed, half the
+                                 * shop's reporting would be wrong. An integration claims the
+                                 * purchase here and prints its own buttons on the action
+                                 * below.
+                                 *
+                                 * @param bool $handled
+                                 * @param int  $course_id
+                                 */
+                                if (apply_filters('sikshya_course_purchase_handled', false, $course_id)) :
+                                    /**
+                                     * Print the purchase buttons for a claimed course.
+                                     *
+                                     * @param int $course_id
+                                     */
+                                    do_action('sikshya_course_purchase_actions', $course_id);
+                                else :
+                                ?>
                                 <form method="post" action="<?php echo esc_url($permalink); ?>" class="sikshya-course-lp__form">
                                     <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                     <input type="hidden" name="sikshya_cart_action" value="add" />
@@ -661,6 +683,7 @@ while (have_posts()) :
                                     <button type="submit" class="sikshya-btn sikshya-btn--sm sikshya-btn--ghost sikshya-course-lp__btn-full"><?php esc_html_e('Add to cart', 'sikshya'); ?></button>
                                 </form>
                                 <a class="sikshya-course-lp__sub-link" href="<?php echo esc_url($urls->getCartUrl()); ?>"><?php esc_html_e('View cart', 'sikshya'); ?></a>
+                                <?php endif; ?>
                                 <?php if ($page_model->canAdminEnrollWithoutPurchase()) : ?>
                                     <form method="post" action="<?php echo esc_url($permalink); ?>" class="sikshya-course-lp__form sikshya-course-lp__form--admin-enroll">
                                         <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>

@@ -191,6 +191,18 @@ cursor — is **34 PHPUnit tests** across `TutorImportIntegrationTest` and
 `LearnDashImportIntegrationTest`, because they need the other plugin's own
 custom tables, which a browser test cannot seed.
 
+## Selling through WooCommerce
+
+There is no browser spec, and that is a gap worth naming: WooCommerce is not
+installed in this environment, so a browser test could only exercise the parts
+that do nothing without it. The rules are **23 PHPUnit tests** in
+`WooCommerceBridgeIntegrationTest`, written against an `OrderSnapshot` rather
+than a `WC_Order` precisely so they can run here — idempotent granting, a
+refund that closes only what that order opened, partial refunds, guest account
+creation, re-purchase after a refund, and the add-to-cart block. The one class
+that touches WooCommerce's API, `WooOrderReader`, is untested and deliberately
+dull: it reads an order and builds a snapshot.
+
 ## Not covered by a browser test
 
 - **`assignments_advanced`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
