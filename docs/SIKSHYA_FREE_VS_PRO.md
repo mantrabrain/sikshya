@@ -51,7 +51,7 @@ Everything in Free, plus (non-exhaustive; implement incrementally):
 - **Multi-instructor / marketplace:** revenue share, payouts, vendor workflows.
 - **Analytics:** gradebook, exports, activity log, scheduled reports.
 - **Certificates:** builder, multiple templates, branding, verification.
-- **Engagement:** announcements, automation emails, richer templates.
+- **Engagement:** announcements, automation emails, richer templates, and **points with a leaderboard** (`gamification`, Growth — see [GAMIFICATION.md](GAMIFICATION.md)). Every award amount starts at zero and the board is staff-only until you widen it.
 - **Integrations:** Elementor/Divi widgets, ESP/CRM, Zapier/Make via webhooks. **Selling through WooCommerce is free** (see [WOOCOMMERCE.md](WOOCOMMERCE.md)), as is importing a course library from Tutor LMS or LearnDash (see [MIGRATING-TO-SIKSHYA.md](MIGRATING-TO-SIKSHYA.md)).
 - **Security & ops:** 2FA (LMS flows), session tools, white label, full REST + API keys, webhooks.
 - **Enterprise:** SCORM and H5P content; **xAPI reporting to your own LRS** (`xapi_lrs`, Scale — see [XAPI.md](XAPI.md); cmi5 is *not* included and is a separate specification); identity lifecycle for SAML/SCIM deployments (see [ENTERPRISE-IDENTITY.md](ENTERPRISE-IDENTITY.md)).

@@ -22,6 +22,7 @@ import { AddonSettingsPage } from '../AddonSettingsPage';
 import { QuizAdvancedWorkspacePage } from '../QuizAdvancedWorkspacePage';
 import { LiveClassesWorkspacePage } from '../LiveClassesWorkspacePage';
 import { ContentBankPage } from '../ContentBankPage';
+import { GamificationPage } from '../GamificationPage';
 import { ScormH5pWorkspacePage } from '../ScormH5pWorkspacePage';
 import { ReportsPage } from '../ReportsPage';
 import { ToolsPage } from '../ToolsPage';
@@ -169,6 +170,15 @@ export function PeopleHubPage({ config, title }: Props) {
               subtitle={`Users with the ${term(config, 'instructor')} role. Pending sign-ups are under Applications.`}
               variant="instructors"
             />
+          ),
+        },
+        {
+          id: 'points',
+          label: __('Points', 'sikshya'),
+          icon: 'star',
+          hidden: !isFeatureEnabled(config, 'gamification'),
+          render: (c) => (
+            <GamificationPage embedded config={c} title={__('Points & leaderboard', 'sikshya')} />
           ),
         },
         {

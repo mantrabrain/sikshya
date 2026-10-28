@@ -100,7 +100,7 @@ This is the list that loses a comparison table, and the first row is now urgent.
 | **Migration importers** | MasterStudy imports from Tutor, LearnDash, LearnPress, LifterLMS, Masteriyo | **Tutor LMS and LearnDash shipped 2026-10-28**, free: courses, structure, lessons, quizzes with their answer keys, enrolments and completions, previewable and re-runnable. LearnDash's three levels adapt to Sikshya's two, and its ProQuiz answers are read without instantiating the classes they name. **LearnPress, LifterLMS and Masteriyo are not written** | Pure acquisition: it is the difference between "we could move" and "we moved". See `docs/MIGRATING-TO-SIKSHYA.md` |
 | **WooCommerce bridge** | LearnDash, LifterLMS, Tutor | **Shipped 2026-10-28**, free: a product sells any number of courses, `completed`/`processing`/`payment_complete` grant idempotently, refunds close only what that order opened, guest checkout creates the account the purchase needs, and the course page hands its buy button to WooCommerce so two checkouts never compete. **Subscriptions renewals are not wired** | Adoption, not capability: a shop that already runs WooCommerce has its gateways, taxes and accounting working, and will not take a second checkout. See `docs/WOOCOMMERCE.md` |
 | **Content bank / shared course steps** | Tutor "Content Bank"; LearnDash shared steps | **Shipped 2026-10-28** as `content_bank` (Starter and above): a library of lessons, quizzes and assignments, saved from any course and inserted into any section the author can edit; a quiz travels with its questions, answer keys and settings; items are private until shared with the site's other authors. Deliberately a **copy**, not LearnDash's shared post — progress and attempts are keyed to one lesson, so a shared step would report a learner finished in a course they never took. What that costs is stated: editing a banked item does not reach courses already built from it. cmi5 lessons are refused rather than half-copied. See `docs/CONTENT-BANK.md` |
-| **Gamification points + leaderboard** | MasterStudy "Point System", LearnDash | **None.** `points_earned` is quiz scoring, not an economy |
+| **Gamification points + leaderboard** | MasterStudy "Point System", LearnDash | **Shipped 2026-10-28** — the `gamification` add-on: a ledger with per-thing idempotency (so re-completing a lesson cannot farm points), derived totals for a fast board, manual adjustments, and a leaderboard that is staff-only until widened, honours a learner opt-out and forgets a deleted person. See `docs/GAMIFICATION.md` |
 | **Membership product surface** | Tutor, MasterStudy, LifterLMS | **Closed 2026-10-28** — membership levels over existing plans; see `docs/MEMBERSHIPS.md` for what is not claimed (no plan-only checkout, no level tiering, no proration) |
 | **PDF lessons** | MasterStudy | **None.** Lesson kinds are text, video, audio, live, scorm, h5p |
 | **Question media** (image/audio in a question) | MasterStudy, LearnDash | **None.** 8 question types, none carry media |
@@ -162,8 +162,10 @@ missing checkbox everyone else ticks loses the comparison before our strengths a
    are keyed to one lesson and a shared step would have made them lie. **Membership surface done,
    2026-10-28** — a level over an existing plan rather than a second access system or a second
    checkout, because every order line in Sikshya is a course line and a plan-only order would have
-   put refunds, invoices and receipts at risk for a button. Remaining, in order: points/leaderboard,
-   PDF lessons, question media, starter templates.
+   put refunds, invoices and receipts at risk for a button. **Points and leaderboard done,
+   2026-10-28** — the hard part was not the scoreboard but making an achievement pay exactly once,
+   since the LMS fires its completion hooks again whenever a learner re-ticks a lesson. Remaining,
+   in order: PDF lessons, question media, starter templates.
 
 Deliberately **not** recommended: building our own SAML or SCIM server, and pursuing SOC 2-gated RFPs.
 

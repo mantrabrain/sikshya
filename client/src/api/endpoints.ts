@@ -204,6 +204,20 @@ export const SIKSHYA_ENDPOINTS = {
     plansBulk: '/pro/plans/bulk',
     plan: (id: number) => `/pro/plans/${encodeURIComponent(String(id))}`,
     /**
+     * Points and the leaderboard (Pro `gamification` addon). All of these are
+     * staff-only: the learner-facing views are rendered server-side.
+     */
+    pointsLeaderboard: (params?: { scope?: string; limit?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.scope) q.set('scope', params.scope);
+      if (params?.limit) q.set('limit', String(params.limit));
+      const s = q.toString();
+      return s ? `/pro/points/leaderboard?${s}` : '/pro/points/leaderboard';
+    },
+    pointsLearner: (userId: number) => `/pro/points/learners/${encodeURIComponent(String(userId))}`,
+    pointsAdjust: '/pro/points/adjust',
+    pointsRecalculate: '/pro/points/recalculate',
+    /**
      * Membership levels (Pro, part of the `subscriptions` addon). A level is
      * presentation plus a catalogue over an existing plan — it never holds a
      * price of its own.

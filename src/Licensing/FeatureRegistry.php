@@ -376,6 +376,19 @@ final class FeatureRegistry
                     'sikshya'
                 ),
             ],
+            'gamification' => [
+                'label' => __('Points & leaderboard', 'sikshya'),
+                'tier' => 'pro',
+                'group' => 'learner',
+                'description' => __(
+                    "Gives learners points for finishing lessons, passing quizzes and completing courses, and ranks them on a leaderboard.\n\nTurn on when friendly competition fits your audience—schools, cohorts, sales training.\n\nTurn off for professional or compliance training where a public ranking would be unwelcome.",
+                    'sikshya'
+                ),
+                'detail_description' => __(
+                    "What you get: You decide what each achievement is worth—a lesson, a passed quiz, an assignment, a finished course, a certificate. Learners see their total and their place on their account page, and you can put a leaderboard on any page with a shortcode.\n\nEvery amount starts at zero, so switching this on changes nothing until you set the values yourself. Points are paid once per thing: un-ticking and re-ticking a lesson, or retaking a quiz, does not pay again.\n\nThe leaderboard is private to site staff until you widen it, learners can hide themselves from it while still earning, and names are shortened to a first name and last initial unless you choose otherwise. Deleting a person removes their points.\n\nTurn it on when: Streaks and rankings would motivate your learners.\n\nTurn it off when: Your training is mandatory or sensitive, and naming people in public order would be the wrong signal. Existing points are kept, not deleted.\n\nPlan: Growth tier or higher (paid plans).",
+                    'sikshya'
+                ),
+            ],
             'live_classes' => [
                 'label' => __('Live classes (Zoom / Meet / Classroom)', 'sikshya'),
                 'tier' => 'pro',

@@ -237,6 +237,23 @@ What a browser spec would add: that the level editor's course picker and the
 tab's problem list behave on screen, and that the pricing table lays out at
 phone width.
 
+## Points and the leaderboard
+
+No browser spec. **49 PHPUnit tests** in `GamificationPointsIntegrationTest`
+(`--group gamification`) cover the part that matters: that an achievement pays
+once however many times its hook fires, that the refused repeat is silent
+rather than a duplicate-key error, that a quiz pays for passing and not for
+attempting, that the board stays invisible until the visibility setting says
+otherwise and fails closed on an unrecognised value, that an opt-out hides a
+learner from the board without hiding their score from themselves, and that a
+deleted person leaves nothing behind in either table. Mutation run: **39 of 39
+seeded defects caught** — three survived the first pass and each one was a real
+hole in the tests, now closed.
+
+What a browser spec would add: that the adjustment form's user search and the
+rebuild button behave on screen, and that the shortcode table reads well at
+phone width.
+
 ## Not covered by a browser test
 
 - **`assignments_advanced`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
@@ -244,6 +261,7 @@ phone width.
 - **`drip_notifications`** (starter) — Sends email from the drip cron (`sikshya_pro_drip_cron`), not from any browser action, so it is not reachable from a browser test. Covered by Pro PHPUnit.
 - **`content_bank`** (starter) — No dedicated browser spec; covered by Pro PHPUnit (`--group content_bank`). See above.
 - **`subscriptions` → membership levels** (pro) — No dedicated browser spec; covered by Pro PHPUnit (`--group memberships`). See above.
+- **`gamification`** (pro) — No dedicated browser spec; covered by Pro PHPUnit (`--group gamification`). See above.
 - **`dynamic_checkout_fields`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`email_advanced_customization`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`multilingual_enterprise`** (scale) — No dedicated browser spec; covered by Pro PHPUnit.

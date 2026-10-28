@@ -101,6 +101,10 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | `/pro/subscriptions/cancel` | POST | `subscriptions` (same) |
 | `/pro/plans` | GET, POST | `subscriptions` (same) |
 | `/pro/plans/(?P<id>\d+)` | PUT/PATCH, DELETE | `subscriptions` (same) |
+| `/pro/points/leaderboard` | GET | `gamification` (`SikshyaPro\Addons\Gamification\Rest\GamificationRestController`; `scope` = all/month/week, opted-out learners filtered out, `dormant` says whether anything on the site awards points) |
+| `/pro/points/learners/(?P<user_id>\d+)` | GET | `gamification` (one learner's standing and ledger) |
+| `/pro/points/adjust` | POST | `gamification` (**writes** a manual ledger line; `manage_options`; capped at 100,000 points) |
+| `/pro/points/recalculate` | POST | `gamification` (**writes**: rebuilds totals from the ledger, for one `user_id` or everyone; `manage_options`) |
 | `/pro/memberships/levels` | GET, POST | `subscriptions` (`SikshyaPro\Addons\Subscriptions\Memberships\Controllers\MembershipsRestController`; GET returns each level with a resolved `course_count` and a `problems` list, POST creates or replaces one — `manage_options`) |
 | `/pro/memberships/levels/(?P<id>[A-Za-z0-9_\-]+)` | DELETE | `subscriptions` (removes the level and the access it granted; subscriptions, orders and enrolments are untouched) |
 | `/pro/memberships/targets` | GET | `subscriptions` (courses and course categories for the level editor's pickers) |
