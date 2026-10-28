@@ -508,6 +508,13 @@ export const SIKSHYA_ENDPOINTS = {
     xapiStatements: '/scale/xapi/statements',
     xapiTest: '/scale/xapi/test',
     xapiDrain: '/scale/xapi/drain',
+    /**
+     * cmi5 package import. A cmi5 package states its own course structure, so
+     * importing one creates a chapter per block and a lesson per assignable
+     * unit — unlike a SCORM zip, which stays one activity.
+     */
+    cmi5Packages: '/scale/cmi5/packages',
+    cmi5Package: (id: number) => `/scale/cmi5/packages/${encodeURIComponent(String(id))}`,
   },
   /**
    * AI authoring (Pro `ai_authoring` addon). The generate routes write nothing;

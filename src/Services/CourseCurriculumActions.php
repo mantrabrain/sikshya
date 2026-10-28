@@ -94,10 +94,11 @@ final class CourseCurriculumActions
         }
 
         if ($post_type === PostTypes::LESSON) {
-            // Free kinds always allowed; "live" / "scorm" / "h5p" are accepted here so the
-            // course-builder picker can create them in one step. The renderer + lesson editor
+            // Free kinds always allowed; "live" / "scorm" / "h5p" / "cmi5" are accepted here
+            // so the course-builder picker — and the cmi5 importer, which creates one lesson
+            // per assignable unit — can create them in one step. The renderer + lesson editor
             // separately enforce that the matching Pro addon is enabled.
-            $allowed_kinds = ['text', 'video', 'audio', 'live', 'scorm', 'h5p'];
+            $allowed_kinds = ['text', 'video', 'audio', 'live', 'scorm', 'h5p', 'cmi5'];
             $kind = in_array($lesson_type, $allowed_kinds, true) ? $lesson_type : 'text';
             update_post_meta($content_id, '_sikshya_lesson_type', $kind);
         }

@@ -1,6 +1,7 @@
 import { useCallback, useId, useMemo, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
+import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { FeaturePreviewSkeleton } from '../components/FeaturePreviewSkeleton';
@@ -72,6 +73,23 @@ type XapiStatementRow = {
 };
 
 type XapiTestResult = { ok?: boolean; code?: number; message?: string; outcome?: string };
+
+type Cmi5PackageRow = {
+  id: number;
+  course_id: number;
+  title: string;
+  au_count: number;
+  created_at: string;
+};
+
+type Cmi5ImportResult = {
+  ok?: boolean;
+  package_id?: number;
+  aus?: number;
+  lessons?: number;
+  chapters?: number;
+  message?: string;
+};
 
 type OAuthAppRow = {
   id: number;
@@ -230,6 +248,10 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   const [xapiTesting, setXapiTesting] = useState(false);
   const [xapiTestResult, setXapiTestResult] = useState<string | null>(null);
 
+  const [cmi5CourseId, setCmi5CourseId] = useState(0);
+  const [cmi5Importing, setCmi5Importing] = useState(false);
+  const [cmi5Result, setCmi5Result] = useState<string | null>(null);
+
   const [pingToken, setPingToken] = useState('');
   const [pingBusy, setPingBusy] = useState(false);
   const [pingResult, setPingResult] = useState<string | null>(null);
@@ -294,6 +316,47 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
   const xapiStatus = useAsyncData(xapiStatusLoader, [xapiOn]);
   const xapiLog = useAsyncData(xapiLogLoader, [xapiOn]);
+
+  const cmi5Loader = useCallback(async () => {
+    if (!xapiOn) {
+      return { ok: true, rows: [] as Cmi5PackageRow[] };
+    }
+    return getSikshyaApi().get<{ ok?: boolean; rows?: Cmi5PackageRow[] }>(SIKSHYA_ENDPOINTS.scale.cmi5Packages);
+  }, [xapiOn]);
+
+  const cmi5Packages = useAsyncData(cmi5Loader, [xapiOn]);
+
+  const importCmi5 = useCallback(
+    async (file: File) => {
+      setCmi5Importing(true);
+      setCmi5Result(null);
+      try {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('course_id', String(cmi5CourseId));
+
+        const res = await getSikshyaApi().request<Cmi5ImportResult>(SIKSHYA_ENDPOINTS.scale.cmi5Packages, {
+          method: 'POST',
+          body: form,
+        });
+
+        setCmi5Result(
+          sprintf(
+            __('Imported: %1$d unit(s) across %2$d chapter(s), %3$d lesson(s) created.', 'sikshya'),
+            Number(res?.aus ?? 0),
+            Number(res?.chapters ?? 0),
+            Number(res?.lessons ?? 0)
+          )
+        );
+      } catch (e) {
+        setCmi5Result(e instanceof Error ? e.message : String(e));
+      } finally {
+        setCmi5Importing(false);
+        cmi5Packages.refetch();
+      }
+    },
+    [cmi5CourseId, cmi5Packages]
+  );
 
   const sendXapiTest = useCallback(async () => {
     setXapiTesting(true);
@@ -1245,6 +1308,84 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                   featureTitle={__('xAPI / Learning Record Store', 'sikshya')}
                   featureDescription={__('Statements are queued and sent in the background; nothing is queued until an endpoint and credentials exist.', 'sikshya')}
                 />
+              </div>
+
+              {/* cmi5 import. Separate from the statement panel above because
+                  it answers a different question: not "is reporting working"
+                  but "is this packaged course on my curriculum". */}
+              <div className="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  {__('cmi5 packages', 'sikshya')}
+                </h3>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                  {__(
+                    'A cmi5 package states its own structure, so importing one adds a chapter per block and a lesson per assignable unit to the course you choose — unlike a SCORM zip, which stays a single activity.',
+                    'sikshya'
+                  )}
+                </p>
+
+                <div className="mt-3 flex flex-wrap items-end gap-3">
+                  <div className="min-w-[16rem]">
+                    <SingleCoursePicker
+                      label={__('Import into', 'sikshya')}
+                      value={cmi5CourseId}
+                      onChange={(id) => setCmi5CourseId(id)}
+                      placeholder={__('Choose a course…', 'sikshya')}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor={`${fieldId}-cmi5-zip`}
+                      className="block text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-300"
+                    >
+                      {__('Package (.zip)', 'sikshya')}
+                    </label>
+                    <input
+                      id={`${fieldId}-cmi5-zip`}
+                      type="file"
+                      accept=".zip,application/zip"
+                      disabled={cmi5Importing || cmi5CourseId <= 0}
+                      data-sikshya-cmi5-upload
+                      className="mt-1.5 block text-sm text-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-300"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = '';
+                        if (file) void importCmi5(file);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {cmi5CourseId <= 0 ? (
+                  <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                    {__('Pick the course first — the units are added to its curriculum.', 'sikshya')}
+                  </p>
+                ) : null}
+
+                {cmi5Importing ? (
+                  <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">{__('Importing…', 'sikshya')}</p>
+                ) : null}
+
+                {cmi5Result ? (
+                  <p className="mt-2 text-sm text-slate-800 dark:text-slate-200" data-sikshya-cmi5-result>
+                    {cmi5Result}
+                  </p>
+                ) : null}
+
+                {(cmi5Packages.data?.rows ?? []).length > 0 ? (
+                  <ul className="mt-3 divide-y divide-slate-100 text-sm dark:divide-slate-800">
+                    {(cmi5Packages.data?.rows ?? []).map((row) => (
+                      <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                        <span className="font-medium text-slate-900 dark:text-white">
+                          {row.title || sprintf(__('Package #%d', 'sikshya'), row.id)}
+                        </span>
+                        <span className="text-xs text-slate-600 dark:text-slate-400">
+                          {sprintf(__('%d unit(s)', 'sikshya'), row.au_count)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
 
               <div className="mt-5">

@@ -142,6 +142,14 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | `/scale/xapi/statements` | GET | `xapi_lrs` (the statement log, without statement bodies) |
 | `/scale/xapi/test` | POST | `xapi_lrs` (**sends**: one real statement down the production path) |
 | `/scale/xapi/drain` | POST | `xapi_lrs` (**sends**: runs one budgeted drain of the queue) |
+| `/scale/cmi5/packages` | GET, POST | `xapi_lrs` (**writes**: a POST imports a package and creates chapters + lessons) |
+| `/scale/cmi5/packages/(?P<id>\d+)` | GET, DELETE | `xapi_lrs` (DELETE forgets the import; the lessons it created stay) |
+| `/scale/cmi5/launch` | POST | `xapi_lrs` (**learner** route: creates a session and returns the launch URL) |
+| `/scale/cmi5/lrs/fetch` | POST | *token-authenticated* — the unit's one-time credential exchange |
+| `/scale/cmi5/lrs/statements` | POST, PUT | *session-authenticated* — accepted and forwarded; GET answers 405 |
+| `/scale/cmi5/lrs/activities/state` | GET, PUT, POST, DELETE | *session-authenticated* — `LMS.LaunchData` is read-only |
+| `/scale/cmi5/lrs/agents/profile` | GET, PUT, POST, DELETE | *session-authenticated* — answers "no document" |
+| `/scale/cmi5/asset/(?P<uuid>…)/(?P<path>.+)` | GET | enrolment- or session-gated package files |
 
 **Course bundles extension (Pro):** My Account strip on `sikshya_account_dashboard_after` (`CourseBundlesAccountPanel` when **Show bundle packs on My Account** is on); filter `sikshya_course_bundles_account_panel_bundles`. Hooks include `sikshya_bundle_pricing_resolved`, `sikshya_course_bundles_after_create`, `sikshya_course_bundles_allow_trash`.
 
@@ -150,6 +158,8 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 **AI authoring extension (Pro):** generation routes are read-only against the database; the three `/pro/ai/apply/*` routes are the only ones that write, and they are applied one chapter or one quiz at a time so a large outline cannot land in a single request. Any `course_id`, `chapter_id`, `lesson_id` or `quiz_id` in the request is checked with `InstructorPermissions::canEditObject()`, and non-administrators are refused entirely unless **Let instructors generate** is on. Filters: `sikshya_ai_authoring_http_timeout`, `sikshya_ai_authoring_hourly_user_cap`, `sikshya_ai_authoring_provider_client`, `sikshya_ai_authoring_anthropic_endpoint`, `sikshya_ai_authoring_openai_endpoint`, `sikshya_ai_authoring_system_prompt`, `sikshya_ai_authoring_outline_prompt`, `sikshya_ai_authoring_lesson_prompt`, `sikshya_ai_authoring_quiz_prompt`.
 
 **xAPI / LRS extension (Pro):** outbound only — Sikshya reports to your LRS and is not one. Statements are queued (`wp_sikshya_xapi_statements`) and drained by `sikshya_xapi_drain_queue` every five minutes under a count and wall-clock budget; `sikshya_xapi_prune_statements` prunes *sent* rows daily, and only when retention is set. Each row carries the statement's own UUID from the moment it is queued, which is why a 409 from the LRS counts as sent rather than as a failure. Filters: `sikshya_xapi_statement`, `sikshya_xapi_actor`, `sikshya_xapi_verb_iri`, `sikshya_xapi_activity_type_iri`, `sikshya_xapi_activity_iri_base`, `sikshya_xapi_statements_per_run`, `sikshya_xapi_time_budget`, `sikshya_xapi_retry_backoff`. See `docs/XAPI.md`.
+
+**cmi5 extension (Pro, part of `xapi_lrs`):** the four `/scale/cmi5/lrs/*` routes are the only ones a *launched unit* talks to, authenticated by its session token rather than a cookie, because content runs in an iframe. Every statement they accept is re-stamped with the session's actor, activity and registration before being forwarded, so a unit cannot report about another learner. `LMS.LaunchData` is read-only. Packages live in `uploads/sikshya-cmi5/<uuid>/` and are served only through `/scale/cmi5/asset/…`, never from the uploads URL. Tables: `wp_sikshya_cmi5_packages`, `_aus`, `_sessions`, `_state`. Filters: `sikshya_cmi5_launch_url`, `sikshya_cmi5_launch_data`; action `sikshya_cmi5_au_satisfied`. See `docs/XAPI.md`.
 
 **Activity log extension (Pro):** filters `sikshya_activity_log_action_label`, `sikshya_activity_log_allow_insert`, `sikshya_activity_log_scope_course_ids`, `sikshya_activity_log_show_learn_sidebar`; hook `sikshya_activity_log_recorded` after a row is stored. Learn UI: `sikshya_learn_sidebar_footer` (see `ActivityLogLearnTouchpoints`).
 

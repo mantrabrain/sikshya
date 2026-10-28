@@ -130,22 +130,117 @@ the only record that it did not.
 | `sikshya_xapi_activity_iri_base` | Change the activity namespace (before first use only). |
 | `sikshya_xapi_statements_per_run`, `sikshya_xapi_time_budget` | Resize a drain run. |
 | `sikshya_xapi_retry_backoff` | Change the wait before attempt N+1. |
+| `sikshya_cmi5_launch_url` | Last word on a unit's launch URL. |
+| `sikshya_cmi5_launch_data` | Change the `LMS.LaunchData` document handed to a unit. |
+| `sikshya_cmi5_au_satisfied` | Fires after a unit is satisfied (lesson id, user id, the AU row). |
+
+## cmi5
+
+cmi5 is the other half: not a reporting format but a **launch** specification,
+where the content arrives as a package that states its own structure and is
+handed an endpoint to report to. Sikshya imports, launches and tracks cmi5
+content.
+
+### Importing a package
+
+Sikshya → Integrations → **cmi5 packages**: choose the course, upload the zip.
+`cmi5.xml` is read and the package becomes curriculum — **a chapter per block
+and a lesson per assignable unit**. This is where cmi5 differs from SCORM in
+how it meets an LMS: a SCORM zip is one activity whose internals stay inside
+the player, while a cmi5 package states a structure and expects the LMS to
+place it.
+
+The importer refuses rather than guesses. An unknown `moveOn`, a
+`masteryScore` outside 0–1 (cmi5 states it as a decimal, so `80` is refused
+rather than read as a bar nobody can clear), a unit with no launch URL, a
+course with no units, a structure nested beyond 20 blocks, or an XML document
+with a doctype — each is a refusal with the reason, because a completion rule
+Sikshya invented is a transcript that is wrong and looks fine.
+
+Removing an imported package forgets the import record and its files. **The
+lessons it created stay**, because a learner may have completed one.
+
+### Launching a unit
+
+A learner presses **Start**; the unit opens in the page or its own window,
+depending on the package's `launchMethod`. The launch is deliberately an
+action, not a page view: a cmi5 launch is an attempt that the LMS reports to
+the LRS, so opening one because somebody scrolled past the lesson would fill
+reporting with attempts nobody made.
+
+**The endpoint the unit is handed is Sikshya's, not the LRS's.** Handing content
+the LRS credentials is the shortest path to a working launch and the wrong one:
+it puts a key with write access to the whole Learning Record Store inside a
+browser, readable by any script on the page and valid long after the lesson
+ends. Instead the unit talks to Sikshya, which knows which session it belongs
+to and forwards its statements with credentials that never leave the server.
+
+That also makes one guarantee possible: **a unit cannot report about anybody
+else**. Whatever actor, activity or registration a statement claims, it is
+stamped with the session it arrived on before being forwarded.
+
+What the unit gets:
+
+| cmi5 requires | Sikshya serves |
+| --- | --- |
+| `fetch` — a one-time credential exchange | Yes, single use, 15-minute expiry. A token in a browser history is not replayable. |
+| `LMS.LaunchData` via the State API | Yes: `launchMode`, `moveOn`, `masteryScore`, `returnURL` and the context template. Read-only — a unit that could rewrite it could rewrite the rules it is judged by. |
+| Somewhere to POST statements | Yes, forwarded to your LRS through the ordinary queue, keeping the unit's own statement ids so its retries still deduplicate. |
+| State API for the unit's own documents | Yes, up to 256 KB per document — this is how content bookmarks, and without it a resuming unit restarts or fails. |
+| Agent Profile | Answered as "no document". Nothing is stored against a learner's profile, and inventing preferences a learner never chose would be worse than none. |
+| Statement *reads* | **No** — answered with 405 and a pointer to your LRS. Sikshya is a launching LMS, not an LRS. |
+
+### When a unit counts as done
+
+The unit reports what happened; the **package** says what counts, in its
+`moveOn` rule; Sikshya holds both and decides.
+
+| `moveOn` | Satisfied when |
+| --- | --- |
+| `Passed` | the unit reports `passed` |
+| `Completed` | the unit reports `completed` |
+| `CompletedAndPassed` | both, in any order, across any number of requests |
+| `CompletedOrPassed` | either (cmi5's default when the package states nothing) |
+| `NotApplicable` | immediately — it is how a package marks a reference document |
+
+When a unit is satisfied Sikshya sends its own `satisfied` statement in the
+`moveon` category, and **marks the lesson complete on the learner's
+curriculum** — a unit the package calls satisfied while Sikshya still shows it
+as outstanding is the complaint this path exists to prevent. The ordinary
+`lesson.completed` statement is *not* also sent for a cmi5 lesson: the unit has
+already reported against the package's own activity id, and a second statement
+under Sikshya's lesson IRI would have an LRS counting one completion twice.
+
+A `failed` is recorded but never un-satisfies a unit already satisfied: a
+learner who passed, came back and failed has still passed it once.
+
+### cmi5 limits
+
+- **Course-level satisfaction is per unit, not per block.** Each AU marks its
+  own lesson complete; Sikshya's own course progress then follows from its
+  lessons, rather than from a block tree of cmi5 `satisfied` statements.
+- **Blocks are flattened into chapters.** Sikshya's curriculum is two levels
+  deep, so a unit nested three blocks down lands in a chapter named by its
+  path. Nothing is dropped; the hierarchy is not reproduced exactly.
+- **No `abandoned` or `waived`.** A session left open is not later reported as
+  abandoned, and there is no way to waive a unit for a learner from the LMS.
+- **`launchMode` is always `Normal`.** `Browse` and `Review` are not offered.
+- **No entitlement keys, no `returnURL` round-trip handling** beyond handing
+  the URL to the unit.
+- Not an ADL-certified implementation: there is a cmi5 conformance test suite,
+  and Sikshya has not been put through it.
 
 ## Limits, stated plainly
-
-- **This is not cmi5.** cmi5 is a *launch* specification on top of xAPI:
-  packaged content, a course structure XML, launch URLs, AU sessions and the
-  State API. Sending xAPI statements is a prerequisite for it, not a subset of
-  it. Sikshya does not package, launch or track cmi5 content, and saying "xAPI"
-  in a tender does not answer a cmi5 question.
-- **Outbound only.** Sikshya has no LRS of its own: it does not accept, store
-  or query statements, and there is no Statement, State, Activity Profile or
-  Agent Profile API to read from. Your LRS is the system of record.
+- **Still not an LRS.** Sikshya accepts statements from a launched cmi5 unit
+  in order to forward them, and serves the State API that cmi5 requires — but
+  it does not store a statement history, answer statement queries, or serve an
+  Activity Profile. Your LRS is the system of record, and the statement read
+  API is answered with a 405 saying so.
 - **No attachments, no signed statements, no voiding.** A statement sent in
   error stays in the LRS; void it there.
-- **One statement per request.** Batching several into one POST would be
-  faster and is a later optimisation; per-statement retry semantics are
-  clearer without it.
+- **One statement per request to the LRS.** Batching would be faster and is a
+  later optimisation; per-statement retry semantics are clearer without it. (A
+  cmi5 unit may *send* several at once; they are queued individually.)
 - **No per-question statements.** A quiz reports one `passed`/`failed` with a
   score, not an `answered` statement per question. Item-level analytics in the
   LRS would need that, and it multiplies statement volume by the number of
