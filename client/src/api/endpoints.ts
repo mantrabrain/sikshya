@@ -517,6 +517,17 @@ export const SIKSHYA_ENDPOINTS = {
     cmi5Package: (id: number) => `/scale/cmi5/packages/${encodeURIComponent(String(id))}`,
   },
   /**
+   * Importing from another LMS. `run` does one batch and says where it got to;
+   * the screen calls it again until `finished`, which is how a site with
+   * hundreds of courses migrates without one request that no host will hold
+   * open.
+   */
+  import: {
+    sources: '/admin/import/sources',
+    run: '/admin/import/run',
+    reset: '/admin/import/reset',
+  },
+  /**
    * AI authoring (Pro `ai_authoring` addon). The generate routes write nothing;
    * the apply routes are the ones that create content, one chapter or one quiz
    * at a time so a large outline cannot land in a single request.

@@ -17,6 +17,7 @@ use Sikshya\Api\Admin\AbstractAdminRestController;
 use Sikshya\Api\Admin\CouponRoutes;
 use Sikshya\Api\Admin\InstructorApplicationRoutes;
 use Sikshya\Api\Admin\SearchRoutes;
+use Sikshya\Api\Admin\ImportRoutes;
 use Sikshya\Api\Admin\SetupWizardRoutes;
 use Sikshya\Api\Admin\TaxonomyRoutes;
 use Sikshya\Commerce\CheckoutService;
@@ -637,6 +638,7 @@ class AdminRestRoutes extends AbstractAdminRestController
         (new SearchRoutes($this->plugin))->register();
         (new SetupWizardRoutes($this->plugin))->register();
         (new TaxonomyRoutes($this->plugin))->register();
+        (new ImportRoutes($this->plugin))->register();
     }
 
     /**

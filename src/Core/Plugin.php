@@ -341,6 +341,13 @@ final class Plugin
         // when. Without it a deleted employee kept their seat forever.
         \Sikshya\Services\UserDeprovisionService::init();
 
+        // Importing from another LMS. Free on purpose: charging somebody to
+        // bring their own course library to us would be a strange toll to put
+        // on the way in.
+        if (defined('WP_CLI') && WP_CLI) {
+            \Sikshya\Import\ImportCli::register();
+        }
+
         // Bust the cached single-course student count when enrollments change.
         $invalidateStudentCount = static function ($user_id, $course_id) {
             $cid = (int) $course_id;

@@ -123,7 +123,7 @@ browser and a real server — re-verify only if you changed that area.
 Auth, roles and capabilities, the React admin shell and every one of its screens, global
 search, settings, setup wizard, tools, REST surface, licence-tier gating, and smoke.
 
-- 236 tests across 31 specs:
+- 237 tests across 32 specs:
   - `admin/addons-docs-url` — 1 passed
   - `admin/auditor-readonly-enforcement` — 1 passed
   - `admin/auditor-role` — 1 passed
@@ -131,6 +131,7 @@ search, settings, setup wizard, tools, REST surface, licence-tier gating, and sm
   - `admin/auth-rest-validation` — 3 passed
   - `admin/bulk-actions` — 3 passed
   - `admin/global-search` — 2 passed
+  - `admin/import-tools-panel` — 1 passed (the migration panel: its two promises on screen, and a preview that creates nothing)
   - `admin/global-search-palette` — 1 passed
   - `admin/health-endpoint` — 1 passed
   - `admin/react-subroutes` — 39 passed
@@ -177,6 +178,16 @@ What is **not** covered is listed under *Not yet evaluated* in
 [ACCESSIBILITY.md](ACCESSIBILITY.md) — most importantly, no screen reader has
 been used, and the course builder's drag-and-drop curriculum has no keyboard
 test.
+
+## Importing from another LMS
+
+The browser spec covers the panel and a preview. Everything that decides
+whether a migration is *correct* — the answer-key encoding, Tutor's enrolment
+status meaning "the enrolment went through" rather than "the learner finished",
+re-running without duplicating, reading terms while the old plugin is
+deactivated, the batch cursor — is 20 PHPUnit tests in
+`TutorImportIntegrationTest`, because they need a Tutor-shaped library with its
+own custom tables, which a browser test cannot seed.
 
 ## Not covered by a browser test
 

@@ -97,7 +97,7 @@ This is the list that loses a comparison table, and the first row is now urgent.
 | Gap | Who has it | Our status |
 |---|---|---|
 | **AI authoring** | **All three majors.** Tutor "AI Studio" (outline, lesson, quiz, feature image) in every paid tier; LearnDash AI course builder; MasterStudy "AI Lab" builds a course from one prompt | **Shipped** as `ai_authoring` (Starter and above): outline → chapters and lessons, lesson body, quiz questions with answer keys and explanations, bring-your-own key for Anthropic or OpenAI. Still missing against Tutor: AI feature images, and a content bank to reuse what it writes |
-| **Migration importers** | MasterStudy imports from Tutor, LearnDash, LearnPress, LifterLMS, Masteriyo | **None.** The only grep hit is the word "Masteriyo" in a feature description |
+| **Migration importers** | MasterStudy imports from Tutor, LearnDash, LearnPress, LifterLMS, Masteriyo | **Tutor LMS shipped 2026-10-28**, free: courses, topics, lessons, quizzes with their answer keys, enrolments and completions, previewable and re-runnable, with a reader interface so a second source is a class not a second importer. **LearnDash is next**; LearnPress, LifterLMS and Masteriyo are not written yet | Pure acquisition: it is the difference between "we could move" and "we moved". See `docs/MIGRATING-TO-SIKSHYA.md` |
 | **WooCommerce bridge** | LearnDash, LifterLMS, Tutor | **None** (0 files). Native checkout only |
 | **Content bank / shared course steps** | Tutor "Content Bank"; LearnDash shared steps | **None.** A lesson belongs to one course |
 | **Gamification points + leaderboard** | MasterStudy "Point System", LearnDash | **None.** `points_earned` is quiz scoring, not an economy |
@@ -155,7 +155,7 @@ missing checkbox everyone else ticks loses the comparison before our strengths a
    drag-and-drop curriculum has no keyboard test, and reflow/zoom is untested — so the report is a
    draft, not a VPAT. See `docs/ACCESSIBILITY.md`.
 4. ~~**xAPI/LRS, then cmi5.** The one standards gap, and a genuine first in this market.~~ **Done, 2026-10-28.** xAPI reporting shipped on the 27th; cmi5 import, launch and satisfaction on the 28th. No WordPress LMS has either natively. What is *not* claimed: ADL certification (there is a conformance suite and we have not been through it), block-level satisfaction, `abandoned`/`waived`, and launch modes other than `Normal` — all listed in `docs/XAPI.md`.
-5. **Migration importers**, starting with Tutor and LearnDash by install base. Pure acquisition.
+5. ~~**Migration importers**, starting with Tutor and LearnDash by install base. Pure acquisition.~~ **Tutor done, 2026-10-28** — free, previewable, re-runnable, non-destructive. LearnDash next on the same framework; then LearnPress / LifterLMS / Masteriyo if the install-base numbers justify them.
 6. **WooCommerce bridge.** Adoption, not capability.
 7. **Membership surface, content bank, points/leaderboard, PDF lessons, question media.** Comparison-table
    parity, in that order.

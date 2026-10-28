@@ -28,6 +28,7 @@ final class Tables
             CouponRedemptionsTable::class,
             AnalyticsTable::class,
             LogsTable::class,
+            ImportMapTable::class,
         ];
     }
 }
