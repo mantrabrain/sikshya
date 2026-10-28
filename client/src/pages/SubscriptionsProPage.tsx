@@ -19,6 +19,7 @@ import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig, WpRestUser } from '../types';
 import { AddonSettingsPage } from './AddonSettingsPage';
+import { MembershipLevelsTab } from './MembershipLevelsTab';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { __ } from '../lib/i18n';
@@ -41,9 +42,9 @@ type SubRow = {
   current_period_end: string | null;
 };
 
-type TabId = 'plans' | 'list' | 'settings';
+type TabId = 'plans' | 'levels' | 'list' | 'settings';
 
-const TAB_IDS: TabId[] = ['plans', 'list', 'settings'];
+const TAB_IDS: TabId[] = ['plans', 'levels', 'list', 'settings'];
 
 type ToastState = { kind: 'success' | 'error'; text: string } | null;
 
@@ -200,6 +201,7 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
             tabs={[
               { id: 'list', label: 'Subscriptions', icon: 'arrowPath' },
               { id: 'plans', label: 'Plans', icon: 'documentText' },
+              { id: 'levels', label: 'Membership levels', icon: 'sparkles' },
               { id: 'settings', label: 'Add-on defaults', icon: 'cog' },
             ]}
             value={activeTab}
@@ -238,6 +240,8 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
               },
             ]}
           />
+        ) : activeTab === 'levels' ? (
+          <MembershipLevelsTab onToast={pushToast} />
         ) : activeTab === 'plans' ? (
           <PlansTab
             loading={loading}

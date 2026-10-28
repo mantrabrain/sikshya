@@ -219,12 +219,31 @@ What a browser spec would add that these do not: that the insert dialog's
 course and section pickers really narrow to what the signed-in author may edit,
 and that the capture list matches the course outline on screen.
 
+## Membership levels
+
+No browser spec. The rules are **52 PHPUnit tests** in
+`MembershipLevelsIntegrationTest` (`--group memberships`), covering the
+catalogue (all / courses / categories, unioned not intersected, unpublished
+excluded), the additive-only access rule at all three gates, the single
+refusal the enrolment gate may overturn, every fault the editor reports, and
+the rendered public HTML — the pricing table, the "included with membership"
+panel and the account line. Mutation run against them: **29 of 30 seeded
+defects caught**; the survivor is behaviour-equivalent (removing the
+`$userId <= 0` guard changes nothing while `hasActiveSubscription()` keeps its
+own, and removing both still fails nothing because no subscription row belongs
+to user 0).
+
+What a browser spec would add: that the level editor's course picker and the
+tab's problem list behave on screen, and that the pricing table lays out at
+phone width.
+
 ## Not covered by a browser test
 
 - **`assignments_advanced`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`community_discussions`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`drip_notifications`** (starter) — Sends email from the drip cron (`sikshya_pro_drip_cron`), not from any browser action, so it is not reachable from a browser test. Covered by Pro PHPUnit.
 - **`content_bank`** (starter) — No dedicated browser spec; covered by Pro PHPUnit (`--group content_bank`). See above.
+- **`subscriptions` → membership levels** (pro) — No dedicated browser spec; covered by Pro PHPUnit (`--group memberships`). See above.
 - **`dynamic_checkout_fields`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`email_advanced_customization`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`multilingual_enterprise`** (scale) — No dedicated browser spec; covered by Pro PHPUnit.

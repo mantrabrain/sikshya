@@ -30,7 +30,7 @@ worse than none — it misdirects a roadmap.
 | Cohorts: **None** | **Shipped.** `cohorts` (pro), drip anchored on the intake, with an admin screen |
 | Compliance / mandatory training: **None** | **Shipped.** `compliance_training` (scale) — audience by role/group/cohort, deadlines, recurrence, waivers, audit reporting, admin screen |
 | Payment gateways: "Offline, PayPal, Stripe, Paystack" | **Nine**: offline, bank transfer, PayPal, Stripe, Razorpay, Mollie, Paystack, Square, Authorize.Net. Authorize.Net was listed as a LifterLMS-only gap; we have it, including recurring |
-| Memberships: **None**, "subscriptions only" | **Capability exists.** A plan is attached per course via `_sikshya_required_plan_id`, and `SubscriptionAccessGate` grants every course requiring that plan. What is missing is the *product surface* — no membership level entity, no membership landing page, configured per course instead |
+| Memberships: **None**, "subscriptions only" | **Shipped 2026-10-28.** The capability already existed (a plan per course via `_sikshya_required_plan_id`); the product surface now does too — membership levels with a catalogue (all / courses / categories), a `[sikshya_membership_levels]` pricing table, an "included with membership" panel on a course, and the level named on the learner's account. Levels are additive only. Joining still goes through a subscription-priced course, because every order line is a course line |
 | Audio lessons: "half-wired" / Tax: "a setting that does nothing" | Both fixed in 1.0.14 |
 | AI authoring: "`docs/AI_ADDON_PREMIUM_UX_IMPLEMENTATION_BLUEPRINT.md` is a plan, not code" | **That file is not an AI-authoring plan.** It is a blueprint *for AI coding agents* about addon gating and premium UX — the three-axis model, `GatedFeatureWorkspace`, the doc→feature matrix. There was no AI-authoring design at all. Corrected here because the earlier wording implied a head start that did not exist |
 
@@ -101,7 +101,7 @@ This is the list that loses a comparison table, and the first row is now urgent.
 | **WooCommerce bridge** | LearnDash, LifterLMS, Tutor | **Shipped 2026-10-28**, free: a product sells any number of courses, `completed`/`processing`/`payment_complete` grant idempotently, refunds close only what that order opened, guest checkout creates the account the purchase needs, and the course page hands its buy button to WooCommerce so two checkouts never compete. **Subscriptions renewals are not wired** | Adoption, not capability: a shop that already runs WooCommerce has its gateways, taxes and accounting working, and will not take a second checkout. See `docs/WOOCOMMERCE.md` |
 | **Content bank / shared course steps** | Tutor "Content Bank"; LearnDash shared steps | **Shipped 2026-10-28** as `content_bank` (Starter and above): a library of lessons, quizzes and assignments, saved from any course and inserted into any section the author can edit; a quiz travels with its questions, answer keys and settings; items are private until shared with the site's other authors. Deliberately a **copy**, not LearnDash's shared post — progress and attempts are keyed to one lesson, so a shared step would report a learner finished in a course they never took. What that costs is stated: editing a banked item does not reach courses already built from it. cmi5 lessons are refused rather than half-copied. See `docs/CONTENT-BANK.md` |
 | **Gamification points + leaderboard** | MasterStudy "Point System", LearnDash | **None.** `points_earned` is quiz scoring, not an economy |
-| **Membership product surface** | Tutor, MasterStudy, LifterLMS | Capability exists, no membership entity or landing page (see corrections) |
+| **Membership product surface** | Tutor, MasterStudy, LifterLMS | **Closed 2026-10-28** — membership levels over existing plans; see `docs/MEMBERSHIPS.md` for what is not claimed (no plan-only checkout, no level tiering, no proration) |
 | **PDF lessons** | MasterStudy | **None.** Lesson kinds are text, video, audio, live, scorm, h5p |
 | **Question media** (image/audio in a question) | MasterStudy, LearnDash | **None.** 8 question types, none carry media |
 | **Starter site templates** (~20) | MasterStudy | **None.** Adoption lever, not a capability |
@@ -159,8 +159,11 @@ missing checkbox everyone else ticks loses the comparison before our strengths a
 6. ~~**WooCommerce bridge.** Adoption, not capability.~~ **Done, 2026-10-28** — free, and deliberately not a second pricing system: WooCommerce charges, Sikshya grants. Subscriptions renewals are the one open piece.
 7. ~~**Membership surface, content bank**, points/leaderboard, PDF lessons, question media.~~ **Content bank
    done, 2026-10-28** — snapshots rather than shared posts, because the existing progress and attempt rows
-   are keyed to one lesson and a shared step would have made them lie. Remaining, in order: membership
-   surface, points/leaderboard, PDF lessons, question media, starter templates.
+   are keyed to one lesson and a shared step would have made them lie. **Membership surface done,
+   2026-10-28** — a level over an existing plan rather than a second access system or a second
+   checkout, because every order line in Sikshya is a course line and a plan-only order would have
+   put refunds, invoices and receipts at risk for a button. Remaining, in order: points/leaderboard,
+   PDF lessons, question media, starter templates.
 
 Deliberately **not** recommended: building our own SAML or SCIM server, and pursuing SOC 2-gated RFPs.
 

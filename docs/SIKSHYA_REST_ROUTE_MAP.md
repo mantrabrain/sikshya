@@ -101,6 +101,9 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | `/pro/subscriptions/cancel` | POST | `subscriptions` (same) |
 | `/pro/plans` | GET, POST | `subscriptions` (same) |
 | `/pro/plans/(?P<id>\d+)` | PUT/PATCH, DELETE | `subscriptions` (same) |
+| `/pro/memberships/levels` | GET, POST | `subscriptions` (`SikshyaPro\Addons\Subscriptions\Memberships\Controllers\MembershipsRestController`; GET returns each level with a resolved `course_count` and a `problems` list, POST creates or replaces one — `manage_options`) |
+| `/pro/memberships/levels/(?P<id>[A-Za-z0-9_\-]+)` | DELETE | `subscriptions` (removes the level and the access it granted; subscriptions, orders and enrolments are untouched) |
+| `/pro/memberships/targets` | GET | `subscriptions` (courses and course categories for the level editor's pickers) |
 | `/pro/gradebook` | GET | `gradebook` (registered in Pro: `GradebookRestController`) |
 | `/pro/gradebook/export` | GET | `gradebook` |
 | `/pro/gradebook/grid` | GET | `gradebook` |

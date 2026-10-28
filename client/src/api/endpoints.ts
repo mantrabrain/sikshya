@@ -203,6 +203,14 @@ export const SIKSHYA_ENDPOINTS = {
     plans: '/pro/plans',
     plansBulk: '/pro/plans/bulk',
     plan: (id: number) => `/pro/plans/${encodeURIComponent(String(id))}`,
+    /**
+     * Membership levels (Pro, part of the `subscriptions` addon). A level is
+     * presentation plus a catalogue over an existing plan — it never holds a
+     * price of its own.
+     */
+    membershipLevels: '/pro/memberships/levels',
+    membershipLevel: (id: string) => `/pro/memberships/levels/${encodeURIComponent(id)}`,
+    membershipTargets: '/pro/memberships/targets',
     gradebook: (courseId?: number) =>
       courseId
         ? `/pro/gradebook?course_id=${encodeURIComponent(String(courseId))}`
