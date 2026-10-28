@@ -332,6 +332,25 @@ export const SIKSHYA_ENDPOINTS = {
     quizAdvancedBankTerms: '/pro/quiz-advanced/bank-terms',
     quizAdvancedPoolPreview: (tag: string) =>
       `/pro/quiz-advanced/pool-preview?tag=${encodeURIComponent(tag)}`,
+    /**
+     * Content bank (Pro `content_bank` addon). Items are snapshots: inserting
+     * one creates a copy in the target section, it does not share a post.
+     */
+    contentBankItems: (params?: { kind?: string; search?: string; page?: number; per_page?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.kind) q.set('kind', params.kind);
+      if (params?.search) q.set('search', params.search);
+      if (params?.page) q.set('page', String(params.page));
+      if (params?.per_page) q.set('per_page', String(params.per_page));
+      const s = q.toString();
+      return s ? `/pro/content-bank/items?${s}` : '/pro/content-bank/items';
+    },
+    contentBankItem: (id: number) => `/pro/content-bank/items/${encodeURIComponent(String(id))}`,
+    contentBankInsert: (id: number) =>
+      `/pro/content-bank/items/${encodeURIComponent(String(id))}/insert`,
+    contentBankTargets: '/pro/content-bank/targets',
+    contentBankCourseContent: (courseId: number) =>
+      `/pro/content-bank/course-content?course_id=${encodeURIComponent(String(courseId))}`,
     /** SCORM/H5P (Pro) — managed package library + reports + H5P picker. */
     scormPackages: (params?: { page?: number; per_page?: number; search?: string; status?: string }) => {
       const q = new URLSearchParams();

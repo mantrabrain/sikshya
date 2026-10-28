@@ -203,11 +203,28 @@ creation, re-purchase after a refund, and the add-to-cart block. The one class
 that touches WooCommerce's API, `WooOrderReader`, is untested and deliberately
 dull: it reads an order and builds a snapshot.
 
+## The content bank
+
+No browser spec either, and for a weaker reason than WooCommerce's: the
+workspace is reachable here, it just has not been driven from a browser. The
+rules are **33 PHPUnit tests** in `ContentBankIntegrationTest`
+(`--group content_bank`) covering what a snapshot carries and refuses, what an
+insert writes and where, and the three separate permission questions — use the
+bank, read an item, write into a course. Mutation run against them: **23 of 24
+seeded defects caught**, the survivor behaviour-equivalent (a forbidden meta
+key added to the base allowlist is still stripped by the same guard, and
+removing both halves fails two tests).
+
+What a browser spec would add that these do not: that the insert dialog's
+course and section pickers really narrow to what the signed-in author may edit,
+and that the capture list matches the course outline on screen.
+
 ## Not covered by a browser test
 
 - **`assignments_advanced`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`community_discussions`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`drip_notifications`** (starter) — Sends email from the drip cron (`sikshya_pro_drip_cron`), not from any browser action, so it is not reachable from a browser test. Covered by Pro PHPUnit.
+- **`content_bank`** (starter) — No dedicated browser spec; covered by Pro PHPUnit (`--group content_bank`). See above.
 - **`dynamic_checkout_fields`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`email_advanced_customization`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`multilingual_enterprise`** (scale) — No dedicated browser spec; covered by Pro PHPUnit.

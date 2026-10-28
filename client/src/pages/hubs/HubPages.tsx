@@ -21,6 +21,7 @@ import { ActivityLogPage } from '../ActivityLogPage';
 import { AddonSettingsPage } from '../AddonSettingsPage';
 import { QuizAdvancedWorkspacePage } from '../QuizAdvancedWorkspacePage';
 import { LiveClassesWorkspacePage } from '../LiveClassesWorkspacePage';
+import { ContentBankPage } from '../ContentBankPage';
 import { ScormH5pWorkspacePage } from '../ScormH5pWorkspacePage';
 import { ReportsPage } from '../ReportsPage';
 import { ToolsPage } from '../ToolsPage';
@@ -106,6 +107,15 @@ export function ContentLibraryHubPage({ config, title }: Props) {
           icon: 'chapterStack',
           render: (c) => (
             <WpEntityListPage embedded config={c} title={T.chapters} subtitle={`All ${T.chapter.toLowerCase()}s`} restBase="sik_chapter" />
+          ),
+        },
+        {
+          id: 'content-bank',
+          label: 'Content bank',
+          icon: 'layers',
+          hidden: !isFeatureEnabled(config, 'content_bank'),
+          render: (c) => (
+            <ContentBankPage embedded config={c} title={__('Content bank', 'sikshya')} />
           ),
         },
         {

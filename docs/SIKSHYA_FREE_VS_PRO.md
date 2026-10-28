@@ -44,6 +44,7 @@ Everything in Free, plus (non-exhaustive; implement incrementally):
   generation and the provider key live in Pro; the AI studio screen lives in Free, like every
   other add-on's admin UI.
 - **Automation:** content drip, prerequisites, learning paths, course clone, bundles.
+- **Authoring:** a **content bank** of reusable lessons, quizzes and assignments (`content_bank`, Starter — see [CONTENT-BANK.md](CONTENT-BANK.md)). It inserts copies rather than sharing one post, because progress and quiz attempts are keyed to a single lesson.
 - **Commerce:** subscriptions, coupons, multiple gateways, invoices, deeper Woo/EDD/PMPro integration.
 - **Assessment:** assignments, question banks, timers, advanced question types, detailed attempt analytics.
 - **Live:** Zoom / Meet / calendar integrations.

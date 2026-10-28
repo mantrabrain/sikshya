@@ -130,6 +130,11 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | `/pro/ai/apply/chapter` | POST | `ai_authoring` (**writes**: one chapter plus its lessons, through `CurriculumService`) |
 | `/pro/ai/apply/lesson` | POST | `ai_authoring` (**writes**: replaces a lesson body) |
 | `/pro/ai/apply/quiz` | POST | `ai_authoring` (**writes**: a quiz plus its questions inside one chapter) |
+| `/pro/content-bank/items` | GET, POST | `content_bank` (`SikshyaPro\Addons\ContentBank\Rest\BankRoutes`; GET filters `kind`, `search`, `page`, `per_page` and is scoped to the caller's own plus shared items; POST **writes** bank rows from `post_ids` (max 50 per call) and reports a `skipped` list for anything the caller cannot edit) |
+| `/pro/content-bank/items/(?P<id>\d+)` | POST/PATCH/PUT, DELETE | `content_bank` (rename and `visibility`; author or site staff only) |
+| `/pro/content-bank/items/(?P<id>\d+)/insert` | POST | `content_bank` (**writes**: a new lesson/quiz/assignment in `chapter_id`, through free's `CurriculumService`; requires edit access to that chapter's course) |
+| `/pro/content-bank/targets` | GET | `content_bank` (courses the caller may write into, each with its sections) |
+| `/pro/content-bank/course-content` | GET | `content_bank` (query `course_id`; the bankable items already in that course, in outline order) |
 | `/scale/vendors` | GET, POST | `marketplace_multivendor` |
 | `/scale/withdrawals` | POST | `marketplace_multivendor` |
 | `/scale/reports/commissions` | GET | `marketplace_multivendor` |

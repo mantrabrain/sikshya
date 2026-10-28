@@ -363,6 +363,19 @@ final class FeatureRegistry
                     'sikshya'
                 ),
             ],
+            'content_bank' => [
+                'label' => __('Content bank', 'sikshya'),
+                'tier' => 'starter',
+                'group' => 'course',
+                'description' => __(
+                    "Keeps a library of lessons, quizzes and assignments you can drop into any course instead of rebuilding them.\n\nTurn on when several courses share the same material—an induction video, a safety quiz, a standard brief.\n\nTurn off when every course is written once and never reused.",
+                    'sikshya'
+                ),
+                'detail_description' => __(
+                    "What you get: A “Save to bank” step for anything already in a course, and an “Insert” step that drops a copy into any section of any course you can edit. Quizzes keep their questions, answer keys and settings. Each saved item is private to you until you share it with the other authors on the site.\n\nInserting makes a copy, on purpose: progress, completions and quiz attempts are recorded against a specific lesson, so one lesson living in two courses would report a learner who finished it in one as finished in the other. The trade-off is that editing a banked item does not change courses already built from it.\n\nTurn it on when: You run many courses with shared material, or a team of authors who should not retype each other's work.\n\nTurn it off when: Your library is small enough to copy by hand. Nothing already inserted stops working—it is ordinary course content.\n\nPlan: Starter tier or higher (paid plans).",
+                    'sikshya'
+                ),
+            ],
             'live_classes' => [
                 'label' => __('Live classes (Zoom / Meet / Classroom)', 'sikshya'),
                 'tier' => 'pro',
