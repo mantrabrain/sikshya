@@ -29,6 +29,18 @@ final class SiteHealthNotices
     private const DISMISS_META_PREFIX = 'sikshya_dismissed_notice_';
     private const PAID_COURSE_CACHE = 'sikshya_has_paid_courses';
     private const ACTION_FLUSH_REWRITES = 'sikshya_flush_rewrites';
+
+    /**
+     * The Sikshya Pro version this build of the free plugin expects.
+     *
+     * Free updates arrive from wordpress.org, often automatically; Pro updates
+     * arrive from the store. So "free is ahead of Pro" is the ordinary state
+     * for a while after every release, not an edge case — and in that window
+     * any screen the free plugin renders for a *newer* Pro add-on finds no REST
+     * route behind it, because a route registered in an add-on's boot does not
+     * exist until that add-on ships.
+     */
+    public const EXPECTED_PRO_VERSION = '1.0.11';
     private const NONCE_FLUSH_REWRITES = 'sikshya_flush_rewrites_nonce';
 
     private static bool $registered = false;
@@ -132,7 +144,68 @@ final class SiteHealthNotices
             ];
         }
 
+        // 5. Pro is installed but older than this build of Sikshya expects.
+        if (self::proIsBehind()) {
+            $out[] = [
+                'id' => 'pro_version_behind',
+                'severity' => 'warning',
+                'title' => __('Sikshya Pro is older than this version of Sikshya', 'sikshya'),
+                'body' => sprintf(
+                    /* translators: 1: installed Pro version, 2: expected Pro version */
+                    __(
+                        'Sikshya Pro %1$s is active, but this version of Sikshya expects %2$s or newer. Features added in this release that are powered by Pro will show their screen and then fail to load — nothing already working is affected, and updating Pro fixes it. Free updates come from WordPress.org while Pro comes from your account, so they do not always arrive together.',
+                        'sikshya'
+                    ),
+                    self::installedProVersion(),
+                    self::EXPECTED_PRO_VERSION
+                ),
+                'settings_label' => __('Sikshya → License', 'sikshya'),
+                'settings_url' => admin_url('admin.php?page=' . \Sikshya\Constants\AdminPages::DASHBOARD . '&view=license'),
+            ];
+        }
+
         return $out;
+    }
+
+    /**
+     * The active Pro plugin's version, or '' when Pro is absent or silent.
+     */
+    private static function installedProVersion(): string
+    {
+        $version = defined('SIKSHYA_PRO_VERSION') ? trim((string) \constant('SIKSHYA_PRO_VERSION')) : '';
+
+        /**
+         * Filter the Pro version this check compares against.
+         *
+         * The real source is a constant, which a site cannot correct and a test
+         * cannot vary. A bundled or white-labelled build that reports its
+         * version elsewhere can answer here instead; returning '' silences the
+         * check entirely.
+         *
+         * @param string $version Version string, or '' when Pro is absent.
+         */
+        return trim((string) apply_filters('sikshya_installed_pro_version', $version));
+    }
+
+    /**
+     * True only when Pro is present *and* states a version below the expected
+     * one.
+     *
+     * Deliberately silent in both unknown cases. No Pro at all is the ordinary
+     * free install and must never be nagged. A Pro that does not define its
+     * version cannot be compared, and guessing "probably old" would warn people
+     * whose setup is fine — a false alarm here costs more than the real one it
+     * would catch, because the symptom it describes is a single screen failing
+     * to load rather than anything breaking.
+     */
+    private static function proIsBehind(): bool
+    {
+        $installed = self::installedProVersion();
+        if ($installed === '') {
+            return false;
+        }
+
+        return version_compare($installed, self::EXPECTED_PRO_VERSION, '<');
     }
 
     /**

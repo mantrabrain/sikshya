@@ -147,5 +147,8 @@ mutation of the pair is caught).
   importers (`docs/MIGRATING-TO-SIKSHYA.md`) still import questions without
   media.
 - **No cropping, resizing or annotation.** Upload the image you want shown.
-- **No Playwright spec.** The viewer, the height cap and audio playback are
-  unverified in a real browser.
+- **Audio playback, the height cap and the authoring field are unverified in a
+  browser.** `e2e/tests/learner/question-media.spec.ts` covers the image half
+  end to end in Chromium — the description reaching the rendered attribute, the
+  signed URL, the image actually painting, and the response staying a download
+  — but not the audio player, not the 340px cap, and not the editor control.

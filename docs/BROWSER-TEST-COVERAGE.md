@@ -254,6 +254,22 @@ What a browser spec would add: that the adjustment form's user search and the
 rebuild button behave on screen, and that the shortcode table reads well at
 phone width.
 
+### PDF lessons (free)
+
+`learner/lesson-pdf.spec.ts`. The reason it exists: the proxy's `stream()`
+emits binary and calls `exit`, so PHPUnit can never see what it puts on the
+wire. The spec asserts the viewer is framed from a `/sikshya/v1/file/` URL
+rather than the uploads path, that the permanent "Open in a new tab" link is
+there, that the response is `application/pdf` with `Content-Disposition:
+inline` and `Accept-Ranges: bytes`, and that `bytes=10-19` returns **206 with
+the exact ten bytes** — a wrong seek returns a plausible-looking body, so the
+assertion is on the content, not the length. A suffix range and an
+unsatisfiable range (416 plus the real length) are pinned too, and a second
+test confirms an `.html` upload never becomes a lesson document.
+
+**Still unverified:** whether the embedded viewer actually draws in WebKit and
+Firefox, and the frame height on a phone.
+
 ## Not covered by a browser test
 
 - **`assignments_advanced`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
@@ -262,8 +278,7 @@ phone width.
 - **`content_bank`** (starter) — No dedicated browser spec; covered by Pro PHPUnit (`--group content_bank`). See above.
 - **`subscriptions` → membership levels** (pro) — No dedicated browser spec; covered by Pro PHPUnit (`--group memberships`). See above.
 - **`gamification`** (pro) — No dedicated browser spec; covered by Pro PHPUnit (`--group gamification`). See above.
-- **Question media** (free) — No dedicated browser spec; covered by free PHPUnit (`--group question_media`). What a browser test would earn and PHPUnit cannot: that the image height cap leaves the options on screen, and that audio actually plays through the signed proxy.
-- **PDF lessons** (free) — No dedicated browser spec; covered by free PHPUnit (`--group pdf_lessons`). The parts a browser test would actually earn are the ones left unverified: whether the viewer draws in each engine, and the frame height on a phone.
+- **Question media** (free) — `learner/question-media.spec.ts` covers the image half end to end: the alt text reaching the rendered attribute, the `src` being the signed proxy rather than the uploads path, the image actually painting (`naturalWidth > 0`), and the response coming back as `Content-Disposition: attachment` — which is the design claim, since `<img>` ignores disposition and so the proxy's inline allowlist never has to grow. **Audio playback and the image height cap are still unverified**, as is the authoring field.
 - **`dynamic_checkout_fields`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`email_advanced_customization`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`multilingual_enterprise`** (scale) — No dedicated browser spec; covered by Pro PHPUnit.

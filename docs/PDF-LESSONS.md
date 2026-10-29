@@ -155,5 +155,9 @@ combined mutation of the pair is caught).
 - **No conversion.** A .docx or .pptx is not turned into a PDF; upload a PDF.
 - **No inline delivery for any other type.** Images and video have their own
   lesson kinds and their own players; the allowlist exists to stay at one entry.
-- **No Playwright spec.** The viewer, the link row and the mobile frame height
-  are unverified in a real browser; everything above is PHPUnit.
+- **Not verified in WebKit or Firefox, and not at phone width.**
+  `e2e/tests/learner/lesson-pdf.spec.ts` drives the feature in Chromium —
+  including what the proxy actually puts on the wire, which PHPUnit cannot see
+  because `stream()` exits — but whether the embedded viewer *draws* in other
+  engines, and whether the frame height leaves the lesson usable on a phone,
+  are still unchecked.

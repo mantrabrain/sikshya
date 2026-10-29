@@ -7,7 +7,12 @@ WordPress REST base: **`/wp-json/sikshya/v1/`** (namespace `sikshya/v1`).
 
 ## Gating (commercial add-on + Addons)
 
-Routes registered by **`sikshya-pro`** are **always present** when the commercial add-on is loaded. Access is denied with **HTTP 403** instead of omitting the route (avoids ambiguous **404** for API clients).
+Routes registered by **`sikshya-pro`** fall into two groups, and the difference is visible to API clients:
+
+- **Central routes** — everything `SikshyaPro\Bootstrap::registerRest()` registers (`ProAddonRoutes`, `ProExtendedFeatureRoutes`, `ProAddonSettingsRoutes`, reviews, discussions, webhooks, API keys, public API, OAuth). These are **always present** whenever the commercial add-on is loaded, and refuse with **HTTP 403** rather than being omitted, so a client can tell "not allowed" from "not a route".
+- **Per-add-on routes** — a controller registered inside an add-on's own `Addon::boot()` (membership levels, points, content bank, cmi5, xAPI, and most other add-on surfaces). `AddonManager::bootEnabledAddons()` never boots a disabled add-on, so while that module is **off** its routes are **not registered at all** and answer **404 `rest_no_route`**, not 403.
+
+That second behaviour is deliberate — a module that is off genuinely is not there — but it is worth knowing before you write a client: **probe the feature catalog (`GET /admin/addons`), not a 404, to decide whether a module exists.** A 404 from a `/pro/…` path means "either this route never existed or its add-on is switched off", and only the catalog tells you which.
 
 | Error code (`code` in JSON) | When |
 |-----------------------------|------|
