@@ -40,6 +40,12 @@ if (!function_exists('sikshya_learn_icon')) {
             case 'audio':
                 // Audio lesson — headphones arc. KEEP IN SYNC with icons.json curriculumLessonAudio.
                 return '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M4 13a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M4 13v4a2 2 0 0 0 2 2h1v-7H5a1 1 0 0 0-1 1zM20 13v4a2 2 0 0 1-2 2h-1v-7h2a1 1 0 0 1 1 1z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>';
+            case 'pdf':
+                // PDF lesson — page with folded corner + lines, distinguished
+                // from the text glyph by a thicker bottom rule (a "document"
+                // rather than prose). KEEP IN SYNC with
+                // sikshya_curriculum_outline_row_type_icon_html() pdf.
+                return '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8l-5-5z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M14 3v3.5A1.5 1.5 0 0 0 15.5 8H19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M8 12.5h8M8 15.5h8M8 18h4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
             case 'folder':
                 return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
             case 'assignment':

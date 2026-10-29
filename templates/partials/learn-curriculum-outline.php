@@ -158,6 +158,8 @@ if ($outline_blocks === []) {
                                                 echo sikshya_learn_icon('play-video');
                                             } elseif ($lesson_type === 'audio') {
                                                 echo sikshya_learn_icon('audio');
+                                            } elseif ($lesson_type === 'pdf') {
+                                                echo sikshya_learn_icon('pdf');
                                             } elseif ($lesson_type === 'live') {
                                                 echo sikshya_learn_icon('live');
                                             } elseif ($lesson_type === 'scorm') {

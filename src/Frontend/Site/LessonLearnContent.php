@@ -8,6 +8,8 @@
 
 namespace Sikshya\Frontend\Site;
 
+use Sikshya\Services\LessonDocument;
+
 // phpcs:ignore
 if (!defined('ABSPATH')) {
     exit;
@@ -120,6 +122,8 @@ final class LessonLearnContent
                 return self::videoBlock($lesson_id);
             case 'audio':
                 return self::audioBlock($lesson_id);
+            case 'pdf':
+                return self::pdfBlock($lesson_id);
             default:
                 /*
                  * Imports and legacy lessons sometimes retain a hosted video URL but never set
@@ -187,6 +191,66 @@ final class LessonLearnContent
             . $fallback
             . '</div>'
             . self::transcriptDisclosureHtml($lesson_id);
+    }
+
+    /**
+     * Document viewer for a `pdf` lesson.
+     *
+     * The frame is never the only way in. Browser support for an embedded PDF
+     * is genuinely uneven — iOS Safari renders a single unscrollable page, and
+     * several Android browsers show nothing at all — so the link row below it
+     * is permanent rather than a fallback revealed on an error event. An
+     * iframe that fails to render a PDF usually fails silently, with no `error`
+     * to listen for, which is exactly why the video/audio fallback pattern
+     * cannot be reused here.
+     */
+    private static function pdfBlock(int $lesson_id): string
+    {
+        $doc = LessonDocument::forDisplay($lesson_id, (int) get_current_user_id());
+        if ($doc === null) {
+            return '';
+        }
+
+        $frame_title = sprintf(
+            /* translators: %s: document or lesson title */
+            __('Document: %s', 'sikshya'),
+            $doc['title'] !== '' ? $doc['title'] : get_the_title($lesson_id)
+        );
+
+        $html = '<div class="sikshya-lesson-embed sikshya-lesson-embed--pdf">'
+            . '<iframe class="sikshya-lesson-pdf__frame" src="' . esc_url($doc['view_url']) . '"'
+            . ' title="' . esc_attr($frame_title) . '" loading="lazy"></iframe>'
+            . '</div>';
+
+        $actions = '<a class="sikshya-lesson-pdf__action" href="' . esc_url($doc['view_url']) . '"'
+            . ' target="_blank" rel="noopener noreferrer">'
+            . esc_html__('Open the document in a new tab', 'sikshya')
+            . '</a>';
+
+        if ($doc['download_url'] !== '') {
+            $size = LessonDocument::formatSize((int) $doc['filesize']);
+            $label = $size !== ''
+                ? sprintf(
+                    /* translators: %s: human-readable file size, e.g. "2 MB" */
+                    __('Download (%s)', 'sikshya'),
+                    $size
+                )
+                : __('Download', 'sikshya');
+            $actions .= '<a class="sikshya-lesson-pdf__action" href="'
+                . esc_url($doc['download_url']) . '" download>'
+                . esc_html($label)
+                . '</a>';
+        }
+
+        $html .= '<p class="sikshya-lesson-pdf__actions">' . $actions . '</p>'
+            . '<p class="sikshya-lesson-pdf__hint">'
+            . esc_html__(
+                'If the document does not appear above, open it in a new tab — some mobile browsers cannot display PDFs inline.',
+                'sikshya'
+            )
+            . '</p>';
+
+        return $html;
     }
 
     /**

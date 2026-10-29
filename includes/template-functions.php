@@ -1665,6 +1665,12 @@ function sikshya_curriculum_outline_row_type_icon_html(
                     $body = '<path d="M12 3l9 5-9 5-9-5 9-5z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M3 13l9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 17l9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>';
 
                     break;
+                case 'pdf':
+                    // Page + folded corner, ruled like a document rather than
+                    // prose. KEEP IN SYNC with learn-icons.php `pdf`.
+                    $body = '<path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8l-5-5z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M14 3v3.5A1.5 1.5 0 0 0 15.5 8H19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M8 12.5h8M8 15.5h8M8 18h4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>';
+
+                    break;
                 case 'h5p':
                     // Puzzle piece — kept; stroke normalised.
                     $body = '<path d="M8.5 4a2.5 2.5 0 1 1 5 0v1h2a2 2 0 0 1 2 2v2h-1a2.5 2.5 0 1 0 0 5h1v2a2 2 0 0 1-2 2h-2v-1a2.5 2.5 0 1 0-5 0v1h-2a2 2 0 0 1-2-2v-2h1a2.5 2.5 0 1 0 0-5H4.5V7a2 2 0 0 1 2-2h2V4z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>';

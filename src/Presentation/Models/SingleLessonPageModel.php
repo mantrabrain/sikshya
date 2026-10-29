@@ -218,6 +218,8 @@ final class SingleLessonPageModel
                 return 'play-video';
             case 'audio':
                 return 'audio';
+            case 'pdf':
+                return 'pdf';
             case 'scorm':
             case 'h5p':
                 return 'doc';

@@ -35,7 +35,7 @@ worse than none — it misdirects a roadmap.
 | AI authoring: "`docs/AI_ADDON_PREMIUM_UX_IMPLEMENTATION_BLUEPRINT.md` is a plan, not code" | **That file is not an AI-authoring plan.** It is a blueprint *for AI coding agents* about addon gating and premium UX — the three-axis model, `GatedFeatureWorkspace`, the doc→feature matrix. There was no AI-authoring design at all. Corrected here because the earlier wording implied a head start that did not exist |
 
 Gaps confirmed as genuine despite a grep hit, after opening each file: **Divi/WPBakery** (the matches
-are `individual`, `divider`), **PDF lessons** (the one hit serves PDFs from inside a SCORM package),
+are `individual`, `divider`),
 **course collections** (`RestCollectionQueryService` is REST pagination), **direct messages** and
 **public profiles** (description text and an OAuth `profile` scope), **OIDC** (the hit is Google
 sign-in requesting `openid email profile` — consumer OAuth, not enterprise SSO).
@@ -102,7 +102,7 @@ This is the list that loses a comparison table, and the first row is now urgent.
 | **Content bank / shared course steps** | Tutor "Content Bank"; LearnDash shared steps | **Shipped 2026-10-28** as `content_bank` (Starter and above): a library of lessons, quizzes and assignments, saved from any course and inserted into any section the author can edit; a quiz travels with its questions, answer keys and settings; items are private until shared with the site's other authors. Deliberately a **copy**, not LearnDash's shared post — progress and attempts are keyed to one lesson, so a shared step would report a learner finished in a course they never took. What that costs is stated: editing a banked item does not reach courses already built from it. cmi5 lessons are refused rather than half-copied. See `docs/CONTENT-BANK.md` |
 | **Gamification points + leaderboard** | MasterStudy "Point System", LearnDash | **Shipped 2026-10-28** — the `gamification` add-on: a ledger with per-thing idempotency (so re-completing a lesson cannot farm points), derived totals for a fast board, manual adjustments, and a leaderboard that is staff-only until widened, honours a learner opt-out and forgets a deleted person. See `docs/GAMIFICATION.md` |
 | **Membership product surface** | Tutor, MasterStudy, LifterLMS | **Closed 2026-10-28** — membership levels over existing plans; see `docs/MEMBERSHIPS.md` for what is not claimed (no plan-only checkout, no level tiering, no proration) |
-| **PDF lessons** | MasterStudy | **None.** Lesson kinds are text, video, audio, live, scorm, h5p |
+| **PDF lessons** | MasterStudy | **Shipped 2026-10-29**, free: a `pdf` lesson kind whose body is a document, read in a viewer in the lesson. A media library file is delivered through the existing signed, per-user, expiring proxy rather than its uploads URL — which meant teaching that proxy inline delivery (a **signed** claim, gated on a one-entry MIME allowlist, because rendering an uploaded `.html` from our own origin is stored XSS) and byte ranges, which PDF viewers need. See `docs/PDF-LESSONS.md` |
 | **Question media** (image/audio in a question) | MasterStudy, LearnDash | **None.** 8 question types, none carry media |
 | **Starter site templates** (~20) | MasterStudy | **None.** Adoption lever, not a capability |
 | **Divi / WPBakery** | MasterStudy | **None.** Gutenberg and basic widgets |
@@ -164,8 +164,12 @@ missing checkbox everyone else ticks loses the comparison before our strengths a
    checkout, because every order line in Sikshya is a course line and a plan-only order would have
    put refunds, invoices and receipts at risk for a button. **Points and leaderboard done,
    2026-10-28** — the hard part was not the scoreboard but making an achievement pay exactly once,
-   since the LMS fires its completion hooks again whenever a learner re-ticks a lesson. Remaining,
-   in order: PDF lessons, question media, starter templates.
+   since the LMS fires its completion hooks again whenever a learner re-ticks a lesson. **PDF
+   lessons done, 2026-10-29** — the lesson kind was an afternoon; the work was that the signed
+   attachment proxy only ever forced a download, so inline delivery had to be added without
+   handing anyone a way to render an arbitrary upload from our own origin, and byte ranges had to
+   be answered because PDF viewers fetch a document a range at a time. Remaining, in order:
+   question media, starter templates.
 
 Deliberately **not** recommended: building our own SAML or SCIM server, and pursuing SOC 2-gated RFPs.
 

@@ -27,6 +27,14 @@ namespace Sikshya\Security;
  * Token format (URL-safe):
  *   `base64url(json({"att":<id>,"uid":<id>,"exp":<ts>})).hex(hmac_sha256)`
  *
+ * A token may also carry `"dsp":"inline"`, which asks the proxy to serve the
+ * file for display rather than download — what a PDF lesson needs to show the
+ * document in a viewer instead of saving it. The claim is inside the signed
+ * payload on purpose: disposition decides whether the browser *renders* bytes
+ * from our own origin, so it must not be something a learner can add to the
+ * URL by hand. The proxy still refuses to render anything but an allowlisted
+ * type, so a signed inline token for an `.html` upload is not stored XSS.
+ *
  * @package Sikshya\Security
  */
 final class AttachmentTokenService
@@ -43,8 +51,12 @@ final class AttachmentTokenService
      *   - The attachment doesn't exist.
      *   - The signing secret can't be loaded.
      */
-    public static function signedUrlFor(int $attachment_id, int $user_id, int $ttl_seconds = 0): string
-    {
+    public static function signedUrlFor(
+        int $attachment_id,
+        int $user_id,
+        int $ttl_seconds = 0,
+        bool $inline = false
+    ): string {
         if ($attachment_id <= 0) {
             return '';
         }
@@ -70,6 +82,11 @@ final class AttachmentTokenService
             'uid' => $user_id,
             'exp' => time() + $ttl_seconds,
         ];
+        if ($inline) {
+            // Only added when asked for, so every token minted before inline
+            // delivery existed still hashes and decodes exactly as it did.
+            $payload['dsp'] = 'inline';
+        }
         $encoded = self::base64UrlEncode((string) \wp_json_encode($payload));
         $sig = \hash_hmac('sha256', $encoded, self::secret());
         $token = $encoded . '.' . $sig;
@@ -81,7 +98,7 @@ final class AttachmentTokenService
      * Verify a token returned by the proxy route. Returns the decoded payload
      * on success or a WP_Error describing the failure mode.
      *
-     * @return array{attachment_id: int, user_id: int}|\WP_Error
+     * @return array{attachment_id: int, user_id: int, disposition: string}|\WP_Error
      */
     public static function verify(string $token)
     {
@@ -121,7 +138,11 @@ final class AttachmentTokenService
             return new \WP_Error('expired', \__('Download link has expired.', 'sikshya'));
         }
 
-        return ['attachment_id' => $att, 'user_id' => $uid];
+        // Anything other than the exact string falls back to a download, so a
+        // malformed or unknown claim cannot talk the proxy into rendering.
+        $dsp = isset($payload['dsp']) && $payload['dsp'] === 'inline' ? 'inline' : 'attachment';
+
+        return ['attachment_id' => $att, 'user_id' => $uid, 'disposition' => $dsp];
     }
 
     /**

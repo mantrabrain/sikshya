@@ -35,7 +35,7 @@ class LessonService
         }
 
         // Validate content type
-        $valid_types = ['text', 'video', 'audio', 'assignment', 'quiz'];
+        $valid_types = ['text', 'video', 'audio', 'pdf', 'assignment', 'quiz'];
         if (!empty($data['type']) && !in_array($data['type'], $valid_types)) {
             throw new \InvalidArgumentException('Invalid lesson type');
         }

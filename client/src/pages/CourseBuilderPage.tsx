@@ -1345,6 +1345,7 @@ function curriculumItemTypePill(config: SikshyaReactConfig, item: CurriculumCont
     // Technical media types (Video / Live / SCORM / H5P / Text) describe how
     // the content is delivered, not the domain — keep these hard-coded.
     if (lt === 'video') return { label: 'Video', tone: 'brand' };
+    if (lt === 'pdf') return { label: 'PDF', tone: 'slate' };
     if (lt === 'live') return { label: 'Live', tone: 'rose' };
     if (lt === 'scorm') return { label: 'SCORM', tone: 'accent' };
     if (lt === 'h5p') return { label: 'H5P', tone: 'accent' };
@@ -2333,6 +2334,8 @@ function CourseBuilderEditor({
       const lessonKind =
         addContentType === 'lesson_video'
           ? 'video'
+          : addContentType === 'lesson_pdf'
+          ? 'pdf'
           : addContentType === 'lesson_live'
           ? 'live'
           : addContentType === 'lesson_scorm'

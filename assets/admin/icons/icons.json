@@ -231,6 +231,14 @@
       "M8.5 13h7M8.5 16.5h4.5"
     ]
   },
+  "curriculumLessonPdf": {
+    "viewBox": "0 0 24 24",
+    "paths": [
+      "M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8l-5-5z",
+      "M14 3v3.5A1.5 1.5 0 0 0 15.5 8H19",
+      "M8 12.5h8M8 15.5h8M8 18h4.5"
+    ]
+  },
   "curriculumLessonAudio": {
     "viewBox": "0 0 24 24",
     "paths": [

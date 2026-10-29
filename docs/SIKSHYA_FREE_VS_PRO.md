@@ -17,6 +17,9 @@ This document defines what ships in **Sikshya** (WordPress.org / free) versus **
 - Unlimited courses, lessons, quizzes (CPT + meta).
 - Admin course builder; public catalog and single course.
 - Sequential lesson navigation; lesson completion and basic course progress.
+- Lesson kinds: text, video, audio, **PDF document** (served through the signed, per-user,
+  expiring attachment proxy — see [PDF-LESSONS.md](PDF-LESSONS.md)). Live classes, SCORM, H5P and
+  cmi5 are Pro.
 
 ### Quizzes (basic)
 - Multiple choice, true/false, short text; passing score; attempts; basic review.

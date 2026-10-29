@@ -74,6 +74,7 @@ import {
 } from '../../components/shared/AddQuestionAuthoringModal';
 import { __ } from '../../lib/i18n';
 import { LessonAttachmentsField } from '../../components/shared/LessonAttachmentsField';
+import { LessonDocumentField } from '../../components/shared/LessonDocumentField';
 
 const FIELD =
   'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
@@ -316,6 +317,11 @@ export function LessonEditor(props: ContentEditorProps) {
   const [lessonType, setLessonType] = useState('text');
   const [videoUrl, setVideoUrl] = useState('');
   const [audioUrl, setAudioUrl] = useState('');
+  // PDF lessons: the document is the lesson body. An attachment id is
+  // preferred over a URL and wins server-side when both are set.
+  const [pdfId, setPdfId] = useState(0);
+  const [pdfUrl, setPdfUrl] = useState('');
+  const [pdfHideDownload, setPdfHideDownload] = useState(false);
   // Optional transcript shown beside the player on the Learn page — keep
   // both an external file URL (downloadable) and a paste-in text (inline
   // disclosure) for flexibility. Either, both, or neither may be set.
@@ -347,6 +353,9 @@ export function LessonEditor(props: ContentEditorProps) {
       setLessonType('text');
       setVideoUrl('');
       setAudioUrl('');
+      setPdfId(0);
+      setPdfUrl('');
+      setPdfHideDownload(false);
       setTranscriptUrl('');
       setTranscriptText('');
       setAttachmentIds([]);
@@ -380,6 +389,10 @@ export function LessonEditor(props: ContentEditorProps) {
     setLessonType(String(readMeta(m, '_sikshya_lesson_type') ?? 'text') || 'text');
     setVideoUrl(String(readMeta(m, '_sikshya_lesson_video_url') ?? ''));
     setAudioUrl(String(readMeta(m, '_sikshya_lesson_audio_url') ?? ''));
+    const rawPdfId = Number(readMeta(m, '_sikshya_lesson_pdf_id') ?? 0);
+    setPdfId(Number.isFinite(rawPdfId) && rawPdfId > 0 ? rawPdfId : 0);
+    setPdfUrl(String(readMeta(m, '_sikshya_lesson_pdf_url') ?? ''));
+    setPdfHideDownload(String(readMeta(m, '_sikshya_lesson_pdf_hide_download') ?? '') === '1');
     setTranscriptUrl(String(readMeta(m, '_sikshya_lesson_transcript_url') ?? ''));
     setTranscriptText(String(readMeta(m, '_sikshya_lesson_transcript_text') ?? ''));
     const rawAttachments = readMeta(m, '_sikshya_lesson_attachments');
@@ -412,6 +425,11 @@ export function LessonEditor(props: ContentEditorProps) {
         _sikshya_lesson_type: kind,
         _sikshya_lesson_video_url: kind === 'video' ? videoUrl.trim() : '',
         _sikshya_lesson_audio_url: kind === 'audio' ? audioUrl.trim() : '',
+        _sikshya_lesson_pdf_id: kind === 'pdf' ? pdfId : 0,
+        // Cleared when a file is chosen, so the ignored half of the pair is
+        // never left behind to confuse a later edit.
+        _sikshya_lesson_pdf_url: kind === 'pdf' && pdfId <= 0 ? pdfUrl.trim() : '',
+        _sikshya_lesson_pdf_hide_download: kind === 'pdf' && pdfHideDownload ? '1' : '',
         _sikshya_lesson_transcript_url: transcriptUrl.trim(),
         _sikshya_lesson_transcript_text: transcriptText,
         _sikshya_lesson_attachments: attachmentIds,
@@ -455,6 +473,9 @@ export function LessonEditor(props: ContentEditorProps) {
     durationUnit,
     lessonType,
     videoUrl,
+    pdfId,
+    pdfUrl,
+    pdfHideDownload,
     transcriptUrl,
     transcriptText,
     isFreePreview,
@@ -501,6 +522,8 @@ export function LessonEditor(props: ContentEditorProps) {
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
                 {lessonType === 'video'
                   ? 'Video'
+                  : lessonType === 'pdf'
+                  ? 'PDF'
                   : lessonType === 'live'
                   ? 'Live class'
                   : lessonType === 'scorm'
@@ -558,6 +581,7 @@ export function LessonEditor(props: ContentEditorProps) {
                   <option value="text">{__('Text lesson', 'sikshya')}</option>
                   <option value="video">{__('Video lesson', 'sikshya')}</option>
                   <option value="audio">{__('Audio lesson', 'sikshya')}</option>
+                  <option value="pdf">{__('PDF document', 'sikshya')}</option>
                   {liveOffered ? (
                     <option value="live">
                       {liveReady
@@ -607,6 +631,28 @@ export function LessonEditor(props: ContentEditorProps) {
                     value={audioUrl}
                     onChange={(e) => setAudioUrl(e.target.value)}
                     placeholder="https://example.com/lesson.mp3"
+                  />
+                </div>
+              ) : null}
+              {lessonType === 'pdf' ? (
+                <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                  <label className={LABEL} htmlFor="sik-lesson-pdf">
+                    {__('Document', 'sikshya')}
+                  </label>
+                  <p className={HINT}>
+                    {__(
+                      'Learners read this document in the lesson itself. Anything you write below appears under the viewer as notes.',
+                      'sikshya',
+                    )}
+                  </p>
+                  <LessonDocumentField
+                    id="sik-lesson-pdf"
+                    attachmentId={pdfId}
+                    url={pdfUrl}
+                    hideDownload={pdfHideDownload}
+                    onAttachmentIdChange={setPdfId}
+                    onUrlChange={setPdfUrl}
+                    onHideDownloadChange={setPdfHideDownload}
                   />
                 </div>
               ) : null}
@@ -683,6 +729,8 @@ export function LessonEditor(props: ContentEditorProps) {
                   label={
                     lessonType === 'video'
                       ? 'Transcript / notes'
+                      : lessonType === 'pdf'
+                        ? 'Notes below the document'
                       : lessonType === 'live'
                         ? 'Briefing for the session'
                         : lessonType === 'scorm' || lessonType === 'h5p'
@@ -692,6 +740,8 @@ export function LessonEditor(props: ContentEditorProps) {
                   help={
                     lessonType === 'video'
                       ? 'Optional but recommended for accessibility and SEO.'
+                      : lessonType === 'pdf'
+                        ? 'Optional context under the viewer — what to look for, which pages matter, what to do next.'
                       : lessonType === 'live'
                         ? 'Agenda, prep work, joining instructions — shown above the “Join live class” button.'
                         : lessonType === 'scorm' || lessonType === 'h5p'

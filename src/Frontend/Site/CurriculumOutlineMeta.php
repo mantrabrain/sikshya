@@ -102,6 +102,7 @@ final class CurriculumOutlineMeta
             'text' => __('Text', 'sikshya'),
             'audio' => __('Audio', 'sikshya'),
             'document' => __('Document', 'sikshya'),
+            'pdf' => __('PDF', 'sikshya'),
             'live' => __('Live class', 'sikshya'),
             'scorm' => __('SCORM', 'sikshya'),
             'h5p' => __('H5P', 'sikshya'),

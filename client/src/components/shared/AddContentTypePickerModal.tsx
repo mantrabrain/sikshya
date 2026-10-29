@@ -9,7 +9,7 @@ import type { SikshyaReactConfig } from '../../types';
 import { term } from '../../lib/terminology';
 
 /**
- * Identifies one of the seven kinds of teaching content the user can add.
+ * Identifies one of the kinds of teaching content the user can add.
  * `lesson_*` variants all create a `sik_lesson` (with `_sikshya_lesson_type`
  * meta), while `quiz` / `assignment` create their own post types. This is the
  * same vocabulary the course-builder curriculum picker uses, so the two
@@ -18,6 +18,7 @@ import { term } from '../../lib/terminology';
 export type ContentPickerType =
   | 'lesson_text'
   | 'lesson_video'
+  | 'lesson_pdf'
   | 'lesson_live'
   | 'lesson_scorm'
   | 'lesson_h5p'
@@ -36,7 +37,7 @@ type PickerOpt = {
 };
 
 /**
- * Single source of truth for the seven content tiles, used by both the
+ * Single source of truth for the content tiles, used by both the
  * standalone "Add lesson" CTA on the Content library list and the in-course
  * curriculum builder modal. There is intentionally only one definition.
  */
@@ -44,6 +45,7 @@ export function getContentPickerTypes(): PickerOpt[] {
   return [
     { type: 'lesson_text', label: __('Text lesson', 'sikshya'), icon: 'plusDocument' },
     { type: 'lesson_video', label: __('Video lesson', 'sikshya'), icon: 'curriculumLessonVideo' },
+    { type: 'lesson_pdf', label: __('PDF document', 'sikshya'), icon: 'curriculumLessonPdf' },
     {
       type: 'lesson_live',
       label: __('Live class', 'sikshya'),
@@ -80,6 +82,7 @@ export function defaultTitleFor(type: ContentPickerType, config?: SikshyaReactCo
   const labels: Record<ContentPickerType, string> = {
     lesson_text: sprintf(__('Text %s', 'sikshya'), lesson.toLowerCase()),
     lesson_video: sprintf(__('Video %s', 'sikshya'), lesson.toLowerCase()),
+    lesson_pdf: __('PDF document', 'sikshya'),
     lesson_live: __('Live class', 'sikshya'),
     lesson_scorm: __('SCORM package', 'sikshya'),
     lesson_h5p: __('H5P interactive', 'sikshya'),

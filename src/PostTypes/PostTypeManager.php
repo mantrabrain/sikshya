@@ -200,6 +200,15 @@ class PostTypeManager
          * server allowlist turned one into a text lesson if anything tried.
          */
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_audio_url');
+        /*
+         * PDF lessons: the document *is* the lesson body. The id is preferred
+         * over the URL because an attachment can be served through the signed
+         * proxy (see LessonDocument), while a URL on someone else's host is
+         * whatever that host allows.
+         */
+        $int_meta(PostTypes::LESSON, \Sikshya\Services\LessonDocument::META_ID);
+        $str_meta(PostTypes::LESSON, \Sikshya\Services\LessonDocument::META_URL);
+        $str_meta(PostTypes::LESSON, \Sikshya\Services\LessonDocument::META_HIDE_DOWNLOAD);
         // Lesson: free preview toggle.
         $str_meta(PostTypes::LESSON, '_sikshya_is_free');
         // Lesson: optional transcript (URL or rich text) shown beside the

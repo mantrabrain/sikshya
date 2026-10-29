@@ -19,6 +19,9 @@ export function navIconForCurriculumRow(
     if (lt === 'audio') {
       return 'curriculumLessonAudio';
     }
+    if (lt === 'pdf') {
+      return 'curriculumLessonPdf';
+    }
     if (lt === 'live') {
       return 'curriculumLessonLive';
     }

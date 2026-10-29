@@ -25,6 +25,28 @@ use WP_REST_Server;
  */
 final class AttachmentProxyRoutes
 {
+    /**
+     * MIME types the proxy will serve with `Content-Disposition: inline`, and
+     * only when the signed token asks for it.
+     *
+     * This list is the whole security boundary for inline delivery. Serving an
+     * uploaded file for *display* from our own origin means the browser parses
+     * it in our security context — an `.html` or `.svg` attachment rendered
+     * that way is stored XSS against every logged-in viewer, which is exactly
+     * why WordPress's own uploads are served with `nosniff` and why this route
+     * defaulted to forcing a download in the first place. A PDF is parsed by
+     * the browser's PDF viewer in its own sandbox, with no access to our DOM
+     * or cookies, so it can be rendered without handing over the origin.
+     *
+     * Anything not named here is downloaded even with a valid inline token.
+     */
+    private const INLINE_SAFE_MIME = [
+        'application/pdf',
+    ];
+
+    /** Bytes per fread() when streaming a byte range. */
+    private const CHUNK_BYTES = 262144;
+
     private Plugin $plugin;
 
     public function __construct(Plugin $plugin)
@@ -96,16 +118,169 @@ final class AttachmentProxyRoutes
             $download_name = 'download';
         }
 
+        $disposition = $this->dispositionFor($mime, (string) ($verified['disposition'] ?? ''));
+
+        $size = (int) filesize($file_path);
+
         \nocache_headers();
         header('Content-Type: ' . $mime);
-        header('Content-Length: ' . (string) filesize($file_path));
-        // `inline` for images / PDFs renders in-browser; we use `attachment`
-        // so any leaked URL surface forces a download (safer default).
-        header('Content-Disposition: attachment; filename="' . $download_name . '"');
+        header('Content-Disposition: ' . $disposition . '; filename="' . $download_name . '"');
         header('X-Content-Type-Options: nosniff');
-        // Don't leak the file path; just stream the bytes.
-        readfile($file_path);
+        // Advertised unconditionally: a client that knows it can ask for a
+        // range will, and one that doesn't is unaffected.
+        header('Accept-Ranges: bytes');
+
+        $range = $this->requestedRange($size);
+
+        if ($range === null) {
+            header('Content-Length: ' . (string) $size);
+            // Don't leak the file path; just stream the bytes.
+            readfile($file_path);
+            exit;
+        }
+
+        if ($range === false) {
+            // RFC 9110 §15.5.17: an unsatisfiable range gets 416 plus the real
+            // length, so the client can retry with a range that exists.
+            \status_header(416);
+            header('Content-Range: bytes */' . (string) $size);
+            header('Content-Length: 0');
+            exit;
+        }
+
+        [$start, $end] = $range;
+        \status_header(206);
+        header('Content-Range: bytes ' . $start . '-' . $end . '/' . (string) $size);
+        header('Content-Length: ' . (string) ($end - $start + 1));
+        $this->streamRange($file_path, $start, $end);
         exit;
+    }
+
+    /**
+     * Decide whether these bytes may be rendered or must be downloaded.
+     *
+     * `attachment` stays the default in both directions: a leaked URL forces a
+     * download rather than rendering in our origin, and a type we do not
+     * recognise is downloaded even when the token asked for display. Both
+     * conditions have to hold — the signature proves *we* minted an inline
+     * link, the allowlist proves the content cannot execute as markup — and
+     * either one alone has been enough to turn an upload form into stored XSS
+     * in other people's plugins.
+     *
+     * @param string $claim The token's verified disposition claim.
+     */
+    private function dispositionFor(string $mime, string $claim): string
+    {
+        if ($claim !== 'inline') {
+            return 'attachment';
+        }
+        if (!in_array($mime, self::INLINE_SAFE_MIME, true)) {
+            return 'attachment';
+        }
+
+        return 'inline';
+    }
+
+    /**
+     * Parse `Range` into an inclusive `[start, end]` byte pair.
+     *
+     * Why this route needs ranges at all: a PDF lesson points a viewer at this
+     * endpoint, and browser PDF viewers fetch linearised documents a range at a
+     * time rather than pulling the whole file. Answering 200-with-everything to
+     * a range request makes the viewer re-download a large document on every
+     * page jump, and some builds simply give up and show a blank frame.
+     *
+     * @return array{0:int,1:int}|null|false Pair to serve, null for "no usable
+     *                                       range header, send it all", or
+     *                                       false for unsatisfiable.
+     */
+    private function requestedRange(int $size)
+    {
+        $header = isset($_SERVER['HTTP_RANGE']) ? (string) \wp_unslash($_SERVER['HTTP_RANGE']) : '';
+        if ($header === '' || $size <= 0) {
+            return null;
+        }
+
+        // Only `bytes` is defined, and only a single range is worth supporting:
+        // a multipart/byteranges response buys nothing for a PDF viewer, so a
+        // comma means "send the whole thing" rather than a wrong answer.
+        if (stripos($header, 'bytes=') !== 0) {
+            return null;
+        }
+        $spec = trim(substr($header, 6));
+        if ($spec === '' || strpos($spec, ',') !== false) {
+            return null;
+        }
+
+        $parts = explode('-', $spec, 2);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        $rawStart = trim($parts[0]);
+        $rawEnd = trim($parts[1]);
+
+        if ($rawStart === '') {
+            // Suffix form, `bytes=-500`: the last N bytes.
+            if ($rawEnd === '' || !ctype_digit($rawEnd)) {
+                return null;
+            }
+            $length = (int) $rawEnd;
+            if ($length <= 0) {
+                return false;
+            }
+            $start = $length >= $size ? 0 : $size - $length;
+
+            return [$start, $size - 1];
+        }
+
+        if (!ctype_digit($rawStart)) {
+            return null;
+        }
+        $start = (int) $rawStart;
+        if ($start >= $size) {
+            return false;
+        }
+
+        if ($rawEnd === '') {
+            return [$start, $size - 1];
+        }
+        if (!ctype_digit($rawEnd)) {
+            return null;
+        }
+        $end = (int) $rawEnd;
+        if ($end < $start) {
+            return false;
+        }
+
+        return [$start, min($end, $size - 1)];
+    }
+
+    /**
+     * Copy `[start, end]` to the client in chunks.
+     *
+     * Chunked rather than one `fread` of the whole range: a learner asking for
+     * a 40 MB slice should not become a 40 MB allocation in PHP.
+     */
+    private function streamRange(string $file_path, int $start, int $end): void
+    {
+        $handle = fopen($file_path, 'rb');
+        if (!$handle) {
+            return;
+        }
+        fseek($handle, $start);
+        $remaining = $end - $start + 1;
+        while ($remaining > 0 && !feof($handle)) {
+            $chunk = fread($handle, (int) min(self::CHUNK_BYTES, $remaining));
+            if ($chunk === false || $chunk === '') {
+                break;
+            }
+            echo $chunk;
+            $remaining -= strlen($chunk);
+            // Keep peak memory flat on a long range rather than buffering the
+            // whole response.
+            flush();
+        }
+        fclose($handle);
     }
 
     /**

@@ -34,12 +34,16 @@ function postTypeForPickerType(t: ContentPickerType): 'sik_lesson' | 'sik_quiz' 
 }
 
 /** Lesson sub-kind written into `_sikshya_lesson_type` meta (empty for non-lessons). */
-function lessonSubtypeForPickerType(t: ContentPickerType): '' | 'text' | 'video' | 'live' | 'scorm' | 'h5p' {
+function lessonSubtypeForPickerType(
+  t: ContentPickerType,
+): '' | 'text' | 'video' | 'pdf' | 'live' | 'scorm' | 'h5p' {
   switch (t) {
     case 'lesson_text':
       return 'text';
     case 'lesson_video':
       return 'video';
+    case 'lesson_pdf':
+      return 'pdf';
     case 'lesson_live':
       return 'live';
     case 'lesson_scorm':

@@ -85,6 +85,7 @@ React admin paths are centralized in `client/src/api/endpoints.ts` (`SIKSHYA_END
 | `/webhooks/stripe`, `/webhooks/paypal` | POST | `WebhooksRestRoutes` | Gateway callbacks (`__return_true`) |
 | `/public/certificates/verify` | GET | `CertificatesPublicRoutes` | Public verify |
 | `/auth/login` | POST | `AuthRestRoutes` | JWT |
+| `/file/(?P<token>[^/]+)` | GET | `AttachmentProxyRoutes` | Streams an attachment's bytes instead of exposing its `uploads/` URL. `permission_callback` is `__return_true` on purpose — authority is the HMAC token, which names the attachment, the **one** user id allowed to use it, an expiry, and optionally `dsp: inline`. Identity is resolved from the REST user, a Bearer JWT, or the logged-in cookie read directly (a clicked link carries cookies but no nonce). Mismatch → 403, expired → 410. Answers `Range` with 206; serves `Content-Disposition: inline` only for a signed inline claim **and** an allowlisted MIME (`application/pdf`), otherwise `attachment`. Emits binary and `exit`s, so it never returns a JSON body. |
 
 ---
 

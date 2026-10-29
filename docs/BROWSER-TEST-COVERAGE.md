@@ -262,6 +262,7 @@ phone width.
 - **`content_bank`** (starter) — No dedicated browser spec; covered by Pro PHPUnit (`--group content_bank`). See above.
 - **`subscriptions` → membership levels** (pro) — No dedicated browser spec; covered by Pro PHPUnit (`--group memberships`). See above.
 - **`gamification`** (pro) — No dedicated browser spec; covered by Pro PHPUnit (`--group gamification`). See above.
+- **PDF lessons** (free) — No dedicated browser spec; covered by free PHPUnit (`--group pdf_lessons`). The parts a browser test would actually earn are the ones left unverified: whether the viewer draws in each engine, and the frame height on a phone.
 - **`dynamic_checkout_fields`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`email_advanced_customization`** (pro) — No dedicated browser spec; covered by Pro PHPUnit.
 - **`multilingual_enterprise`** (scale) — No dedicated browser spec; covered by Pro PHPUnit.

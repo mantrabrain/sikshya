@@ -34,7 +34,8 @@ page, or in a single course the others link to.
 ## What travels
 
 The item's title and body, plus an **allowlist** of meta per type — lesson
-kind and media URLs, transcripts, attachments, durations; quiz time limit,
+kind and media URLs, a PDF lesson's document, transcripts, attachments,
+durations; quiz time limit,
 passing score, attempt limits, shuffling; assignment points and submission
 rules. A quiz also carries its questions: title, body, type, points, options,
 explanation, and the answer key **exactly as stored**, because the grader
