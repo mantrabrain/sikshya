@@ -248,6 +248,15 @@ class PostTypeManager
         // Optional learner-facing explanation shown after the quiz is graded
         // ("Review answers"). Helps turn each question into a learning moment.
         $str_meta(PostTypes::QUESTION, '_sikshya_question_explanation');
+        /*
+         * One image or audio clip on the question's stem. The title is stored
+         * and rendered as plain text, so this is the only way to ask "listen to
+         * this" or "what is wrong with this diagram".
+         */
+        $int_meta(PostTypes::QUESTION, \Sikshya\Services\QuestionMedia::META_ID);
+        $str_meta(PostTypes::QUESTION, \Sikshya\Services\QuestionMedia::META_URL);
+        $str_meta(PostTypes::QUESTION, \Sikshya\Services\QuestionMedia::META_KIND);
+        $str_meta(PostTypes::QUESTION, \Sikshya\Services\QuestionMedia::META_ALT);
 
         // Assignment (sik_assignment).
         $str_meta(PostTypes::ASSIGNMENT, '_sikshya_assignment_due_date');

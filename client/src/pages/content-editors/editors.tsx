@@ -13,6 +13,8 @@ import { HorizontalEditorTabs } from '../../components/shared/HorizontalEditorTa
 import { WPMediaPickerField } from '../../components/shared/WPMediaPickerField';
 import { DateTimePickerField } from '../../components/shared/DateTimePickerField';
 import { QuillField } from '../../components/shared/QuillField';
+import { QuestionMediaField, kindFromUrl } from '../../components/shared/QuestionMediaField';
+import type { QuestionMediaKind } from '../../components/shared/QuestionMediaField';
 import { NumberWithUnitField } from '../../components/shared/NumberWithUnitField';
 import { SkeletonCard } from '../../components/shared/Skeleton';
 import type { SikshyaReactConfig } from '../../types';
@@ -1483,6 +1485,14 @@ export function QuestionEditor(props: ContentEditorProps) {
   const [orderItems, setOrderItems] = useState<string[]>(['Item 1', 'Item 2', 'Item 3']);
   const [orderPerm, setOrderPerm] = useState<number[]>([0, 1, 2]);
   const [featured, setFeatured] = useState(0);
+  // One image or audio clip on the stem. The kind is derived — from the
+  // attachment's media type, or the URL's extension — and only asked for when
+  // there is nothing to derive it from.
+  const [mediaId, setMediaId] = useState(0);
+  const [mediaUrl, setMediaUrl] = useState('');
+  const [mediaKind, setMediaKind] = useState<QuestionMediaKind>('');
+  const [mediaAlt, setMediaAlt] = useState('');
+  const [mediaAltError, setMediaAltError] = useState<string | null>(null);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [editorTab, setEditorTab] = useState<'content' | 'settings'>('content');
   const [proQuestionValues, setProQuestionValues] = useState<ProQuestionValues>(PRO_QUESTION_DEFAULTS);
@@ -1516,6 +1526,11 @@ export function QuestionEditor(props: ContentEditorProps) {
       setMatchMap([0, 0]);
       setOrderItems(['Item 1', 'Item 2', 'Item 3']);
       setOrderPerm([0, 1, 2]);
+      setMediaId(0);
+      setMediaUrl('');
+      setMediaKind('');
+      setMediaAlt('');
+      setMediaAltError(null);
       setProQuestionValues(PRO_QUESTION_DEFAULTS);
       return;
     }
@@ -1532,6 +1547,21 @@ export function QuestionEditor(props: ContentEditorProps) {
     setQType(t);
     setPoints(Number(readMeta(m, '_sikshya_question_points') ?? 1));
     setProQuestionValues(readProQuestionFromMeta(m));
+    const rawMediaId = Number(readMeta(m, '_sikshya_question_media_id') ?? 0);
+    setMediaId(Number.isFinite(rawMediaId) && rawMediaId > 0 ? rawMediaId : 0);
+    const loadedMediaUrl = String(readMeta(m, '_sikshya_question_media_url') ?? '');
+    setMediaUrl(loadedMediaUrl);
+    const storedKind = String(readMeta(m, '_sikshya_question_media_kind') ?? '');
+    const derivedKind = loadedMediaUrl !== '' ? kindFromUrl(loadedMediaUrl) : '';
+    setMediaKind(
+      derivedKind !== ''
+        ? derivedKind
+        : storedKind === 'image' || storedKind === 'audio'
+          ? (storedKind as QuestionMediaKind)
+          : '',
+    );
+    setMediaAlt(String(readMeta(m, '_sikshya_question_media_alt') ?? ''));
+    setMediaAltError(null);
     const loadedOpts = metaStringArray(readMeta(m, '_sikshya_question_options'));
     const rawCorrect = String(readMeta(m, '_sikshya_question_correct_answer') ?? '');
 
@@ -1688,6 +1718,18 @@ export function QuestionEditor(props: ContentEditorProps) {
       correctPayload = JSON.stringify(perm);
     }
 
+    const hasMedia = mediaId > 0 || mediaUrl.trim() !== '';
+    // An image stem with no description cannot be answered with a screen
+    // reader, so the save is refused rather than quietly shipping a question
+    // some learners cannot attempt. Audio is exempt: the player gets a
+    // sensible generated name, and a transcript would give the answer away.
+    if (hasMedia && mediaKind === 'image' && mediaAlt.trim() === '') {
+      setMediaAltError(__('Describe the image before saving — the question cannot be answered without it.', 'sikshya'));
+      setEditorTab('content');
+      return false;
+    }
+    setMediaAltError(null);
+
     const body: Record<string, unknown> = {
       title,
       content,
@@ -1698,6 +1740,13 @@ export function QuestionEditor(props: ContentEditorProps) {
         _sikshya_question_points: Math.max(0, points),
         _sikshya_question_options: optionsPayload,
         _sikshya_question_correct_answer: correctPayload,
+        _sikshya_question_media_id: mediaId > 0 ? mediaId : 0,
+        // Cleared when a library file is chosen: the id always wins
+        // server-side, and leaving the ignored half behind confuses a later
+        // edit.
+        _sikshya_question_media_url: mediaId > 0 ? '' : mediaUrl.trim(),
+        _sikshya_question_media_kind: hasMedia ? mediaKind : '',
+        _sikshya_question_media_alt: hasMedia ? mediaAlt.trim() : '',
         ...buildProQuestionMeta(proQuestionValues),
       },
     };
@@ -1742,6 +1791,10 @@ export function QuestionEditor(props: ContentEditorProps) {
     matchMap,
     orderItems,
     orderPerm,
+    mediaId,
+    mediaUrl,
+    mediaKind,
+    mediaAlt,
     proQuestionValues,
   ]);
 
@@ -1860,6 +1913,29 @@ export function QuestionEditor(props: ContentEditorProps) {
                   placeholder={__('Enter the question stem…', 'sikshya')}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                <label className={LABEL} htmlFor="sik-question-media">
+                  {__('Image or audio (optional)', 'sikshya')}
+                </label>
+                <p className={HINT}>
+                  {__(
+                    'Shown between the question and its options — for "listen to this and answer" or "what is wrong with this diagram". One file per question.',
+                    'sikshya',
+                  )}
+                </p>
+                <QuestionMediaField
+                  id="sik-question-media"
+                  attachmentId={mediaId}
+                  url={mediaUrl}
+                  kind={mediaKind}
+                  alt={mediaAlt}
+                  onAttachmentIdChange={setMediaId}
+                  onUrlChange={setMediaUrl}
+                  onKindChange={setMediaKind}
+                  onAltChange={setMediaAlt}
+                  altError={mediaAltError}
                 />
               </div>
               {!qType ? (

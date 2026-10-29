@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { QuestionMediaField, kindFromUrl } from './QuestionMediaField';
+import type { QuestionMediaKind } from './QuestionMediaField';
 import { getWpApi } from '../../api';
 import { NavIcon } from '../NavIcon';
 import { ApiErrorPanel } from './ApiErrorPanel';
@@ -143,6 +145,10 @@ function hydrateAuthoringFormFromQuestionPost(
     setMatchMap: (v: number[]) => void;
     setOrderItems: (v: string[]) => void;
     setOrderPerm: (v: number[]) => void;
+    setMediaId: (v: number) => void;
+    setMediaUrl: (v: string) => void;
+    setMediaKind: (v: QuestionMediaKind) => void;
+    setMediaAlt: (v: string) => void;
     setProQuestionValues: (v: ProQuestionValues) => void;
   }
 ): void {
@@ -161,6 +167,10 @@ function hydrateAuthoringFormFromQuestionPost(
     setMatchMap,
     setOrderItems,
     setOrderPerm,
+    setMediaId,
+    setMediaUrl,
+    setMediaKind,
+    setMediaAlt,
     setProQuestionValues,
   } = setters;
   setTitle(titleFromPost(p));
@@ -172,6 +182,20 @@ function hydrateAuthoringFormFromQuestionPost(
   setQType(t);
   setPoints(Number(readMeta(m, '_sikshya_question_points') ?? 1));
   setProQuestionValues(readProQuestionFromMeta(m));
+  const rawMediaId = Number(readMeta(m, '_sikshya_question_media_id') ?? 0);
+  setMediaId(Number.isFinite(rawMediaId) && rawMediaId > 0 ? rawMediaId : 0);
+  const loadedMediaUrl = String(readMeta(m, '_sikshya_question_media_url') ?? '');
+  setMediaUrl(loadedMediaUrl);
+  const storedMediaKind = String(readMeta(m, '_sikshya_question_media_kind') ?? '');
+  const derivedMediaKind = loadedMediaUrl !== '' ? kindFromUrl(loadedMediaUrl) : '';
+  setMediaKind(
+    derivedMediaKind !== ''
+      ? derivedMediaKind
+      : storedMediaKind === 'image' || storedMediaKind === 'audio'
+        ? (storedMediaKind as QuestionMediaKind)
+        : ''
+  );
+  setMediaAlt(String(readMeta(m, '_sikshya_question_media_alt') ?? ''));
   const loadedOpts = metaStringArray(readMeta(m, '_sikshya_question_options'));
   const rawCorrect = String(readMeta(m, '_sikshya_question_correct_answer') ?? '');
 
@@ -319,6 +343,10 @@ function buildCreateBody(params: {
   matchMap: number[];
   orderItems: string[];
   orderPerm: number[];
+  mediaId: number;
+  mediaUrl: string;
+  mediaKind: QuestionMediaKind;
+  mediaAlt: string;
   proQuestionValues: ProQuestionValues;
 }): Record<string, unknown> {
   const {
@@ -385,6 +413,14 @@ function buildCreateBody(params: {
       _sikshya_question_points: Math.max(0, points),
       _sikshya_question_options: optionsPayload,
       _sikshya_question_correct_answer: correctPayload,
+      _sikshya_question_media_id: params.mediaId > 0 ? params.mediaId : 0,
+      // The id always wins server-side, so the ignored half is cleared rather
+      // than left behind to confuse a later edit.
+      _sikshya_question_media_url: params.mediaId > 0 ? '' : params.mediaUrl.trim(),
+      _sikshya_question_media_kind:
+        params.mediaId > 0 || params.mediaUrl.trim() !== '' ? params.mediaKind : '',
+      _sikshya_question_media_alt:
+        params.mediaId > 0 || params.mediaUrl.trim() !== '' ? params.mediaAlt.trim() : '',
       // Mirror the explanation textarea to the dedicated meta key so the
       // learn-page renderer can pick it up without depending on raw
       // post_content (which doubles as instructor notes in some workflows).
@@ -454,6 +490,11 @@ export function AddQuestionAuthoringModal(props: Props) {
   const [orderItems, setOrderItems] = useState<string[]>(['Item 1', 'Item 2', 'Item 3']);
   const [orderPerm, setOrderPerm] = useState<number[]>([0, 1, 2]);
   const [featured, setFeatured] = useState(0);
+  const [mediaId, setMediaId] = useState(0);
+  const [mediaUrl, setMediaUrl] = useState('');
+  const [mediaKind, setMediaKind] = useState<QuestionMediaKind>('');
+  const [mediaAlt, setMediaAlt] = useState('');
+  const [mediaAltError, setMediaAltError] = useState<string | null>(null);
   const [proQuestionValues, setProQuestionValues] = useState<ProQuestionValues>(PRO_QUESTION_DEFAULTS);
   const [typeMenuPos, setTypeMenuPos] = useState<{ top: number; left: number } | null>(null);
 
@@ -528,6 +569,10 @@ export function AddQuestionAuthoringModal(props: Props) {
           setMatchMap,
           setOrderItems,
           setOrderPerm,
+          setMediaId,
+          setMediaUrl,
+          setMediaKind,
+          setMediaAlt,
           setProQuestionValues,
         });
       })
@@ -663,6 +708,16 @@ export function AddQuestionAuthoringModal(props: Props) {
     if (isEditMode && (!editQuestionId || editQuestionId <= 0)) {
       return;
     }
+    // Same rule as the full-page editor: an image stem with no description
+    // cannot be answered with a screen reader, so the save is refused.
+    if ((mediaId > 0 || mediaUrl.trim() !== '') && mediaKind === 'image' && mediaAlt.trim() === '') {
+      setMediaAltError(
+        __('Describe the image before saving — the question cannot be answered without it.', 'sikshya')
+      );
+      setEditorTab('content');
+      return;
+    }
+    setMediaAltError(null);
     setBusy(true);
     setError(null);
     const body = buildCreateBody({
@@ -680,6 +735,10 @@ export function AddQuestionAuthoringModal(props: Props) {
       matchMap,
       orderItems,
       orderPerm,
+      mediaId,
+      mediaUrl,
+      mediaKind,
+      mediaAlt,
       proQuestionValues,
     });
     if (isEditMode && editQuestionId && editQuestionId > 0) {
@@ -873,6 +932,29 @@ export function AddQuestionAuthoringModal(props: Props) {
                       placeholder={__('Enter the question stem…', 'sikshya')}
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                    <label className={LABEL} htmlFor="sik-q-modal-media">
+                      {__('Image or audio (optional)', 'sikshya')}
+                    </label>
+                    <p className={HINT}>
+                      {__(
+                        'Shown between the question and its options. One file per question.',
+                        'sikshya'
+                      )}
+                    </p>
+                    <QuestionMediaField
+                      id="sik-q-modal-media"
+                      attachmentId={mediaId}
+                      url={mediaUrl}
+                      kind={mediaKind}
+                      alt={mediaAlt}
+                      onAttachmentIdChange={setMediaId}
+                      onUrlChange={setMediaUrl}
+                      onKindChange={setMediaKind}
+                      onAltChange={setMediaAlt}
+                      altError={mediaAltError}
                     />
                   </div>
                   {!qType ? (

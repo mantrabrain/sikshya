@@ -52,6 +52,57 @@ if ($qtype === 'true_false' && $opts === []) {
 <fieldset class="sikshya-quizQ sikshya-q" data-qid="<?php echo esc_attr((string) $qid); ?>" data-qtype="<?php echo esc_attr($qtype); ?>">
 	<legend class="sikshya-quizQ__title sikshya-q__title"><?php echo esc_html($label); ?></legend>
 
+	<?php
+	/*
+	 * Optional image or audio on the stem, between the question and its
+	 * options — where a learner reads it before choosing, rather than after.
+	 *
+	 * For an image the alt text is not decoration: the image is part of the
+	 * question. When an author left it empty the image is marked decorative
+	 * (`alt=""`) rather than given a made-up description or the filename,
+	 * because a screen reader announcing "diagram-final-v2.png" is worse than
+	 * silence — and the authoring UI refuses to save an image without it, so
+	 * an empty one here means the data predates that check or came from an
+	 * import.
+	 */
+	$q_media = isset($q['media']) && is_array($q['media']) ? $q['media'] : null;
+	$q_media_url = $q_media !== null ? (string) ($q_media['url'] ?? '') : '';
+	$q_media_kind = $q_media !== null ? (string) ($q_media['kind'] ?? '') : '';
+	$q_media_alt = $q_media !== null ? (string) ($q_media['alt'] ?? '') : '';
+	if ($q_media_url !== '' && ($q_media_kind === 'image' || $q_media_kind === 'audio')) :
+		?>
+		<div class="sikshya-quizQ__media sikshya-quizQ__media--<?php echo esc_attr($q_media_kind); ?>">
+			<?php if ($q_media_kind === 'image') : ?>
+				<img
+					class="sikshya-quizQ__mediaImage"
+					src="<?php echo esc_url($q_media_url); ?>"
+					alt="<?php echo esc_attr($q_media_alt); ?>"
+					loading="lazy"
+					decoding="async"
+				/>
+			<?php else : ?>
+				<audio
+					class="sikshya-quizQ__mediaAudio"
+					controls
+					playsinline
+					preload="metadata"
+					src="<?php echo esc_url($q_media_url); ?>"
+					<?php if ($q_media_alt !== '') : ?>
+						aria-label="<?php echo esc_attr($q_media_alt); ?>"
+					<?php else : ?>
+						aria-label="<?php echo esc_attr(sprintf(
+							/* translators: %d: question number */
+							__('Audio for question %d', 'sikshya'),
+							$qi + 1
+						)); ?>"
+					<?php endif; ?>
+				></audio>
+			<?php endif; ?>
+		</div>
+		<?php
+	endif;
+	?>
+
 	<?php if ($qtype === 'multiple_choice' || $qtype === 'true_false') : ?>
 		<?php foreach ($opts as $oi => $opt) : ?>
 			<label class="sikshya-quizQ__opt">

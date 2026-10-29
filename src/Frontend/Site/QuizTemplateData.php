@@ -13,6 +13,7 @@ use Sikshya\Services\Frontend\LearnOutlineItemAccess;
 use Sikshya\Services\Frontend\LessonPageService;
 use Sikshya\Services\Frontend\QuizPageService;
 use Sikshya\Services\LessonCourseLink;
+use Sikshya\Services\QuestionMedia;
 use Sikshya\Services\Settings;
 
 /**
@@ -443,6 +444,17 @@ final class QuizTemplateData
             'title' => wp_strip_all_tags((string) $qp->post_title),
             'options' => $opts,
         ];
+
+        /*
+         * Optional image or audio on the stem. Absent rather than null when
+         * there is none, so every consumer that already iterates this row —
+         * the quiz template, the learner REST payload, Pro's question-bank
+         * runtime — keeps the shape it had.
+         */
+        $media = QuestionMedia::forDisplay($qid, (int) get_current_user_id());
+        if ($media !== null) {
+            $row['media'] = $media;
+        }
 
         if ($type === 'matching') {
             $raw = (string) get_post_meta($qid, '_sikshya_question_correct_answer', true);

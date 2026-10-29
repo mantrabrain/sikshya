@@ -103,7 +103,7 @@ This is the list that loses a comparison table, and the first row is now urgent.
 | **Gamification points + leaderboard** | MasterStudy "Point System", LearnDash | **Shipped 2026-10-28** — the `gamification` add-on: a ledger with per-thing idempotency (so re-completing a lesson cannot farm points), derived totals for a fast board, manual adjustments, and a leaderboard that is staff-only until widened, honours a learner opt-out and forgets a deleted person. See `docs/GAMIFICATION.md` |
 | **Membership product surface** | Tutor, MasterStudy, LifterLMS | **Closed 2026-10-28** — membership levels over existing plans; see `docs/MEMBERSHIPS.md` for what is not claimed (no plan-only checkout, no level tiering, no proration) |
 | **PDF lessons** | MasterStudy | **Shipped 2026-10-29**, free: a `pdf` lesson kind whose body is a document, read in a viewer in the lesson. A media library file is delivered through the existing signed, per-user, expiring proxy rather than its uploads URL — which meant teaching that proxy inline delivery (a **signed** claim, gated on a one-entry MIME allowlist, because rendering an uploaded `.html` from our own origin is stored XSS) and byte ranges, which PDF viewers need. See `docs/PDF-LESSONS.md` |
-| **Question media** (image/audio in a question) | MasterStudy, LearnDash | **None.** 8 question types, none carry media |
+| **Question media** (image/audio in a question) | MasterStudy, LearnDash | **Shipped 2026-10-29**, free: one image or audio clip on a question's stem, on all 8 types, served through the signed per-user proxy. The kind is derived from the file rather than asked, and an image cannot be saved without a description — the image *is* the question, so without one it cannot be attempted with a screen reader. Media **on the options** is deliberately not built: it would change what a learner submits. See `docs/QUESTION-MEDIA.md` |
 | **Starter site templates** (~20) | MasterStudy | **None.** Adoption lever, not a capability |
 | **Divi / WPBakery** | MasterStudy | **None.** Gutenberg and basic widgets |
 | **BuddyPress / bbPress, SMS/Twilio, wishlist, trial courses, direct messages, public profiles, CEU/credits** | Various | **None** — each verified at 0 real hits |
@@ -168,8 +168,11 @@ missing checkbox everyone else ticks loses the comparison before our strengths a
    lessons done, 2026-10-29** — the lesson kind was an afternoon; the work was that the signed
    attachment proxy only ever forced a download, so inline delivery had to be added without
    handing anyone a way to render an arbitrary upload from our own origin, and byte ranges had to
-   be answered because PDF viewers fetch a document a range at a time. Remaining, in order:
-   question media, starter templates.
+   be answered because PDF viewers fetch a document a range at a time. **Question media done,
+   2026-10-29** — on the stem, not on the options, because option media changes what a learner
+   submits and is the half a grading bug would be worst in; and an image stem is refused without a
+   description, since the image is the question. Remaining: starter site templates, then
+   Divi/WPBakery.
 
 Deliberately **not** recommended: building our own SAML or SCIM server, and pursuing SOC 2-gated RFPs.
 

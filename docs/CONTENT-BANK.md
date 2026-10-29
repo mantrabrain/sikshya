@@ -38,7 +38,8 @@ kind and media URLs, a PDF lesson's document, transcripts, attachments,
 durations; quiz time limit,
 passing score, attempt limits, shuffling; assignment points and submission
 rules. A quiz also carries its questions: title, body, type, points, options,
-explanation, and the answer key **exactly as stored**, because the grader
+explanation, its image or audio clip with that clip's description, and the
+answer key **exactly as stored**, because the grader
 reads a different shape per question type and a second encoder would be a
 second chance to mark learners wrong for being right.
 

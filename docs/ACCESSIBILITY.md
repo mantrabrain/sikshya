@@ -121,3 +121,9 @@ caveats:
 6. New dialogs should use `components/shared/Modal.tsx`, which handles Escape,
    the focus trap and focus restoration. Hand-rolled dialogs need
    `lib/focusTrap.ts`.
+7. If a field lets an author add an image that **carries meaning**, the save is
+   refused without a description — not warned about. Question media works this
+   way (`docs/QUESTION-MEDIA.md`): the image is the question, so an undescribed
+   one is a question some learners cannot attempt at all. Where enforcement
+   cannot reach — a REST write, an importer, a row older than the check — the
+   renderer marks the image decorative rather than reading out its filename.

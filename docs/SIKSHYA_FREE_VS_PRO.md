@@ -15,6 +15,8 @@ This document defines what ships in **Sikshya** (WordPress.org / free) versus **
 
 ### Curriculum
 - Unlimited courses, lessons, quizzes (CPT + meta).
+- 8 question types, any of which can carry one image or audio clip on its stem — see
+  [QUESTION-MEDIA.md](QUESTION-MEDIA.md).
 - Admin course builder; public catalog and single course.
 - Sequential lesson navigation; lesson completion and basic course progress.
 - Lesson kinds: text, video, audio, **PDF document** (served through the signed, per-user,

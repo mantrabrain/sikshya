@@ -4120,6 +4120,39 @@
   color: var(--sikshya-learn-text);
 }
 
+/* Question media — an image or an audio clip on the stem, between the
+ * question and its options.
+ *
+ * The image is capped by height rather than width: a diagram wide enough to
+ * read is useless if answering it means scrolling past the options, and an
+ * author uploading a 4000px screenshot is the normal case, not the edge one.
+ * `max-width: 100%` still keeps it inside the card on a phone. */
+.sikshya-quizQ__media {
+  margin: 0 0 12px;
+}
+
+.sikshya-quizQ__mediaImage {
+  display: block;
+  max-width: 100%;
+  max-height: 340px;
+  width: auto;
+  height: auto;
+  border-radius: var(--sikshya-learn-radius-10, 10px);
+  border: 1px solid var(--sikshya-learn-border);
+  background: #fff;
+}
+
+.sikshya-quizQ__mediaAudio {
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .sikshya-quizQ__mediaImage {
+    max-height: 240px;
+  }
+}
+
 .sikshya-quizQ:focus-within {
   border-color: rgba(44, 91, 168, 0.28);
   box-shadow: 0 0 0 3px rgba(44, 91, 168, 0.08);
