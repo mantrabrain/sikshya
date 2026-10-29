@@ -155,9 +155,14 @@ combined mutation of the pair is caught).
 - **No conversion.** A .docx or .pptx is not turned into a PDF; upload a PDF.
 - **No inline delivery for any other type.** Images and video have their own
   lesson kinds and their own players; the allowlist exists to stay at one entry.
-- **Not verified in WebKit or Firefox, and not at phone width.**
-  `e2e/tests/learner/lesson-pdf.spec.ts` drives the feature in Chromium —
-  including what the proxy actually puts on the wire, which PHPUnit cannot see
-  because `stream()` exits — but whether the embedded viewer *draws* in other
-  engines, and whether the frame height leaves the lesson usable on a phone,
-  are still unchecked.
+- **Whether the PDF itself paints is not verified, and cannot be.**
+  `e2e/tests/learner/lesson-pdf.spec.ts` passes in Chromium, WebKit and
+  Firefox, which
+  establishes real things — the frame is present with a non-empty box (so the
+  `min(78vh, 900px)` height applies in both engines), and the proxy delivers
+  `inline` with working byte ranges — but a visible iframe is not a rendered
+  document. Headless browsers may have no PDF viewer at all, in which case the
+  frame is there and empty. That is unobservable from a test, and it is exactly
+  why the link row below the viewer is permanent rather than an error state:
+  the one failure mode we cannot detect is the one the links cover.
+- **Not checked at phone width.** The 60vh/300px mobile cap is CSS only.

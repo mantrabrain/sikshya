@@ -182,6 +182,18 @@ Shipped since the last review: query-budget gates (compliance sync, list endpoin
 upgrade verification on real data (1.0.9 → 1.0.14 on a throwaway install, content and settings
 preserved), and a 42-screen admin health sweep.
 
+**Repeated for the pending release, 2026-10-29.** A throwaway install at the released free 1.0.14 +
+Pro 1.0.10, seeded with a priced course, a chapter, text/video/audio lessons, a quiz with an answer
+key, an enrolment row and a progress row, then **updated the way wordpress.org updates it** — files
+replaced, no activation hook, upgrade left to the next page load. The before/after diff was exactly
+four lines: 51 → 53 Sikshya tables, Pro schema 1.6.1 → 1.7.0, and the two points tables appearing.
+Every title, body, price, meta value and table row was byte-identical, and the load produced no PHP
+notice, warning or fatal. The new tables were then exercised on that upgraded install — a points
+award landed, and the repeat was refused silently rather than raising a duplicate-key error — so
+they are usable after a cold upgrade, not merely present. Run on **PHP 7.4**, the version the site
+actually serves; every PHPUnit run is on 8.4. See `reference-production-readiness-pass` for the
+method.
+
 Still missing, in priority order:
 
 - **Accessibility:** automated axe-core per template plus a manual keyboard and screen-reader pass.

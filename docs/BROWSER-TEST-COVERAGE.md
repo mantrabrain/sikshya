@@ -267,8 +267,11 @@ assertion is on the content, not the length. A suffix range and an
 unsatisfiable range (416 plus the real length) are pinned too, and a second
 test confirms an `.html` upload never becomes a lesson document.
 
-**Still unverified:** whether the embedded viewer actually draws in WebKit and
-Firefox, and the frame height on a phone.
+Passes in Chromium, WebKit and Firefox. **Still unverified, and partly unverifiable:**
+a visible iframe is not a rendered document — a headless browser may have no
+PDF viewer, leaving the frame present and empty, which no assertion can tell
+apart from a working one. That is why the link row is permanent. The phone-width
+cap is CSS only and unchecked.
 
 ## Not covered by a browser test
 

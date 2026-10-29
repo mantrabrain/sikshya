@@ -29,6 +29,15 @@ export function focusStops(panel: HTMLElement): HTMLElement[] {
 /**
  * Handle one Tab press for a dialog. Returns true when the event was consumed,
  * so the caller knows not to let it through.
+ *
+ * Every Tab inside the dialog is driven from {@see focusStops}, not just the
+ * ones at the two ends. Intercepting only the edges assumes the browser's own
+ * tab order visits the same elements we computed — and Safari's does not. With
+ * macOS full keyboard access off (the default), WebKit's Tab order skips
+ * buttons and links entirely, so the "last stop" we calculated from the DOM is
+ * never reached, the edge never fires, and Tab walks straight out of the dialog
+ * into the page behind it. Driving the whole cycle makes the order exactly DOM
+ * order in every engine, which is also what a keyboard user expects.
  */
 export function trapTab(panel: HTMLElement | null, event: KeyboardEvent): boolean {
   if (!panel || event.key !== 'Tab') return false;
@@ -46,18 +55,25 @@ export function trapTab(panel: HTMLElement | null, event: KeyboardEvent): boolea
     (event.shiftKey ? last : first).focus();
     return true;
   }
-  if (event.shiftKey && active === first) {
+
+  const index = stops.indexOf(active);
+  if (index === -1) {
+    // Focus is on the panel itself, or on something we do not consider a stop
+    // (a container with `tabindex="-1"`, say). Enter the cycle at the end the
+    // press is heading for.
     event.preventDefault();
-    last.focus();
-    return true;
-  }
-  if (!event.shiftKey && active === last) {
-    event.preventDefault();
-    first.focus();
+    (event.shiftKey ? last : first).focus();
     return true;
   }
 
-  return false;
+  const next = event.shiftKey
+    ? stops[(index - 1 + stops.length) % stops.length]
+    : stops[(index + 1) % stops.length];
+
+  event.preventDefault();
+  next.focus();
+
+  return true;
 }
 
 /**
@@ -74,13 +90,34 @@ export function trapTab(panel: HTMLElement | null, event: KeyboardEvent): boolea
 let lastOutsideDialog: HTMLElement | null = null;
 
 if (typeof document !== 'undefined') {
+  const remember = (el: HTMLElement | null): void => {
+    if (!el || typeof el.closest !== 'function') return;
+    if (el.closest('[role="dialog"]')) return;
+    lastOutsideDialog = el;
+  };
+
+  document.addEventListener('focusin', (event) => remember(event.target as HTMLElement | null), true);
+
+  /*
+   * `focusin` alone is not enough, and the gap is a platform difference rather
+   * than an edge case: on macOS, clicking a button does not focus it, so in
+   * Safari opening a dialog with the mouse fires no `focusin` at all and we
+   * have nothing to hand focus back to on close. Focus then lands on <body>
+   * and a keyboard user has lost their place — the exact bug the returner
+   * exists to prevent.
+   *
+   * What the pointer went down on is a better answer than what happened to be
+   * focused anyway: it is the control the person actually used.
+   */
   document.addEventListener(
-    'focusin',
+    'pointerdown',
     (event) => {
-      const el = event.target as HTMLElement | null;
-      if (!el || typeof el.closest !== 'function') return;
-      if (el.closest('[role="dialog"]')) return;
-      lastOutsideDialog = el;
+      const target = event.target as HTMLElement | null;
+      if (!target || typeof target.closest !== 'function') return;
+      // Only an actual control, so clicking blank page chrome does not become
+      // the place focus returns to.
+      const control = target.closest<HTMLElement>(FOCUSABLE);
+      remember(control);
     },
     true
   );
@@ -96,7 +133,16 @@ if (typeof document !== 'undefined') {
 export function focusReturner(): () => void {
   const active = document.activeElement as HTMLElement | null;
   const insideDialog = Boolean(active && typeof active.closest === 'function' && active.closest('[role="dialog"]'));
-  const returnTo = insideDialog ? lastOutsideDialog : (active ?? lastOutsideDialog);
+  /*
+   * `document.activeElement` is `<body>` whenever nothing is focused, which is
+   * not a place to send anyone back to — handing focus to <body> is the very
+   * "you lost your place" outcome this function exists to prevent. It is also
+   * the normal reading in Safari, where clicking a button does not focus it,
+   * so a dialog opened with the mouse captures <body> here and would discard
+   * the trigger that `pointerdown` had correctly remembered.
+   */
+  const meaningful = active && active !== document.body && active !== document.documentElement ? active : null;
+  const returnTo = insideDialog ? lastOutsideDialog : (meaningful ?? lastOutsideDialog);
 
   return () => {
     if (returnTo && document.contains(returnTo) && typeof returnTo.focus === 'function') {

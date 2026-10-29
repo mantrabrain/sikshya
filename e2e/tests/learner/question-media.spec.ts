@@ -35,9 +35,20 @@ test.describe('learner: question media', () => {
     const stamp = Date.now();
     const alt = `A supply curve crossing demand at 40 units ${stamp}`;
 
-    // Smallest valid PNG: 1x1, transparent.
+    /*
+     * A real 48x24 checkerboard, not a 1x1 transparent pixel.
+     *
+     * This matters more than a fixture usually does: with a 1x1 RGBA PNG this
+     * spec passed in Chromium and WebKit and failed in Firefox with
+     * "EncodingError: Invalid encoded image data" — on bytes that were
+     * verified byte-for-byte correct (70 bytes, valid signature, IHDR, IDAT,
+     * IEND) and served as `image/png`. Firefox simply will not decode that
+     * degenerate image in this path. Nothing was wrong with the product, and a
+     * fixture that is not a plausible diagram is not worth the hours of
+     * proving that.
+     */
     const png = Buffer.from(
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==',
+      'iVBORw0KGgoAAAANSUhEUgAAADAAAAAYCAIAAAAzn+mLAAAAOUlEQVR4nO3OsQ0AMAwCQQ+R/VdNJqCMXHDUL3Fzwm7Y736AgIDqQFvHqQcCAuoDbR2nHggIqA70ANmGQKrjgjSBAAAAAElFTkSuQmCC',
       'base64',
     );
 
@@ -138,9 +149,23 @@ test.describe('learner: question media', () => {
         'question media must not need inline delivery',
       ).toContain('attachment');
 
+      // The image is below the fold on a short viewport and carries
+      // `loading="lazy"`, so bring it into view before asking whether it
+      // painted.
+      await img.scrollIntoViewIfNeeded();
+
       // And the browser really did paint it, rather than showing a broken icon.
       const painted = await img.evaluate(
-        (el) => (el as HTMLImageElement).naturalWidth > 0 && (el as HTMLImageElement).complete,
+        (el) =>
+          new Promise<boolean>((resolve) => {
+            const image = el as HTMLImageElement;
+            if (image.complete) {
+              resolve(image.naturalWidth > 0);
+              return;
+            }
+            image.addEventListener('load', () => resolve(image.naturalWidth > 0), { once: true });
+            image.addEventListener('error', () => resolve(false), { once: true });
+          }),
       );
       expect(painted, 'the image must actually load through the signed URL').toBeTruthy();
     } finally {

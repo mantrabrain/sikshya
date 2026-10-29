@@ -44,6 +44,30 @@ found two.
 can: that Tab stays inside an open dialog, and that closing one returns focus
 to the control that opened it.
 
+**Run it in WebKit too, not just Chromium.** On 2026-10-29 that spec passed in
+Chromium and failed three of four in WebKit, and both causes were real defects
+rather than engine quirks to shrug at:
+
+1. `trapTab()` intercepted only the two **ends** of the cycle, which assumes the
+   browser's own tab order visits the same elements we computed. Safari's does
+   not — with macOS full keyboard access off, which is the default, WebKit's
+   Tab order skips buttons and links entirely, so the "last stop" we calculated
+   from the DOM was never reached, the edge never fired, and Tab walked out of
+   the dialog into the page behind it. It now drives the whole cycle from
+   `focusStops()`, so the order is exactly DOM order in every engine.
+2. `focusReturner()` accepted `document.body` as a place to send focus back to.
+   Clicking a button does not focus it on macOS, so a dialog opened with the
+   mouse in Safari captured `<body>` and discarded the trigger — handing focus
+   to `<body>` on close, which is the precise "you lost your place" outcome the
+   function exists to prevent. It now ignores `body`, and a `pointerdown`
+   listener remembers the control the person actually clicked even when that
+   control never receives focus.
+
+The lesson worth keeping: a focus trap verified in one engine is not verified.
+Both bugs were invisible to axe-core, to the source scan, and to Chromium.
+
+    PW_CROSS_BROWSER=1 npx playwright test --project=admin-webkit e2e/tests/a11y/admin
+
 ### Rules, and why there is no baseline
 
 The gates run axe-core with `wcag2a`, `wcag2aa`, `wcag21a` and `wcag21aa`.
@@ -98,6 +122,11 @@ caveats:
   likeliest place to find a keyboard dead end.
 - **Zoom and reflow (1.4.10), 400% zoom, and Windows High Contrast** are
   untested.
+- **Cross-engine coverage is now real but narrow.** The whole Playwright suite
+  passes in Chromium, WebKit and Firefox (1077 tests, 2026-10-29), which is how
+  the two focus defects above were found. That is three engines on one platform:
+  nothing has been run on Windows, on a real iOS or Android browser, or with a
+  screen reader attached.
 - **Sale and featured badge contrast** is fixed by colour arithmetic, not by a
   scan: reaching those badges needs a sale-priced course, which the gate has no
   fixture for.
