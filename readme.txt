@@ -146,6 +146,8 @@ Sell access without duct-taping five plugins together for a basic launch: config
 
 Unlock advanced [content drip](https://mantrabrain.com/plugins/sikshya-lms/features/content-drip/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_content_drip) and [prerequisites](https://mantrabrain.com/plugins/sikshya-lms/features/prerequisites/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_prerequisites), [multi-instructor](https://mantrabrain.com/plugins/sikshya-lms/features/multi-instructor/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_multi_instructor) collaboration, [subscriptions](https://mantrabrain.com/plugins/sikshya-lms/features/subscriptions/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_subscriptions), deeper [analytics](https://mantrabrain.com/plugins/sikshya-lms/features/reports-advanced/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_reports_advanced) and [gradebook](https://mantrabrain.com/plugins/sikshya-lms/features/gradebook/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_gradebook) workflows, [course bundles](https://mantrabrain.com/plugins/sikshya-lms/features/course-bundles/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_course_bundles), [white-label](https://mantrabrain.com/plugins/sikshya-lms/features/white-label/?utm_source=wporg&utm_medium=readme&utm_campaign=feature_white_label) options, and broader integrations. **Free stays generous; Pro unlocks scale.**
 
+[youtube https://youtu.be/6tSzihgfCo8]
+
 👉 [Explore Sikshya Pro](https://mantrabrain.com/plugins/sikshya-lms/pricing/?utm_source=wporg&utm_medium=readme&utm_campaign=pro_detail)
 
 👉 [Sikshya pricing & plans](https://mantrabrain.com/plugins/sikshya-lms/pricing/?utm_source=wporg&utm_medium=readme&utm_campaign=plans)
@@ -419,6 +421,11 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 
 == Changelog ==
 
+Only the two most recent releases are listed here, because WordPress.org truncates a
+changelog longer than 5,000 words. Every earlier entry is kept in full in `changelog.txt`,
+shipped alongside this file, and in the release history at
+https://github.com/mantrabrain/sikshya/releases
+
 = 1.0.15 - 2026-11-01 =
 **An AI studio for authoring: draft an outline, write a lesson, write quiz questions — with your own provider key, and nothing created until you have read the draft.**
 * **New: Course → AI studio.** Describe what a course should teach and get an outline of chapters and lessons you can rename, reorder and delete before anything exists. Pick a lesson and have its body written. Pick a chapter and have quiz questions written, with explanations learners see after grading. Then press a button to create it — generating and creating are deliberately two steps, so a draft you dislike costs you nothing but a click.
@@ -459,203 +466,6 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 * **Admin list screens were slow on busy sites.** The orders screen issued a database query for every order on the page — fetching its lines, each line's course title and the payer separately — and the quiz-attempts screen did the same for every attempt. On a real dataset those two pages cost 65 and 64 queries; they now cost 9 and 6. Nothing about what they show has changed.
 * **Audio lessons could not be created.** The lesson player already handled them, but the type was missing from the picker and the server turned an audio lesson into a text one. You can now pick "Audio lesson", paste a direct link to an .mp3, .m4a, .ogg or .wav file, and learners get a player — with the existing transcript field alongside it for accessibility.
 * Requires Sikshya Pro 1.0.10. The compliance screen reports on the audience Pro assigns, and Pro 1.0.10 is the release that stopped capping that audience at 5,000 learners.
-
-= 1.0.13 - 2026-10-15 =
-**Compliance & mandatory training (new, Scale).**
-* Make a course mandatory for a role, group or cohort with a deadline, and report on who is compliant. Somebody who joins the audience later inherits the obligation without you re-assigning anything.
-* Recurring training reopens on its own cycle, dated from when the learner actually certified rather than from the old deadline, and every past cycle stays on the record as the audit trail.
-* Overdue is worked out from the deadline and the clock rather than stored, so a report is never stale. Waivers record who granted them and why, and are counted separately from training that actually happened.
-* Requires Sikshya Pro 1.0.8.
-
-= 1.0.12 - 2026-10-15 =
-**Cohorts (new, Pro).**
-* Run a course as a scheduled intake that learners move through together. A cohort has a start date, and drip schedules count from it rather than from each learner's own sign-up — so everyone in the January intake reaches week two on the same day, however late they joined. Ordinary per-learner drip cannot express that.
-* Joining an intake grants its course, each intake reports its own progress, and a whole group can be moved into one in a single step.
-* Requires Sikshya Pro 1.0.7.
-
-= 1.0.11 - 2026-10-15 =
-**Groups & seat licensing (new, Scale).**
-* Sell a block of seats to an organisation and let them run their own roster. A group owner, or a leader they appoint, adds and removes learners without needing you, and membership grants access to every course the group holds.
-* Seats are enforced: once the purchased number is used, adding another learner is refused rather than quietly handing over unpaid access. Reducing a plan below current usage is reported as over-capacity instead of showing a negative number.
-* A learner removed from a group keeps their enrolment and progress. For compliance training that record is the thing the customer needs to keep, so leaving a roster does not erase it.
-* Requires Sikshya Pro 1.0.6.
-
-= 1.0.10 - 2026-10-01 =
-**Security and data-integrity release — update immediately.**
-
-Every item below was reproduced on a live install before the fix and re-tested after, and each is covered by a new automated test.
-
-**Instructors could modify and destroy each other's content (critical)**
-* On any site with more than one instructor, instructor A could rewrite instructor B's course, lesson and quiz, rename B's chapters, inject lessons into B's course, and **permanently delete B's chapters and lessons** — that route force-deletes, bypassing the trash, so the content was unrecoverable. A could also enrol themselves into B's paid course, taking paid content for free.
-* The routes checked only plural capabilities such as `edit_sikshya_courses`, which every instructor holds for every course, so there was no per-course check at all. WordPress core refused the same writes through `/wp/v2`; only Sikshya's own routes were open.
-* Ownership is now resolved once, in `InstructorPermissions::canEditObject()`, and applied to every course-owned object. A lesson, quiz or chapter inherits ownership from its course.
-
-**Learner personal data was visible to any instructor (high)**
-* `/admin/enrollments`, `/admin/quiz-attempts` and `/admin/issued-certificates` returned every row on the site — including learner names, email addresses and certificate verification codes — to any instructor, not just rows for their own courses. All three are now scoped.
-
-**Erasing data on uninstall never actually happened**
-* WordPress loads only `uninstall.php` when deleting a plugin, so Composer's autoloader was never registered and the uninstaller raised a fatal error on its first statement. Nothing was ever removed, whatever you had opted in to — relevant if you rely on this for a data-deletion request.
-* What it would have removed was also incomplete: 13 of 21 option names in its list have never existed, while roughly 28 options the plugin does write were missing from it, including the JWT signing secret. User meta was not touched at all (cart contents and learner-authored lesson notes survived), and the four scheduled events it cleared are not events Sikshya registers, so the three real ones stayed behind.
-* Uninstall now loads correctly, verifies its dependencies before starting so it can never half-erase, and clears options, user meta, stray post meta and its own cron events. Erasure is still strictly opt-in and still defaults to off. Sikshya Pro's data is left to Pro's own uninstaller.
-
-**An interrupted upgrade could abandon learner enrolments and progress**
-* Enrolments and progress are migrated after the post types are renamed. A migration stopped in between left no legacy post types behind, so the plugin reported "nothing to migrate" and every learner's enrolment and progress was abandoned in a table nothing reads. Detection now recognises that state and resumes.
-
-**Certificate verification did not work**
-* The public verification endpoint was implemented but never registered, so `/sikshya/v1/public/certificates/verify` returned 404 and a certificate's verification code could not be checked by anyone. It is now live, and returns only the certificate number, issue date, course title and recipient name.
-
-**Downloadable files could not be downloaded**
-* Every protected attachment link returned "Authentication required to download this file." as soon as a learner clicked it. The links are signed REST URLs, and WordPress treats a REST request that arrives without a nonce as logged out — which is exactly what a click is. Fetching the URL from JavaScript worked, clicking it never did, so course resources have not been reachable by learners.
-* The download endpoint now identifies the requester from the session cookie as well. Authority still comes from the signed token, which names a single attachment and a single account: a link shared with anyone else is still refused, and so is a logged-out visitor.
-
-**Lesson attachments now work**
-* `Lesson attachments` has been listed as a free feature without a working implementation: the meta was written under one key and read under another, no screen offered a way to add files, and no template displayed them. Nothing was lost, because nothing could be saved.
-* Lessons now have an **Attachments** field in the lesson editor that opens the media library and takes any number of files. They appear under Resources on the lesson, listed above the course-wide downloads and labelled "For this lesson", with the same per-learner link protection course resources use.
-
-**Removed from the feature list**
-* `Wishlist` was advertised but has never had an implementation of any kind. It has been removed from the feature list rather than left as a promise; nothing changes on your site.
-
-**Fixes**
-* Instructors could not edit their own published courses: the course builder answered "You are not allowed to edit this course", and the Pricing tab failed every save with "Failed to save some data". Both were caused by a capability check that cannot succeed for these post types.
-* The front-end admin bar showed no Edit link to an instructor on their own published course.
-* Removed a `wpdb::prepare()` call with no placeholders on the default Quiz Attempts view.
-* The lesson Resources tab no longer says "No resources available for this lesson yet" while listing files.
-* Lesson attachment ids are validated on save, so a value that is not a real media file can no longer be stored or rendered as a dead link.
-
-= 1.0.9 - 2026-10-01 =
-**Critical fixes — update immediately.**
-
-Two defects that disabled core functionality, plus a sweep of the underlying cause. Found and verified against a live WordPress 7.1 install; every item below was reproduced before the fix and re-tested after.
-
-**Free enrolment was completely broken (critical)**
-* `POST /sikshya/v1/me/enroll` rejected every course with `404 "Invalid course."`, so no learner could enrol in anything. The guard compared the course against the post type `sikshya_course`, but courses have been registered as `sik_course` since 1.0.0 — the comparison could never be true. Present in 1.0.6, 1.0.7 and 1.0.8.
-
-**Paid courses could be enrolled in for free (critical)**
-* Unmasked by the fix above. The paywall read the price from a single meta key while checkout reads it through the canonical resolver that checks every alias key, so a course priced through any other alias looked free. Both price accessors now use the same resolver as checkout, so the paywall cannot disagree with the code that takes the money.
-
-**The same stale post-type name, found everywhere else it was hiding**
-* Audited every identifier in the plugin against what WordPress actually has registered. 36 further occurrences across 12 files still used the pre-1.0.0 names. Consequences on a site with 1,855 courses: the admin dashboard reported **0 courses**, usage telemetry reported **0 courses and 0 lessons**, lesson and quiz REST endpoints returned nothing, the lesson data layer matched nothing, and the frontend course search returned no results.
-* **Uninstall did not erase course content.** The uninstaller targeted four post types that have never existed, and omitted questions, chapters and certificates entirely. If you enabled "erase data on uninstall", your course content was left behind. It now covers all seven registered post types and the five real taxonomies. Erasure is still strictly opt-in and still defaults to off.
-* All references now use shared constants so the names cannot drift from the registry again.
-
-**Also**
-* The admin dashboard's course count is now a prepared statement rather than an interpolated query.
-* A frontend AJAX handler no longer reads an undefined property when counting courses.
-
-= 1.0.8 - 2026-09-01 =
-**Role-aware login and registration redirects**
-* New filter `sikshya_auth_redirect_to` controls where a visitor lands after signing in or registering through Sikshya's own forms. It runs *after* authentication, so the `WP_User` is available and the destination can be chosen from the account's roles or capabilities — sending instructors to their teaching view, learners to their courses, and so on.
-* This was previously impossible to customise, even with code. The destination was resolved *before* the credentials were checked, so the account was still unknown at the moment it was decided, and nothing in the plugin filtered it. Reported by a site owner whose instructors were landing on the site home page after logging in.
-* Applies to all four auth paths: AJAX and non-AJAX sign-in, and AJAX and non-AJAX registration. `$context` is `login` or `register`. Sikshya Pro 1.0.3 applies the same filter to social sign-in with a `social-login` context, so a single filter covers every way a visitor can sign in.
-* Nothing changes by default. With no filter attached the destination is identical to 1.0.7 — an explicit `redirect_to`, else a same-origin referer, else the site home. The filtered value still passes through `wp_validate_redirect()`, so a filter cannot be used to send visitors off-site.
-
-= 1.0.7 - 2026-08-21 =
-**WordPress 7.1 compatibility**
-* Tested up to WordPress 7.1. `Requires at least: 6.0` and `Requires PHP: 7.4` are unchanged, so this update applies to every site already running 1.0.6.
-* `load_plugin_textdomain()` is now deferred to the `init` action instead of running while the plugin file is being included. WordPress 6.7+ expects translations to be loaded no earlier than `init`, and calling it from the bootstrap is the pattern that trips the `_load_textdomain_just_in_time` notice. Nothing in the load path translated that early, so this is a hardening change rather than a fix for a notice anyone was seeing.
-* Audited against WordPress 7.1 core: no deprecated or removed core functions are called, and all 108 REST routes still declare a `permission_callback`.
-* Readme: the shortcode/block reference moved out of **Description** and into the FAQ as "What shortcodes and blocks does Sikshya provide?". WordPress.org caps the Description section at 2,500 words and was silently truncating ours (it measured ~2,748), so the tail of the section — including the third-party service disclosure — was being cut from the plugin directory listing. Description is now ~2,246 words with every line preserved; the FAQ section has a 5,000-word cap and sits well under it.
-
-= 1.0.6 - 2026-07-03 =
-**Security release — please update.**
-
-This release fixes a set of privacy and access-control issues found in a deep security audit. No functional changes — everything below is a hardening fix. Sites using the legacy `/sikshya/v1/lessons`, `/sikshya/v1/quizzes`, or `/sikshya/v1/courses` REST routes from an external client should re-check their integration (see below).
-
-**REST auth (fixes information disclosure and paywall bypass)**
-* `GET /sikshya/v1/lessons` and `GET /sikshya/v1/lessons/{id}` now require the same `canManageLessons` capability as the write side. Previously anyone could fetch a lesson's full `post_content` + every `_sikshya_*` meta key — this was a paywall bypass for paid courses. Learner consumption goes through `/me/quiz-attempt` (unaffected — still enforces enrollment).
-* `GET /sikshya/v1/quizzes` and `GET /sikshya/v1/quizzes/{id}` now require `canManageQuizzes`. Previously exposed the ordered question ID list, passing score, time limit, and attempt cap to any client — assessment enumeration for competitors and cheat-sheet builders.
-* `GET /sikshya/v1/courses` and `GET /sikshya/v1/courses/{id}` stay public for catalog use, but the returned `meta` is now built from an explicit allowlist (`sikshya_course_price`, `sikshya_course_duration`, `sikshya_course_level`) instead of dumping every meta key — no more leaking `_edit_lock`, unpublished sale schedules, AI-generation flags, or third-party plugin meta.
-
-**Cross-site request / race conditions**
-* `POST /sikshya/v1/me/enroll` now enforces `post_type === sikshya_course` + `post_status === 'publish'` before any pricing/addon logic. Previously, a draft or private course whose price meta was zero (or cleared) could be self-enrolled via ID enumeration.
-* Coupon per-user redemption cap is now atomic (transaction + `SELECT … FOR UPDATE` on the redemption rows). Previously two parallel checkouts of a `per_user_limit = 1` coupon could both pass the initial count check, both insert redemptions, both discount their orders. A lost race now returns a clean "already used" error with the coupon's `used_count` rolled back.
-* `SocialLogin` OAuth state token is now bound to the initiating browser via an HTTPOnly `SameSite=Lax` cookie and verified with `hash_equals` on callback. Prevents an attacker from minting a state on their machine and smuggling the callback URL to a victim.
-* `EnrollmentRepository` list methods (`findAll`, `findByUser`, `findByCourse`, `findByStatus`, `searchWithFilters`) now route `orderby`/`order`/`limit`/`offset` through a shared column-whitelist normaliser. No live SQLi existed (callers pass hardcoded values), but the shape was a trap for future callers.
-
-**Web-register flow**
-* `POST /sikshya/v1/auth/web-register` now records the rate-limit attempt on entry instead of after `wp_create_user` succeeds. Previously the first attacker in a rate-limit bucket got a full free registration + auth cookie before the limiter engaged.
-* Instructor application submissions no longer silently re-open a `rejected` / `suspended` / `active` status. Applicants whose application was terminally decided must be re-considered by an admin — they can't reset themselves to `pending` by re-submitting the form.
-
-**XSS / output escaping**
-* React admin: courses list and generic WP-entity list no longer feed WP REST `title.rendered` into `dangerouslySetInnerHTML`. Any Author-level user could store XSS in a post title that then executed in the admin's session on list-page view; both sites now render titles as text via a new `decodeWpTitle` helper.
-* Checkout page: dynamic-field labels, help text, textarea values, input placeholders, option labels, and country names are now HTML-entity-escaped before being templated into `innerHTML`. Prevents stored XSS via admin-configurable checkout fields.
-
-**Notes for integrators**
-* If you have an external client (mobile app, CRM sync, etc.) that reads `GET /sikshya/v1/lessons` or `/quizzes` anonymously, it will now receive `401`. Authenticate the client with a REST cookie / JWT / application password held by a user with the appropriate capability, or switch to the curated `PublicApiRoutes` for public consumption.
-
-= 1.0.5 - 2026-05-31 =
-**Vendor + readme hygiene**
-* Composer: `composer/installers` moved from `require` to `require-dev` — it's a Composer build-time plugin, not a runtime dependency, so it had no business shipping to customer sites. The runtime `require` list is now just PHP 7.4+ and `firebase/php-jwt ^6.10` — the bare minimum the plugin actually uses at runtime.
-* Build pipeline: `build.sh` already ran `composer install --no-dev --optimize-autoloader` before zipping, but the working tree now also reflects production-only deps; a fresh checkout's `vendor/` weighs in at ~716 KB instead of the previous 78 MB.
-* Readme: full restructure with a marketing-funnel section order — "Why choose Sikshya?" promoted above the fold; Pro CTA → catalog → competitor comparisons → developer reference flow; new "Compatible with your stack" callout naming Gutenberg, Elementor, Divi; 4 new FAQs (page-builder compatibility, migration from LearnDash/Tutor/LearnPress, mobile-responsiveness, GDPR).
-* Readme: all **36** distinct feature pages on `mantrabrain.com/plugins/sikshya-lms/` are now deep-linked (Free Course Builder, Video & Text Lessons, Quizzes, Course Certificates, Native Checkout + 31 Pro add-ons), each with feature-specific UTM campaign so analytics attribute click-throughs back to the originating section.
-* Readme: documentation host migrated from `docs.mantrabrain.com/sikshya-wordpress-plugin/` to `sikshya.mantrabrain.com/docs/`; product page URL aligned with `/plugins/sikshya-lms/` and "Explore Pro" + "Pricing & plans" CTAs route directly to `/pricing/`.
-* Known issue: `firebase/php-jwt ^6.10` has a low-severity advisory (CVE-2025-45769, "weak encryption"). The fix requires a major bump to v7.x — slated for the next release after we verify the API delta against `JwtAuthService`.
-
-= 1.0.4 - 2026-05-31 =
-**Learn page — production sprint**
-* Quiz auto-save: mid-attempt answers now persist via a new `POST /sikshya/v1/me/quiz-save` endpoint and `auto_save_data` column — a refresh no longer wipes 30 minutes of work. Hydrates on resume.
-* Lesson transcripts: new `_sikshya_lesson_transcript_url` and `_sikshya_lesson_transcript_text` meta with admin UI in the React lesson editor and a calm `<details>` disclosure beside video / audio players.
-* Per-question explanations: new `_sikshya_question_explanation` meta surfaced as a "Why?" disclosure after grading on the Review answers view.
-* Per-type score breakdown: results card now shows multiple-choice / essay / matching / ordering subtotals so learners see where they slipped.
-* Course-completion CTA hook: new `sikshya_learn_course_completion_cta` action above the tabs strip for Pro Certificates Advanced to slot a celebratory card.
-* Quiz client validation: warns about unanswered questions before submit and scrolls to the first miss.
-* Ordering questions: 36×36 touch buttons + Alt+↑/↓ keyboard reorder.
-* Tabs ARIA: `role="tab"`, `aria-controls`, `aria-selected`, `tabindex`, `role="tabpanel"`, `aria-labelledby`, `hidden` mirrored on lesson + quiz templates.
-* Media fallback: video / audio embeds now render a graceful "open in a new tab" panel when the source fails to load.
-* Assignment dropzone: plain-text "Allowed: pdf, docx · Max N MB per file" hint above the dropzone.
-* Course title + permalink (target=_blank) added to the Learn sidebar so learners always know which course they're in.
-
-**Learn page — mobile**
-* Content header sticky behaviour fixed for both lesson and quiz pages using `display: contents` on the wrapping section (the section was zero-height on the lesson page, killing sticky's pin range).
-* Tabs strip: edge-fade gradients + scroll-padding signal "more here, scroll to reveal" without needing a visible scrollbar.
-* Topbar progress: compact 56px chip in the header; on mobile the topbar scrolls away with the page while the content header pins.
-* Header chrome trimmed on phones: hides chapter inline + focus toggle + 5 quiz meta pills so the 52px fixed row never wraps under the topbar.
-
-**Account page**
-* Top-right user menu: now avatar-only (name + email + caret hidden); dropdown z-index lifted and parent `overflow: hidden` removed so it stops being clipped behind content.
-* Form-status pill: empty pseudo-class hides the chip on initial load (was rendering as a phantom bordered chip next to "Save profile" on the marketplace view).
-* Focus-visible ring on the avatar button.
-
-**Course landing**
-* "Expand all / Collapse all" button now ships with unfold-more / unfold-less icons (Material-style double-chevron pair).
-* Label wrapped in its own span so the icon swap survives JS text updates.
-
-**Schema + infra**
-* `SCHEMA_VERSION` bumped 1.9.0 → 1.10.0 with idempotent migration adding `auto_save_data` to `sikshya_quiz_attempts`.
-* Migrations now run lazily on `admin_init` (handles drop-in deploys without re-activation).
-* `sikshya_course_completed` action gains an optional 3rd `$enrollment_id` arg (additive — existing 2-arg listeners unaffected).
-* `display: contents` mobile-sticky pattern: cleaner than absolutely-positioned shims and respects the document scroll model.
-
-**Hardening sprint (carry-over from internal audit)**
-* 60+ patches across security, capability checks, post_status guards on learner endpoints, email-listener wiring, perf, i18n, and admin column polish — see `AUDIT_REGRESSION_TESTS.md` for the full ledger.
-* Compatibility: no breaking API changes; all public hooks remain backwards compatible.
-
-= 1.0.3 - 2026-05-08 =
-* Readme: WordPress.org listing refresh—SEO-oriented short description and tags; Quick links (documentation on Mantrabrain, demos, pricing, community); structured sections (At a glance, self-hosted LMS, FAQs including block editor and optional usage insights); third-party services and privacy disclosure aligned with docs.
-* Readme: plugin listing title aligned with WordPress plugin directory expectations; screenshot captions tuned for LMS and checkout keywords; Installation and security reporting guidance clarified.
-* Plugin metadata: version bump; default documentation URLs in Plugin API / admin bootstrap now point to `https://sikshya.mantrabrain.com/docs/`.
-
-= 1.0.2 - 2026-05-04 =
-* Admin (React shell): Grading & submissions and gradebook screens — toolbar layout fixes so Course, Search, and Status filters align cleanly; contextual helper copy moved below the filter row; clearer sidebar icons for Gradebook and related entries.
-* Marketing: Pro upgrade notice now uses “up to 50% off” instead of “50%+ OFF” for clearer, defensible wording (classic admin notice + in-app strip).
-* Public: course category index and taxonomy routing improvements for a better category archive experience.
-* Build: refreshed compiled admin JavaScript/CSS from current sources.
-
-= 1.0.0.1 - 2026-05-02 =
-* Certificate: fixes for issues in the admin certificate designer (layout, editing, and related flows).
-* Build: refreshed compiled admin React assets from the latest sources.
-
-= 1.0.0 - 2026-04-30 =
-* Initial public release.
-* Core course, lesson, quiz, and question model with builder-oriented admin UI.
-* Student and instructor roles with capability-safe management surfaces.
-* Baseline commerce: Stripe/PayPal-oriented checkout, coupons, orders.
-* Learner templates, account views, and progress-oriented flows.
-* REST-aligned services where documented for integrations.
-* Default certificate presets (Regalia & Vertex) ship without QR blocks; QR-style verification remains documented as a Pro-oriented enhancement.
-* Requires PHP 7.4+ and WordPress 6.0+; tested on current stable WordPress releases.
-* Checkout (with Sikshya Pro Dynamic Checkout Fields): optional server-rendered dynamic field markup—JavaScript attaches listeners and visibility without rebuilding the form in the browser; includes `CheckoutDynamicFieldsView` and refactored checkout helpers (`dfBindDynamicFields`, `dfSyncValuesFromHost`).
 
 == Upgrade Notice ==
 
