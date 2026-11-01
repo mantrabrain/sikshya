@@ -2,6 +2,11 @@ Sikshya LMS - full changelog
 (readme.txt carries only the two most recent releases; WordPress.org truncates
 a changelog longer than 5,000 words.)
 
+= 1.0.16 - 2026-11-01 =
+**Documentation only. No code changed; there is no reason to rush this update.**
+* WordPress.org truncates a plugin changelog longer than 5,000 words, and Sikshya's had grown to 7,300 — so the older half of the history was quietly vanishing from the plugin page. The changelog here now carries the two most recent releases, and every earlier entry is kept in full in `changelog.txt`, which ships with the plugin.
+* Adds the Sikshya Pro overview video to the Pro section of this page.
+
 = 1.0.15 - 2026-11-01 =
 **An AI studio for authoring: draft an outline, write a lesson, write quiz questions — with your own provider key, and nothing created until you have read the draft.**
 * **New: Course → AI studio.** Describe what a course should teach and get an outline of chapters and lessons you can rename, reorder and delete before anything exists. Pick a lesson and have its body written. Pick a chapter and have quiz questions written, with explanations learners see after grading. Then press a button to create it — generating and creating are deliberately two steps, so a draft you dislike costs you nothing but a click.

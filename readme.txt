@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.15
+Stable tag: 1.0.16
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -426,6 +426,11 @@ changelog longer than 5,000 words. Every earlier entry is kept in full in `chang
 shipped alongside this file, and in the release history at
 https://github.com/mantrabrain/sikshya/releases
 
+= 1.0.16 - 2026-11-01 =
+**Documentation only. No code changed; there is no reason to rush this update.**
+* WordPress.org truncates a plugin changelog longer than 5,000 words, and Sikshya's had grown to 7,300 — so the older half of the history was quietly vanishing from the plugin page. The changelog here now carries the two most recent releases, and every earlier entry is kept in full in `changelog.txt`, which ships with the plugin.
+* Adds the Sikshya Pro overview video to the Pro section of this page.
+
 = 1.0.15 - 2026-11-01 =
 **An AI studio for authoring: draft an outline, write a lesson, write quiz questions — with your own provider key, and nothing created until you have read the draft.**
 * **New: Course → AI studio.** Describe what a course should teach and get an outline of chapters and lessons you can rename, reorder and delete before anything exists. Pick a lesson and have its body written. Pick a chapter and have quiz questions written, with explanations learners see after grading. Then press a button to create it — generating and creating are deliberately two steps, so a draft you dislike costs you nothing but a click.
@@ -455,17 +460,6 @@ https://github.com/mantrabrain/sikshya/releases
 * The rich-text editor's toolbar buttons — bold, italic, lists, link, text style — had no names, so the editor could not be operated without sight. They do now.
 * **New: report learning to your own Learning Record Store (xAPI).** Enrollments, lesson and course completions, quiz results with their scores, assignment submissions and certificates are sent to any conformant LRS as xAPI 1.0.3 statements — the thing nearly every public-sector and corporate tender asks for alongside SCORM, and that no other WordPress LMS does natively. You choose how much about a learner leaves your site: their email address, a hash of it that still lets an LRS recognise the same person elsewhere, or an account id with no email at all. Sikshya → Integrations shows what has been accepted, what is waiting, and what failed with the LRS's own words. Scale tier, off until you enable it, and nothing is queued until an endpoint and credentials exist — so turning it on early cannot build a backlog that floods your LRS later. `docs/XAPI.md` has the full statement map and, just as plainly, what is not included: this is reporting to an LRS, not cmi5, and Sikshya is not itself an LRS.
 * For contributors: WCAG 2.1 AA is enforced by the test suite, over all 43 admin screens and 13 learner-facing pages, plus a source check that catches an unlabelled field even when it is hidden behind a tab. What has *not* been done is stated just as plainly: no screen reader has been used, so the conformance report in `docs/ACCESSIBILITY-CONFORMANCE-REPORT.md` is a draft rather than a VPAT. `docs/ACCESSIBILITY.md` has both lists.
-
-= 1.0.14 - 2026-10-16 =
-**Groups, cohorts and compliance training get their screens. Tax works, audio lessons are finished, and the session timeout finally measures what it says.**
-* **Groups, cohorts and compliance training had no screens at all.** All three shipped as working APIs with nothing in the admin, so there was no way to sell a seat, run a scheduled intake, or read a compliance report anywhere in WordPress. Each now has a full screen under the Sikshya menu. Cohorts leads with the intake's start date, because drip schedules count from it — everyone in one intake reaches week two on the same day however late they joined — and it warns you when an intake has no date, since an undated intake anchors nothing and ordinary per-learner drip applies instead. Compliance shows "overdue" and "completed late" apart from the headline percentage, because an auditor asking whether training was done *on time* is not answered by a figure that counts a late completion as compliant.
-* **"Log out inactive users after (minutes)" did not measure inactivity.** It capped how long a login lasted, so somebody halfway through marking a batch of assignments was signed out mid-task at the two-hour mark whatever they were doing — the one thing the setting's own label promises not to do. A session is now extended while the person is active, so only an idle one runs out. The same setting also ignored "Remember Me": a login you explicitly asked to be remembered expired in two hours rather than the fourteen days WordPress promises, with nothing on screen to explain why you kept being signed out. Remembered logins now keep their full length.
-* **Importing the sample data twice gave you two of everything.** Pressing Tools → import sample data again, or running the setup wizard after an earlier attempt, created a second copy of every sample course. An import cut short by a hosting time limit was worse still: retrying duplicated the courses it had already made instead of finishing the ones it had not, leaving you with a half-built course sitting beside a copy of it. Each imported course is now recognised, so a later import skips what is already finished and rebuilds only what was interrupted, and the import asks for more time up front so it usually completes in one pass. Courses you wrote yourself are never touched, even if they share a name with a sample one.
-* **Tax was a setting that did nothing.** Settings → Commerce has offered a tax rate and a "prices already include tax" switch, and neither was read anywhere — you could configure 8.25% and the store charged nothing extra. Tax is now applied to the amount after any discount, shown on the checkout quote, and recorded on the order. Both modes work: exclusive tax is added on top, and an inclusive price stays exactly what the customer was shown. A rate of 0, which is the default, changes nothing for existing stores.
-* **The Email → Templates link was broken.** Opening it printed two PHP warnings into the page and left you there instead of taking you to Email → Templates, because the redirect ran after the page had already started rendering. It now redirects before any output.
-* **Admin list screens were slow on busy sites.** The orders screen issued a database query for every order on the page — fetching its lines, each line's course title and the payer separately — and the quiz-attempts screen did the same for every attempt. On a real dataset those two pages cost 65 and 64 queries; they now cost 9 and 6. Nothing about what they show has changed.
-* **Audio lessons could not be created.** The lesson player already handled them, but the type was missing from the picker and the server turned an audio lesson into a text one. You can now pick "Audio lesson", paste a direct link to an .mp3, .m4a, .ogg or .wav file, and learners get a player — with the existing transcript field alongside it for accessibility.
-* Requires Sikshya Pro 1.0.10. The compliance screen reports on the audience Pro assigns, and Pro 1.0.10 is the release that stopped capping that audience at 5,000 learners.
 
 == Upgrade Notice ==
 
