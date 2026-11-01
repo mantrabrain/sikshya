@@ -3,7 +3,7 @@
         'name' => 'sikshya/lms',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '3d7cc1165968b4d7fe0fbfb22306cd063f2c08f9',
+        'reference' => 'd939f693c1589bd7acb16268cee20918e8755526',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -31,7 +31,7 @@
         'sikshya/lms' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '3d7cc1165968b4d7fe0fbfb22306cd063f2c08f9',
+            'reference' => 'd939f693c1589bd7acb16268cee20918e8755526',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

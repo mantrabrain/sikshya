@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.14
+Stable tag: 1.0.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,8 @@ Sikshya LMS — WordPress learning management plugin for online courses, quizzes
 
 ### Quick links
 
+👉 [Watch: Sikshya LMS in 75 seconds](https://youtu.be/6fmT3gXLW2k)
+👉 [Watch: Sikshya Pro](https://youtu.be/6tSzihgfCo8)
 👉 [Documentation](https://sikshya.mantrabrain.com/docs/?utm_source=wporg&utm_medium=readme&utm_campaign=documentation)
 
 👉 [Try Sikshya LMS Free](https://try.new/plugins/sikshya/)
@@ -41,7 +43,7 @@ Sikshya LMS — WordPress learning management plugin for online courses, quizzes
 
 Join the community for release notes, setup tips, and peer discussion with other WordPress course creators.
 
-[youtube https://youtu.be/CF1p9slkQrg]
+[youtube https://youtu.be/6fmT3gXLW2k]
 
 ### Why choose Sikshya?
 
@@ -417,7 +419,7 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 
 == Changelog ==
 
-= 1.0.15 - 2026-10-29 =
+= 1.0.15 - 2026-11-01 =
 **An AI studio for authoring: draft an outline, write a lesson, write quiz questions — with your own provider key, and nothing created until you have read the draft.**
 * **New: Course → AI studio.** Describe what a course should teach and get an outline of chapters and lessons you can rename, reorder and delete before anything exists. Pick a lesson and have its body written. Pick a chapter and have quiz questions written, with explanations learners see after grading. Then press a button to create it — generating and creating are deliberately two steps, so a draft you dislike costs you nothing but a click.
 * **Your key, your data.** Bring an API key from Anthropic or OpenAI. Requests go from your own server straight to that provider: no course material passes through MantraBrain, and nothing leaves your site until you have saved a key. A monthly request limit is set to 200 out of the box so a mistake cannot run up a provider bill, and it is checked before each request, so a refused one is free.
@@ -428,6 +430,8 @@ In the block editor, open the **Sikshya** block category or search for “Sikshy
 * For integrators: a single new action, `sikshya_user_deprovisioned`, carries the departure with the identity attached (login, email, roles, how many enrolments were closed), because by the time it fires the WordPress user record is gone. It is the hook to use for anything of your own that tracks people, and it is what makes an identity provider deprovisioning through a SCIM plugin do the right thing in the LMS — see `docs/ENTERPRISE-IDENTITY.md`.
 * **New: a content bank for material more than one course uses.** Content library → Content bank keeps a library of lessons, quizzes and assignments: save anything already in a course, then drop a copy into any section of any course you can edit. A quiz comes with its questions, answer keys and settings. Inserting makes a **copy**, on purpose — a learner's progress and quiz attempts are recorded against one lesson, so a lesson shared between two courses would show somebody as having finished a course they never took. The cost of that is worth knowing before you rely on it: fixing a typo in the bank does not fix the courses already built from it. Items are private to whoever saved them until shared with the site's other authors, and a shared item stays theirs to rename or remove. Starter tier and above, off until you enable the add-on; `docs/CONTENT-BANK.md` covers what travels with a copy and what is refused — cmi5 lessons are, with a reason.
 * **Dialogs now trap the keyboard correctly in Safari.** Two focus bugs were hiding behind the fact that everything had only ever been tested in Chrome. On macOS, Safari's Tab order skips buttons and links unless you have turned on full keyboard access, so Sikshya's dialogs calculated where the last stop was and then never reached it — Tab walked straight out of the dialog and into the page behind it. And because clicking a button does not focus it on macOS, opening a dialog with the mouse and pressing Escape dropped you at the top of the page instead of back on the button you pressed. Both are fixed, and the whole browser suite now runs in Chromium, WebKit and Firefox so this class of bug cannot hide again.
+* **Checked on PHP 7.4 through 8.5.** The whole test suite now runs on each of 7.4, 8.1, 8.2, 8.3, 8.4 and 8.5, and the compatibility ruleset checks the code against "7.4 and every later version" instead of 7.4 alone. Sikshya still *requires* only PHP 7.4, so no host is left behind — this is about the other end of the range, where a host that has moved to a current PHP should see no deprecation notices from Sikshya.
+* **The course picker's search box now actually searches.** Every admin screen that asks you to choose a course — the AI studio, Enrolments, Discussions, the activity log, the gradebook, grading, Integrations, prerequisites, the course builder, orders and coupons — offered a search box that threw away what you typed and listed the first twenty courses by title instead. On a site with twenty courses or fewer nobody could tell, because that list was already all of them; past that, a course whose title did not sort into the first page simply could not be chosen. Typing now filters, and the box keeps what you typed.
 * **A warning when Sikshya Pro is older than Sikshya.** Free updates come from WordPress.org, often automatically, while Pro updates come from your account — so for a while after every release the ordinary state of a paid site is the free plugin running ahead of Pro. In that window, screens for features added by a newer Pro add-on appear and then fail to load, which looks like a bug and is not one. Sikshya now says so plainly, naming both versions and where to update, and the notice can be dismissed. A site with no Pro at all never sees it.
 * **New: images and audio in quiz questions.** Any question type can now carry one image or audio clip on its stem, shown between the question and the answers — so you can ask "listen to this and tell us what you hear" or "what is wrong with this diagram", which until now simply could not be asked. Pick a file from your media library, or paste a URL. A library file is served through the same signed, expiring, per-learner link as everything else, so a question image behind a paid course is not handed out by its URL. **A picture cannot be saved without a description**, and that is on purpose: the image *is* the question, so without one a learner using a screen reader has nothing to answer from. Audio is exempt — the player gets a sensible name on its own, and a transcript of a clip you are asking somebody to identify would give the answer away. `docs/QUESTION-MEDIA.md` covers what is not claimed: media on the individual answer options is deliberately not built, there is no video, and imports still bring questions across without their pictures.
 * **New: PDF lessons.** Set a lesson's type to **PDF document**, pick a file from your media library (or paste a URL), and learners read it in the lesson itself — ticking it complete, counting towards progress and certificates, like any other step. A file from your media library is **not** served by its uploads URL: it goes through a signed link that expires within the hour and only works for the signed-in learner it was issued to, so a URL shared in a chat does not hand your course material to somebody who did not pay for it. There is always a visible "Open in a new tab" link beside the viewer, because embedded PDF support is uneven on phones and a frame that fails to draw does so silently. "Hide the download link" is offered and labelled honestly: it removes the link, and it does not stop anyone saving the file — the browser's own PDF viewer has a save button, and no web page can take it away. `docs/PDF-LESSONS.md` covers the rest, including what is not claimed: no page count or reading progress, no annotations, and no copy protection.

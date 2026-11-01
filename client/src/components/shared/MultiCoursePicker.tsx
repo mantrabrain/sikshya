@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../../api';
 import { ButtonPrimary, ButtonSecondary } from './buttons';
 import { FieldHint } from './FieldHint';
@@ -42,6 +42,27 @@ function uniqSorted(ids: number[]) {
   return Array.from(new Set(ids.filter((n) => Number.isFinite(n) && n > 0))).sort((a, b) => a - b);
 }
 
+/** Shared empty array so an id list that is empty keeps one identity forever. */
+const NO_IDS: number[] = [];
+
+/**
+ * An id list reduced to a primitive, so effects can depend on *what* the ids
+ * are rather than on which array object carried them.
+ *
+ * Most call sites build this prop in render — `value={id > 0 ? [id] : []}` in
+ * `SingleCoursePicker`, `excludeIds={row ? [row.id] : []}` in Prerequisites —
+ * so the array is a new object on every render even when the ids are
+ * identical. An effect keyed on the array therefore re-ran on every render,
+ * and the one that resets the modal wiped the search box between keystrokes:
+ * typing filtered nothing and the unfiltered first page was listed instead,
+ * which on a site with more courses than `perPage` made most of them
+ * unreachable. Keyed on the string, these effects run when the ids change.
+ */
+function useIdListKey(ids: number[] | undefined) {
+  const key = uniqSorted(ids || []).join(',');
+  return [key, useMemo(() => (key === '' ? NO_IDS : key.split(',').map(Number)), [key])] as const;
+}
+
 /**
  * Multi-course selector with a modal list (search + checkboxes + Done), matching
  * the "Applicable To → Specific ..." UX pattern.
@@ -62,7 +83,8 @@ export function MultiCoursePicker({
   reserveHintSpace = true,
   density = 'comfortable',
 }: Props) {
-  const selected = useMemo(() => uniqSorted(value || []), [value]);
+  const [selectedKey, selected] = useIdListKey(value);
+  const [excludeKey, exclude] = useIdListKey(excludeIds);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [busy, setBusy] = useState(false);
@@ -74,7 +96,13 @@ export function MultiCoursePicker({
 
   useEffect(() => {
     if (!labels) return;
-    setLabelMap((prev) => ({ ...prev, ...labels }));
+    // Returning `prev` unchanged when there is nothing new matters: call sites
+    // may rebuild this object in render, and an unconditional set would then
+    // queue a fresh render on every render.
+    setLabelMap((prev) => {
+      const changed = Object.keys(labels).filter((k) => prev[Number(k)] !== labels[Number(k)]);
+      return changed.length === 0 ? prev : { ...prev, ...labels };
+    });
   }, [labels]);
 
   useEffect(() => {
@@ -107,20 +135,27 @@ export function MultiCoursePicker({
     return () => {
       cancelled = true;
     };
-    // We intentionally depend on `selected` and `labelMap` so this re-checks after user adds items.
-  }, [selected, labelMap]);
+    // Keyed on the ids themselves, so this re-checks when the user adds items
+    // rather than on every render. `labelMap` stays a dependency because the
+    // effect bails once nothing is missing.
+  }, [selected, selectedKey, labelMap]);
+
+  // Seeded from a ref so that opening the modal is the only thing that clears
+  // the search box. Depending on `selected` here is what discarded what the
+  // user had typed.
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
 
   useEffect(() => {
     if (!open) return;
-    setDraft(selected);
+    setDraft(selectedRef.current);
     // reset search each open so the list starts friendly
     setQuery('');
     setResults([]);
-  }, [open, selected]);
+  }, [open]);
 
   const search = useCallback(
     async (term: string) => {
-      const exclude = Array.from(new Set([...(excludeIds || [])])).filter((n) => n > 0);
       const excludeSet = new Set(exclude);
       setBusy(true);
       let usedSikshya = false;
@@ -181,7 +216,9 @@ export function MultiCoursePicker({
       }
       setBusy(false);
     },
-    [excludeIds, perPage]
+    // `excludeKey` rather than the array, so `search` keeps one identity and
+    // the debounce effect below is not re-armed on every render.
+    [exclude, excludeKey, perPage]
   );
 
   useEffect(() => {
