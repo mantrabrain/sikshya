@@ -182,4 +182,45 @@ final class RestReadGuardIntegrationTest extends WP_UnitTestCase
             'The price is printed on the course page; hiding it would break catalogues for nothing.'
         );
     }
+
+    public function test_authors_can_still_create_and_update_questions(): void
+    {
+        // The route gate covers reads only; closing writes would stop the
+        // question editor saving anything.
+        wp_set_current_user((int) self::factory()->user->create(['role' => 'administrator']));
+
+        $create = new WP_REST_Request('POST', '/wp/v2/sik_question');
+        $create->set_param('title', 'A new question');
+        $create->set_param('status', 'publish');
+        $create->set_param('meta', ['_sikshya_question_correct_answer' => '2']);
+        $created = rest_do_request($create);
+        $this->assertSame(201, $created->get_status(), 'Authors must still be able to create a question.');
+
+        $id = (int) ($created->get_data()['id'] ?? 0);
+        $this->assertGreaterThan(0, $id);
+
+        $update = new WP_REST_Request('PUT', '/wp/v2/sik_question/' . $id);
+        $update->set_param('meta', ['_sikshya_question_correct_answer' => '3']);
+        $this->assertSame(200, rest_do_request($update)->get_status(), 'Authors must still be able to save edits.');
+        $this->assertSame('3', get_post_meta($id, '_sikshya_question_correct_answer', true));
+    }
+
+    public function test_pro_meta_on_a_free_post_type_is_covered_too(): void
+    {
+        // Every Sikshya Pro registration attaches to a free type (course,
+        // lesson, quiz, assignment), so stripping by prefix covers add-on meta
+        // such as the live-class join URL without Pro shipping a thing.
+        register_post_meta(PostTypes::LESSON, '_sikshya_live_meeting_url', [
+            'type' => 'string',
+            'single' => true,
+            'show_in_rest' => true,
+            'auth_callback' => static fn(): bool => current_user_can('edit_posts'),
+        ]);
+        update_post_meta($this->lesson, '_sikshya_live_meeting_url', 'https://zoom.example/j/private');
+
+        wp_set_current_user(0);
+        [, $data] = $this->get('/wp/v2/sik_lesson/' . $this->lesson);
+
+        $this->assertArrayNotHasKey('_sikshya_live_meeting_url', $data['meta'] ?? []);
+    }
 }
