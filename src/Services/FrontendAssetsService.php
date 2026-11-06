@@ -10,6 +10,10 @@ use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Shortcodes\AuthShortcodes;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Frontend Asset Management Service
  *

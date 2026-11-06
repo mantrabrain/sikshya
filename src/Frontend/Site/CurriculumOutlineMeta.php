@@ -2,6 +2,10 @@
 
 namespace Sikshya\Frontend\Site;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Builds human-readable outline strings for sidebar curriculum rows.
  *

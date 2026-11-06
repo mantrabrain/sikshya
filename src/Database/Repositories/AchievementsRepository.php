@@ -7,6 +7,10 @@ namespace Sikshya\Database\Repositories;
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use Sikshya\Database\Tables\AchievementsTable;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Reads + writes against the {@see AchievementsTable} (`sikshya_achievements`).
  *

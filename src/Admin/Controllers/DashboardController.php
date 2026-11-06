@@ -8,6 +8,10 @@ use Sikshya\Core\Plugin;
 use Sikshya\Services\AnalyticsService;
 use Sikshya\Services\CacheService;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Dashboard Controller
  *

@@ -4,6 +4,10 @@ namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * @package Sikshya\Frontend\Site
  */

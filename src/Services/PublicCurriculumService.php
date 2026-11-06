@@ -4,6 +4,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Constants\PostTypes;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Read-only curriculum tree for learner-facing templates.
  *

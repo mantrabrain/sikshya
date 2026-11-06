@@ -5,6 +5,10 @@ namespace Sikshya\Services;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 use WP_Error;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Business logic for enrollment CRUD used by REST controllers.
  */

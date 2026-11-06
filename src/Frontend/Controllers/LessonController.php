@@ -7,6 +7,10 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\LessonAttachments;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Frontend Lesson Controller
  *

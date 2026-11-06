@@ -4,6 +4,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Constants\PostTypes;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Keeps the course meta alias pairs in sync whenever either side is written.
  *

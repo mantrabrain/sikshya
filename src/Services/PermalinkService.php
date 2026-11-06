@@ -2,6 +2,10 @@
 
 namespace Sikshya\Services;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Virtual frontend routes (cart, checkout, account, learn, order) and permalink option keys.
  *

@@ -7,6 +7,10 @@ use Sikshya\Services\CourseFrontendSettings;
 use Sikshya\Services\CourseService;
 use WP_Query;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class CourseController
 {
     private Plugin $plugin;

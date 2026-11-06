@@ -4,6 +4,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\CertificateRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Learner certificates (table-backed).
  *

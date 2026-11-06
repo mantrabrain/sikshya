@@ -8,6 +8,10 @@ use Sikshya\Constants\Taxonomies;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Utils\RichText;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Course Categories Controller
  *

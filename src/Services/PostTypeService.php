@@ -6,6 +6,10 @@ use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 use Sikshya\PostTypes\PostTypeManager;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Post Type Management Service
  *

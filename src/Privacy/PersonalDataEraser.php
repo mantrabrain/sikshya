@@ -2,6 +2,10 @@
 
 namespace Sikshya\Privacy;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * GDPR personal-data eraser for Sikshya.
  *

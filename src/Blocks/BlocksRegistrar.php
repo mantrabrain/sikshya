@@ -6,6 +6,10 @@ use Sikshya\Core\Plugin;
 use Sikshya\Shortcodes\AuthShortcodes;
 use Sikshya\Shortcodes\CoursesShortcode;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Registers Sikshya Gutenberg blocks (dynamic; same output as shortcodes).
  *

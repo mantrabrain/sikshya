@@ -5,6 +5,10 @@ namespace Sikshya\Frontend\Controllers;
 use Sikshya\Core\Plugin;
 use Sikshya\Frontend\Site\PublicPageUrls;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Frontend User Controller
  *

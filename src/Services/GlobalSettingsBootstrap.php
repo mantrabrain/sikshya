@@ -7,6 +7,10 @@ namespace Sikshya\Services;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Wires Sikshya Global Settings (React / {@see \Sikshya\Admin\Settings\SettingsManager}) into runtime behavior.
  *

@@ -6,6 +6,10 @@ use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Students List Table
  *

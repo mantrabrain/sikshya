@@ -10,6 +10,10 @@ use Sikshya\Services\Settings;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
 use Sikshya\Services\Frontend\SingleCoursePageService;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * View-model for {@see templates/single-course.php} (no business logic in the template file).
  *

@@ -2,6 +2,10 @@
 
 namespace Sikshya\Database\Tables;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 abstract class AbstractTable implements TableInterface
 {
     public static function getTableName(): string

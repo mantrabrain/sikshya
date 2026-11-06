@@ -4,6 +4,10 @@ namespace Sikshya\Certificates;
 
 use Sikshya\Services\PermalinkService;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Lightweight public certificate renderer for the free plugin.
  *
