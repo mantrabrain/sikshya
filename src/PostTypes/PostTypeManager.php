@@ -33,6 +33,13 @@ class PostTypeManager
     public function __construct()
     {
         add_action('init', [$this, 'registerRestAccessiblePostMeta'], 20);
+
+        /*
+         * `show_in_rest` above is what lets the editor save these fields; core
+         * reads it as "publish to any reader" as well, which is not what the
+         * registrations meant. The guard puts the read side back.
+         */
+        \Sikshya\Api\RestReadGuard::register();
     }
 
     /**

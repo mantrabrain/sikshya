@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.17
+Stable tag: 1.0.18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -426,15 +426,22 @@ changelog longer than 5,000 words. Every earlier entry is kept in full in `chang
 shipped alongside this file, and in the release history at
 https://github.com/mantrabrain/sikshya/releases
 
+= 1.0.18 - 2026-11-06 =
+**Security release. If you sell courses with Sikshya, update now.**
+* **Paid lesson content and quiz answer keys were readable over the WordPress REST API without logging in.** Sikshya registers its post meta with `show_in_rest` so the editor can save it; WordPress also reads that flag as "publish this field to anyone who may read the post", which for a published post is everybody. `auth_callback` does not change it — WordPress consults that when writing, not when answering a read. So `wp-json/wp/v2/sik_question` handed an anonymous visitor the correct answer, the options and the explanation for every question on the site, and `wp-json/wp/v2/sik_lesson` handed over lesson bodies, video URLs, transcripts, live-class join links and SCORM launch URLs — while the course page and the Learn shell correctly refused that same visitor, because those are WordPress's own routes and Sikshya's enrolment check never ran on them.
+* Private meta is now withheld by default. Every key beginning with an underscore is stripped from a REST response unless the reader may edit that post — so a meta key added in a future release is protected the day it is written, rather than being public until somebody remembers it. Course prices stay public, because the course page prints them anyway.
+* The body of a lesson, quiz, question or assignment is withheld from anyone who cannot edit it, **unless the author marked the lesson free**, which is a deliberate preview and still works.
+* Questions are no longer listed over the REST API to anyone who cannot author content. A question's title is the question, so hiding only the answer key would still have handed over the whole question bank.
+* **Nothing changes for authors.** Administrators and instructors read and write exactly as before; the block editor and the Sikshya admin are unaffected.
+* Reported privately and responsibly by an independent security researcher, with a clear reproduction. Our thanks — it was a real finding and the report is what made the fix quick.
+
 = 1.0.17 - 2026-11-06 =
 * **A feature you had paid for could be invisible.** Course discussions is included in Growth, but its menu row was built to remove itself unless the add-on was already switched on — the one row of thirteen that hid instead of reporting "off". So a site with the right licence saw no Discussions entry anywhere and no route to enable it, while the screen behind it had been sitting there the whole time offering to turn it on. It is now listed like every other add-on route, marked "off" until you enable it at Sikshya → Addons. Reported by a customer on Growth who could not find it.
 
-= 1.0.16 - 2026-11-01 =
-**Documentation only. No code changed; there is no reason to rush this update.**
-* WordPress.org truncates a plugin changelog longer than 5,000 words, and Sikshya's had grown to 7,300 — so the older half of the history was quietly vanishing from the plugin page. The changelog here now carries the two most recent releases, and every earlier entry is kept in full in `changelog.txt`, which ships with the plugin.
-* Adds the Sikshya Pro overview video to the Pro section of this page.
-
 == Upgrade Notice ==
+
+= 1.0.18 =
+Security release: paid lesson content and quiz answer keys were readable over the REST API without logging in. Update now if you sell courses.
 
 = 1.0.9 - 2026-10-01 =
 Critical. Free enrolment was broken in 1.0.6-1.0.8 (every enrolment returned "Invalid course"), paid courses could be enrolled in for free, and uninstall did not erase course content when that option was enabled. Update immediately.

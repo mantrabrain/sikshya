@@ -193,6 +193,7 @@ return array(
     'Sikshya\\Api\\PublicRestRoutes' => $baseDir . '/src/Api/PublicRestRoutes.php',
     'Sikshya\\Api\\QuizService' => $baseDir . '/src/Api/QuizService.php',
     'Sikshya\\Api\\RestPermissions' => $baseDir . '/src/Api/RestPermissions.php',
+    'Sikshya\\Api\\RestReadGuard' => $baseDir . '/src/Api/RestReadGuard.php',
     'Sikshya\\Api\\RestResponse' => $baseDir . '/src/Api/RestResponse.php',
     'Sikshya\\Api\\Services\\CourseBuilderSaveService' => $baseDir . '/src/Api/Services/CourseBuilderSaveService.php',
     'Sikshya\\Api\\UserService' => $baseDir . '/src/Api/UserService.php',

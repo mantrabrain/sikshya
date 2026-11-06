@@ -224,6 +224,7 @@ class ComposerStaticInit47b632aee622770d1fef198fea2ecc44
         'Sikshya\\Api\\PublicRestRoutes' => __DIR__ . '/../..' . '/src/Api/PublicRestRoutes.php',
         'Sikshya\\Api\\QuizService' => __DIR__ . '/../..' . '/src/Api/QuizService.php',
         'Sikshya\\Api\\RestPermissions' => __DIR__ . '/../..' . '/src/Api/RestPermissions.php',
+        'Sikshya\\Api\\RestReadGuard' => __DIR__ . '/../..' . '/src/Api/RestReadGuard.php',
         'Sikshya\\Api\\RestResponse' => __DIR__ . '/../..' . '/src/Api/RestResponse.php',
         'Sikshya\\Api\\Services\\CourseBuilderSaveService' => __DIR__ . '/../..' . '/src/Api/Services/CourseBuilderSaveService.php',
         'Sikshya\\Api\\UserService' => __DIR__ . '/../..' . '/src/Api/UserService.php',
