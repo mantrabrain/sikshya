@@ -259,15 +259,21 @@ final class ReactAdminConfig
             ], 'course_reviews'),
         ];
 
-        if (TierCapabilities::feature('community_discussions') && Addons::isEnabled('community_discussions')) {
-            $course_children[] = [
-                'id' => 'discussions',
-                'label' => __('Discussions & Q&A', 'sikshya'),
-                'icon' => 'chatBubbles',
-                'href' => self::reactAppUrl('discussions'),
-                'cap' => 'sikshya_staff',
-            ];
-        }
+        /*
+         * Badged like every other add-on entry rather than hidden outright.
+         * Hiding it meant a site that *had* paid for Discussions saw no trace
+         * of it anywhere in the menu and no route to switch it on — the one
+         * nav row of thirteen that removed itself instead of saying "off".
+         * `DiscussionsPage` already renders an enable prompt when the add-on
+         * is off, so the destination has always been ready for this.
+         */
+        $course_children[] = self::withNavGate([
+            'id' => 'discussions',
+            'label' => __('Discussions & Q&A', 'sikshya'),
+            'icon' => 'chatBubbles',
+            'href' => self::reactAppUrl('discussions'),
+            'cap' => 'sikshya_staff',
+        ], 'community_discussions');
 
         $course_children[] = self::withNavGate([
             'id' => 'ai-studio',

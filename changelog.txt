@@ -2,6 +2,9 @@ Sikshya LMS - full changelog
 (readme.txt carries only the two most recent releases; WordPress.org truncates
 a changelog longer than 5,000 words.)
 
+= 1.0.17 - 2026-11-06 =
+* **A feature you had paid for could be invisible.** Course discussions is included in Growth, but its menu row was built to remove itself unless the add-on was already switched on — the one row of thirteen that hid instead of reporting "off". So a site with the right licence saw no Discussions entry anywhere and no route to enable it, while the screen behind it had been sitting there the whole time offering to turn it on. It is now listed like every other add-on route, marked "off" until you enable it at Sikshya → Addons. Reported by a customer on Growth who could not find it.
+
 = 1.0.16 - 2026-11-01 =
 **Documentation only. No code changed; there is no reason to rush this update.**
 * WordPress.org truncates a plugin changelog longer than 5,000 words, and Sikshya's had grown to 7,300 — so the older half of the history was quietly vanishing from the plugin page. The changelog here now carries the two most recent releases, and every earlier entry is kept in full in `changelog.txt`, which ships with the plugin.
