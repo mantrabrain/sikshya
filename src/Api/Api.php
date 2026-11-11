@@ -354,6 +354,52 @@ class Api
         );
 
         /*
+         * Resolve a whole page of questions in one pass.
+         *
+         * `sikshya_learn_view_url` below asks "which quiz holds this question",
+         * which can only be answered with a `LIKE '%i:123;%'` over `postmeta` —
+         * a leading wildcard, so every call reads the table. Per row that is
+         * one full scan each; on a site with ~292k postmeta rows a 20-row page
+         * spent 402ms of 535ms doing exactly that, twenty times over.
+         *
+         * Priming from the posts query turns the page into a single scan. The
+         * per-row callback is unchanged and still correct on its own, so a
+         * question fetched singly, or through any other route, behaves the same.
+         */
+        add_filter(
+            'the_posts',
+            static function ($posts, $query) {
+                // Only during a REST request: that is the only place the
+                // `sikshya_learn_view_url` field below is serialised, so
+                // priming anywhere else — a front-end quiz rendering its
+                // questions, say — would add a query the old code never ran.
+                if (!defined('REST_REQUEST') || !REST_REQUEST) {
+                    return $posts;
+                }
+                if (!is_array($posts) || count($posts) < 2 || !$query instanceof \WP_Query) {
+                    return $posts;
+                }
+                $requested = (array) $query->get('post_type');
+                if (!in_array(\Sikshya\Constants\PostTypes::QUESTION, $requested, true)) {
+                    return $posts;
+                }
+                $ids = [];
+                foreach ($posts as $post) {
+                    if ($post instanceof \WP_Post && $post->post_type === \Sikshya\Constants\PostTypes::QUESTION) {
+                        $ids[] = (int) $post->ID;
+                    }
+                }
+                if ($ids !== []) {
+                    \Sikshya\Services\QuizQuestionInverseLookup::prime($ids);
+                }
+
+                return $posts;
+            },
+            10,
+            2
+        );
+
+        /*
          * Question CPT has no standalone Learn URL; open the first published quiz that references it (if any).
          */
         register_rest_field(

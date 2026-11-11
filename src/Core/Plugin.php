@@ -190,6 +190,12 @@ final class Plugin
             // docblock for why drift was a paywall problem, not a cosmetic one).
             \Sikshya\Services\CourseMetaAliasMirror::init();
 
+            // The question list resolves "which quiz holds this question" from
+            // a serialized meta value, which can only be a full postmeta scan.
+            // It is memoised per request, so it has to be told when a quiz's
+            // question list changes underneath it.
+            \Sikshya\Services\QuizQuestionInverseLookup::listen();
+
             // Self-diagnosing notices for configuration that silently breaks the
             // LMS (plain permalinks, registration off, priced courses with no
             // gateway). Admin-only; they hook `admin_notices` deliberately.
