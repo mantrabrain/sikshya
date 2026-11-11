@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.18
+Stable tag: 1.0.19
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -426,6 +426,10 @@ changelog longer than 5,000 words. Every earlier entry is kept in full in `chang
 shipped alongside this file, and in the release history at
 https://github.com/mantrabrain/sikshya/releases
 
+= 1.0.19 - 2026-11-11 =
+* **Lesson, quiz, question and assignment lists are faster, and stay fast as your site grows.** Opening one of those lists asked the database "which quiz holds this question?" once for every row on the page. That question can only be answered by searching through stored settings text, which no index can speed up, so each row read the whole table. On a site with ~292,000 stored settings rows a 20-row page spent 402ms of its 535ms doing that twenty times over — and because the cost follows how much content you have rather than how many rows are on screen, it got worse the longer you used Sikshya. It is now answered once per page: the lists come back about a quarter faster, and the saving grows with the size of your site.
+* Nothing about what you see changes — the same links, in the same order. Verified identical across 200 questions against the previous behaviour, and covered by tests that fail if the per-row version ever comes back.
+
 = 1.0.18 - 2026-11-06 =
 **Security release. If you sell courses with Sikshya, update now.**
 * **Paid lesson content and quiz answer keys were readable over the WordPress REST API without logging in.** Sikshya registers its post meta with `show_in_rest` so the editor can save it; WordPress also reads that flag as "publish this field to anyone who may read the post", which for a published post is everybody. `auth_callback` does not change it — WordPress consults that when writing, not when answering a read. So `wp-json/wp/v2/sik_question` handed an anonymous visitor the correct answer, the options and the explanation for every question on the site, and `wp-json/wp/v2/sik_lesson` handed over lesson bodies, video URLs, transcripts, live-class join links and SCORM launch URLs — while the course page and the Learn shell correctly refused that same visitor, because those are WordPress's own routes and Sikshya's enrolment check never ran on them.
@@ -435,10 +439,10 @@ https://github.com/mantrabrain/sikshya/releases
 * **Nothing changes for authors.** Administrators and instructors read and write exactly as before; the block editor and the Sikshya admin are unaffected.
 * Reported privately and responsibly by an independent security researcher, with a clear reproduction. Our thanks — it was a real finding and the report is what made the fix quick.
 
-= 1.0.17 - 2026-11-06 =
-* **A feature you had paid for could be invisible.** Course discussions is included in Growth, but its menu row was built to remove itself unless the add-on was already switched on — the one row of thirteen that hid instead of reporting "off". So a site with the right licence saw no Discussions entry anywhere and no route to enable it, while the screen behind it had been sitting there the whole time offering to turn it on. It is now listed like every other add-on route, marked "off" until you enable it at Sikshya → Addons. Reported by a customer on Growth who could not find it.
-
 == Upgrade Notice ==
+
+= 1.0.19 =
+Performance: lesson, quiz, question and assignment lists no longer search the whole settings table once per row. Noticeably faster on large sites, and no change to what you see.
 
 = 1.0.18 =
 Security release: paid lesson content and quiz answer keys were readable over the REST API without logging in. Update now if you sell courses.
