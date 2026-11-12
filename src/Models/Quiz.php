@@ -6,6 +6,10 @@ use Sikshya\Constants\PostTypes;
 
 use WP_Post;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Quiz Model
  *

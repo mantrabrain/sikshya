@@ -2,6 +2,10 @@
 
 namespace Sikshya\Database\Tables;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 final class OrderItemsTable extends AbstractTable
 {
     public static function baseName(): string

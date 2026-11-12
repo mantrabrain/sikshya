@@ -5,6 +5,10 @@ namespace Sikshya\Admin\Controllers;
 use Sikshya\Admin\ReactAdminView;
 use Sikshya\Core\Plugin;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Lesson admin — React shell only.
  *

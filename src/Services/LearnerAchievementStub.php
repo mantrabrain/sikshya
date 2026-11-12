@@ -7,6 +7,10 @@ namespace Sikshya\Services;
 use Sikshya\Database\Repositories\AchievementsRepository;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Learner achievement / badge service.
  *

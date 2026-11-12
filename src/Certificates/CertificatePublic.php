@@ -5,6 +5,10 @@ namespace Sikshya\Certificates;
 use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Services\PermalinkService;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Public hash-based certificate page for the free plugin.
  *

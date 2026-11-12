@@ -2,6 +2,10 @@
 
 namespace Sikshya\Frontend\Site;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Server-rendered markup for checkout dynamic fields (matches assets/js/checkout-page.js structure).
  *

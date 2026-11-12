@@ -2,6 +2,10 @@
 
 namespace Sikshya\Frontend\Site;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Prompts learners to rate a course after completion.
  *

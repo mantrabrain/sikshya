@@ -6,6 +6,10 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use WP_Query;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class CourseRepository implements RepositoryInterface
 {
     public function findAll(array $args = []): array

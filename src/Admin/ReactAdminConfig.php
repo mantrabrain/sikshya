@@ -11,6 +11,10 @@ use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\Settings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Bootstrap payload for the React admin shell (URL-based pages, full-width layout).
  */

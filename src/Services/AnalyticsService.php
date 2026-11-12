@@ -5,6 +5,10 @@ namespace Sikshya\Services;
 use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\AnalyticsRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Analytics Service
  *

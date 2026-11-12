@@ -7,6 +7,10 @@ use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Core\Plugin;
 use Sikshya\Admin\Views\BaseView;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Setting Controller Class
  *

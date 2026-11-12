@@ -5,6 +5,10 @@ namespace Sikshya\Database\Repositories;
 use Sikshya\Database\Tables\OrdersTable;
 use Sikshya\Database\Tables\OrderItemsTable;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Checkout orders + line items.
  *
