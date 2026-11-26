@@ -168,6 +168,19 @@ final class CourseGridBlockTest extends WP_UnitTestCase
         }
     }
 
+    /**
+     * The list layout reserves a column for the image, so with thumbnails off
+     * the CSS needs to know or that column is an empty gutter.
+     */
+    public function test_thumbnails_off_is_signalled_on_the_wrapper(): void
+    {
+        $with = $this->renderGrid(['perPage' => 2, 'showThumbnail' => true]);
+        $without = $this->renderGrid(['perPage' => 2, 'showThumbnail' => false]);
+
+        $this->assertStringNotContainsString('sikshya-cg--no-media', $with);
+        $this->assertStringContainsString('sikshya-cg--no-media', $without);
+    }
+
     public function test_column_counts_travel_as_custom_properties(): void
     {
         $html = $this->renderGrid(['columns' => 4, 'columnsTablet' => 3, 'columnsMobile' => 2]);

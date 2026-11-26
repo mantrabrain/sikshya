@@ -147,6 +147,12 @@ final class CourseGridBlock
             'sikshya-cg--ratio-' . sanitize_html_class((string) $a['aspectRatio']),
         ];
 
+        // The list layout reserves a column for the image; with thumbnails off
+        // that column would be an empty gutter, so the CSS needs to know.
+        if (empty($a['showThumbnail'])) {
+            $classes[] = 'sikshya-cg--no-media';
+        }
+
         // `sik-f-scope` is what the design-system stylesheet keys its
         // primitives off; without it the cards lose their type scale.
         $classes[] = 'sik-f-scope';

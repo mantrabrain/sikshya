@@ -63,6 +63,47 @@
   }
 }
 
+/*
+ * Where container queries exist, measure the block instead of the window.
+ *
+ * The viewport rules above are the floor, and they are wrong whenever the
+ * block sits somewhere narrow: on a theme whose page template is a ~490px
+ * column, a 1440px window still counted as "desktop", so three columns were
+ * laid out 197px wide each and the cards were unreadable. The theme is not at
+ * fault and neither is the author's choice of three columns — the grid simply
+ * has to look at the space it was actually given.
+ *
+ * Wrapped in @supports and scoped to a named container so this only ever
+ * overrides the media queries, never the other way round.
+ */
+@supports (container-type: inline-size) {
+  .sikshya-cg {
+    container-type: inline-size;
+    container-name: sikshya-cg;
+  }
+
+  .sikshya-cg__list {
+    grid-template-columns: repeat(var(--sikshya-grid-columns-mobile, 1), minmax(0, 1fr));
+  }
+
+  @container sikshya-cg (min-width: 30rem) {
+    .sikshya-cg__list {
+      grid-template-columns: repeat(var(--sikshya-grid-columns-tablet, 2), minmax(0, 1fr));
+    }
+  }
+
+  @container sikshya-cg (min-width: 48rem) {
+    .sikshya-cg__list {
+      grid-template-columns: repeat(var(--sikshya-grid-columns, 3), minmax(0, 1fr));
+    }
+  }
+
+  /* A list layout is one column at every width. */
+  .sikshya-cg--list .sikshya-cg__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .sikshya-cg__item {
   margin: 0;
   padding: 0;
@@ -74,22 +115,65 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+/*
+ * List rows are a two-column grid, not a row of three flex children.
+ *
+ * As a flex row the card's media, body and footer each became a column, so
+ * inside a theme's ~500px content area the body was squeezed into a third of
+ * the width and the button wrapped onto two lines. Here the media spans both
+ * rows on the left and the text stacks beside it, which is what a list row is
+ * meant to look like. Seen in a screenshot; computed styles alone looked fine.
+ */
 .sikshya-cg--list .sikshya-cg-card {
-  flex-direction: row;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: min(38%, 20rem) minmax(0, 1fr);
+  grid-template-areas:
+    "media body"
+    "media footer";
+  grid-template-rows: 1fr auto;
 }
 
 .sikshya-cg--list .sikshya-cg-card__media {
-  flex: 0 0 min(38%, 20rem);
+  grid-area: media;
+  height: 100%;
+}
+
+.sikshya-cg--list .sikshya-cg-card__media-link,
+.sikshya-cg--list .sikshya-cg-card__image {
+  height: 100%;
+}
+
+.sikshya-cg--list .sikshya-cg-card__body {
+  grid-area: body;
+}
+
+.sikshya-cg--list .sikshya-cg-card__footer {
+  grid-area: footer;
+}
+
+/* A list row with no image must not leave an empty first column. The class
+ * comes from the renderer rather than :has(), so it works everywhere. */
+.sikshya-cg--list.sikshya-cg--no-media .sikshya-cg-card {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "body"
+    "footer";
 }
 
 @media (max-width: 599px) {
   .sikshya-cg--list .sikshya-cg-card {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "media"
+      "body"
+      "footer";
+    grid-template-rows: auto auto auto;
   }
 
-  .sikshya-cg--list .sikshya-cg-card__media {
-    flex: 0 0 auto;
+  .sikshya-cg--list .sikshya-cg-card__media,
+  .sikshya-cg--list .sikshya-cg-card__media-link,
+  .sikshya-cg--list .sikshya-cg-card__image {
+    height: auto;
   }
 }
 
@@ -359,9 +443,19 @@
 }
 
 /*
- * The CTA carries `wp-element-button`, so a block theme styles it. These rules
- * are the classic-theme fallback and are written so they lose to the theme:
- * no !important, and only properties a theme button sets itself.
+ * The CTA carries `wp-element-button` so a block theme can restyle it, but it
+ * is always given a complete button of its own here, coloured from the theme's
+ * palette via --sik-cg-accent. Whichever of the two wins, the result is a
+ * button in the theme's colour.
+ *
+ * It used to `revert` these properties under `.wp-site-blocks` and
+ * `body.wp-embed-responsive`, on the assumption that both mean "block theme"
+ * and that `wp-element-button` would supply the styling. `wp-embed-responsive`
+ * is not a block-theme signal at all — WordPress adds it to any theme that
+ * supports responsive embeds, classic ones included. So on a classic theme the
+ * revert fired, nothing replaced it, and the call to action rendered as bare
+ * underlined text with no padding or background. Found by screenshotting the
+ * page in a browser; no server-side render test can see a computed style.
  */
 .sikshya-cg-card__cta {
   display: inline-block;
@@ -375,16 +469,11 @@
   text-decoration: none;
 }
 
-.wp-site-blocks .sikshya-cg-card__cta,
-body.wp-embed-responsive .sikshya-cg-card__cta {
-  /* On a block theme `wp-element-button` already supplies all of the above;
-   * dropping ours avoids fighting the theme's own padding and radius. */
-  padding: revert;
-  border-radius: revert;
-  background: revert;
-  color: revert;
-  font-size: revert;
-  font-weight: revert;
+.sikshya-cg-card__cta:hover,
+.sikshya-cg-card__cta:focus-visible {
+  color: #fff;
+  text-decoration: none;
+  filter: brightness(0.92);
 }
 
 /* -------------------------------------------------------------------------
@@ -407,10 +496,17 @@ body.wp-embed-responsive .sikshya-cg-card__cta {
 }
 
 .sikshya-cg-cats__item {
+  /* display:flex so the link fills the grid cell: without it a tile whose
+   * name wraps to three lines was taller than its neighbours. */
+  display: flex;
   margin: 0;
   padding: 0;
   list-style: none;
   min-width: 0;
+}
+
+.sikshya-cg-cats__item > .sikshya-cg-cats__link {
+  flex: 1 1 auto;
 }
 
 .sikshya-cg-cats__link {
@@ -537,12 +633,9 @@ body.wp-embed-responsive .sikshya-cg-card__cta {
   cursor: pointer;
 }
 
-.wp-site-blocks .sikshya-course-search__submit {
-  padding: revert;
-  border-radius: revert;
-  background: revert;
-  color: revert;
-  font-weight: revert;
+.sikshya-course-search__submit:hover,
+.sikshya-course-search__submit:focus-visible {
+  filter: brightness(0.92);
 }
 
 /* -------------------------------------------------------------------------

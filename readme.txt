@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.0.21
+Stable tag: 1.0.22
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -426,6 +426,14 @@ changelog longer than 5,000 words. Every earlier entry is kept in full in `chang
 shipped alongside this file, and in the release history at
 https://github.com/mantrabrain/sikshya/releases
 
+= 1.0.22 - 2026-11-26 =
+**Fixes how the new catalog blocks look on a classic theme. If you added a Course Grid in 1.0.21, update.**
+* **The "Start free" / "View course" button was not a button.** On a classic theme it rendered as plain underlined text with no padding and no background. A rule meant to step aside on block themes — so the theme's own button styling could take over — was keyed on a body class that WordPress also adds to classic themes, so the plugin's button styling was removed and nothing replaced it. The call to action is now always a real button, coloured from your theme's palette, and still defers to a block theme's own button design.
+* **List layout rows are readable again.** The image, the text and the price were each taking a third of the row, so inside a theme with a narrow content column the description was squeezed into a sliver and the button wrapped onto two lines. The image now sits beside the text, with the price and button beneath it.
+* **The grid now measures the space it was given, not the width of the browser window.** Asking for three columns inside a theme whose page template is a narrow column produced three unreadable 197px cards on a full-size screen. The grid now drops to fewer columns when the area it sits in is narrow, so your column choice applies where there is room for it and never squashes the cards where there is not.
+* Category tiles in a row are the same height again, regardless of how long the category names are.
+* These were all found by looking at the blocks in a browser. There are now automated browser tests that read the rendered page the way a visitor's browser does and fail if the button loses its styling, the stylesheet does not load, the columns get too narrow, or the page scrolls sideways on a phone — none of which the existing tests could see.
+
 = 1.0.21 - 2026-11-26 =
 * **Three new blocks for building a course catalog: Course Grid, Course Categories and Course Search.** Drop them on any page — a home-page row of featured courses, a catalog page you lay out yourself, a "continue learning" strip for signed-in students. Course Grid filters by category, tag, instructor, price, or a hand-picked list of courses, and it can show only the courses a visitor is enrolled in, or hide those. You choose the columns separately for desktop, tablet and phone, and which parts of the card appear.
 * **The new blocks take their look from your theme, not from Sikshya.** Colours, fonts, spacing and corner radius are read from the theme first, and the buttons use the same class your theme styles its own buttons with — so on a block theme the cards arrive already matching the rest of the site, with no CSS to write. Colour, spacing, typography and border controls in the block sidebar work as they do on a core block, which they did not on the older Sikshya Courses block.
@@ -436,11 +444,10 @@ https://github.com/mantrabrain/sikshya/releases
 * **The admin dashboard and reports no longer slow down as you gain users.** Counting how many students and instructors you have means reading every user's stored roles, which no database index can speed up — and Sikshya asked for it three times on a single admin page load, including once in the reports screen where the answer was then thrown away unused. The count is now worked out once and remembered until somebody registers, is deleted, or has their role changed, and the reports screen does not ask for it at all when the enrolment records already answer the question.
 * The original Sikshya Courses block is untouched and still works; pages using it render exactly as before.
 
-= 1.0.20 - 2026-11-26 =
-* **Ready for WordPress 7.2**, which is due on 8 December. The whole plugin was run against the 7.2 release candidate — 313 integration tests, covering the course builder, checkout, the Learn pages, quizzes, certificates, the importers, multisite and uninstall — and everything passed unchanged. `Requires at least: 6.0` and `Requires PHP: 7.4` are untouched, so this update is safe for every existing site.
-* Our own test harness now runs the WordPress version it claims to support, rather than an older bundled copy. That is an internal change with no effect on your site, but it is why the 7.2 result can be trusted.
-
 == Upgrade Notice ==
+
+= 1.0.22 =
+Fixes the Course Grid block's appearance on classic themes: the call-to-action button had lost its styling, list rows were cramped, and a three-column grid could be squeezed into unreadable widths inside a narrow theme container. Update if you added a catalog block in 1.0.21.
 
 = 1.0.21 =
 Adds Course Grid, Course Categories and Course Search blocks that inherit your theme's design, and lets a theme override any Sikshya template from a `sikshya/` folder. Also fixes misleading upgrade wording on the Addons screen and removes two listing slowdowns. Nothing breaks: existing pages, blocks and themes render exactly as before.
