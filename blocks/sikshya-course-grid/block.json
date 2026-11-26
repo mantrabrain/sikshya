@@ -1,0 +1,86 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sikshya/course-grid",
+  "version": "1.0.0",
+  "title": "Course Grid",
+  "category": "sikshya",
+  "icon": "grid-view",
+  "description": "A grid or list of courses that inherits your theme's colours, fonts and buttons. Filter by category, tag, instructor or price.",
+  "keywords": ["sikshya", "course", "courses", "grid", "catalog", "lms", "learning"],
+  "textdomain": "sikshya",
+  "editorScript": "sikshya-blocks-editor",
+  "editorStyle": "sikshya-blocks-editor",
+  "style": "sikshya-blocks-catalog",
+  "attributes": {
+    "perPage": { "type": "number", "default": 6 },
+    "columns": { "type": "number", "default": 3 },
+    "columnsTablet": { "type": "number", "default": 2 },
+    "columnsMobile": { "type": "number", "default": 1 },
+    "layout": { "type": "string", "default": "grid" },
+    "cardStyle": { "type": "string", "default": "card" },
+    "aspectRatio": { "type": "string", "default": "16-9" },
+    "orderBy": { "type": "string", "default": "date" },
+    "order": { "type": "string", "default": "desc" },
+    "categories": { "type": "array", "default": [], "items": { "type": "number" } },
+    "tags": { "type": "array", "default": [], "items": { "type": "number" } },
+    "instructors": { "type": "array", "default": [], "items": { "type": "number" } },
+    "includeIds": { "type": "array", "default": [], "items": { "type": "number" } },
+    "excludeIds": { "type": "array", "default": [], "items": { "type": "number" } },
+    "priceFilter": { "type": "string", "default": "any" },
+    "enrolledOnly": { "type": "boolean", "default": false },
+    "excludeEnrolled": { "type": "boolean", "default": false },
+    "showThumbnail": { "type": "boolean", "default": true },
+    "showCategory": { "type": "boolean", "default": true },
+    "showExcerpt": { "type": "boolean", "default": true },
+    "showInstructor": { "type": "boolean", "default": true },
+    "showRating": { "type": "boolean", "default": true },
+    "showPrice": { "type": "boolean", "default": true },
+    "showMeta": { "type": "boolean", "default": true },
+    "showDifficulty": { "type": "boolean", "default": true },
+    "showProgress": { "type": "boolean", "default": true },
+    "showButton": { "type": "boolean", "default": true },
+    "excerptLength": { "type": "number", "default": 18 },
+    "buttonLabel": { "type": "string", "default": "" },
+    "emptyMessage": { "type": "string", "default": "" },
+    "pagination": { "type": "boolean", "default": false },
+    "queryId": { "type": "number", "default": 0 }
+  },
+  "supports": {
+    "html": false,
+    "multiple": true,
+    "align": ["wide", "full"],
+    "anchor": true,
+    "color": {
+      "background": true,
+      "text": true,
+      "gradients": true,
+      "link": true
+    },
+    "spacing": {
+      "margin": true,
+      "padding": true,
+      "blockGap": true
+    },
+    "typography": {
+      "fontSize": true,
+      "lineHeight": true,
+      "__experimentalFontFamily": true,
+      "__experimentalFontWeight": true,
+      "__experimentalLetterSpacing": true
+    },
+    "__experimentalBorder": {
+      "color": true,
+      "radius": true,
+      "style": true,
+      "width": true
+    }
+  },
+  "example": {
+    "attributes": {
+      "perPage": 3,
+      "columns": 3,
+      "showExcerpt": false
+    }
+  }
+}

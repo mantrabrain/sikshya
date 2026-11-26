@@ -103,6 +103,41 @@ final class BlocksRegistrar
                 },
             ]
         );
+
+        /*
+         * Catalog block set. These render their own markup (not a shortcode)
+         * and emit get_block_wrapper_attributes(), so the colour / spacing /
+         * typography / border supports declared in their block.json reach the
+         * DOM. BlockPreviewMarkup::wrap() is deliberately not used: it would
+         * add an outer div between the wrapper attributes and the content,
+         * which is what breaks alignment on the older blocks.
+         */
+        register_block_type(
+            $base . '/sikshya-course-grid',
+            [
+                'render_callback' => static function (array $attributes, string $content = '', $block = null): string {
+                    return CourseGrid\CourseGridBlock::render($attributes, $content, $block);
+                },
+            ]
+        );
+
+        register_block_type(
+            $base . '/sikshya-course-categories',
+            [
+                'render_callback' => static function (array $attributes): string {
+                    return CourseGrid\CourseCategoriesBlock::render($attributes);
+                },
+            ]
+        );
+
+        register_block_type(
+            $base . '/sikshya-course-search',
+            [
+                'render_callback' => static function (array $attributes): string {
+                    return CourseGrid\CourseSearchBlock::render($attributes);
+                },
+            ]
+        );
     }
 
     public function enqueueEditorAssets(): void
@@ -111,7 +146,9 @@ final class BlocksRegistrar
         PublicBlockStyles::registerStyles();
 
         wp_enqueue_script('sikshya-blocks-editor');
+        wp_enqueue_script('sikshya-blocks-catalog-editor');
         wp_enqueue_style('sikshya-blocks-editor');
+        wp_enqueue_style(PublicBlockStyles::CATALOG_HANDLE);
 
         /*
          * Public course/auth CSS is attached via PublicBlockStyles (iframe + front end).
@@ -127,6 +164,13 @@ final class BlocksRegistrar
             return;
         }
 
+        /*
+         * The catalog blocks' editor UI is a separate file, registered as its
+         * own handle rather than appended to editor.js: block.json's
+         * `editorScript` only takes an array from WordPress 6.1, and the
+         * plugin supports 6.0. Depending on `sikshya-blocks-editor` guarantees
+         * the load order either way.
+         */
         wp_register_script(
             'sikshya-blocks-editor',
             $this->plugin->getAssetUrl('blocks/editor.js'),
@@ -143,8 +187,26 @@ final class BlocksRegistrar
             true
         );
 
+        wp_register_script(
+            'sikshya-blocks-catalog-editor',
+            $this->plugin->getAssetUrl('blocks/catalog-editor.js'),
+            [
+                'sikshya-blocks-editor',
+                'wp-blocks',
+                'wp-block-editor',
+                'wp-components',
+                'wp-element',
+                'wp-server-side-render',
+                'wp-api-fetch',
+                'wp-i18n',
+            ],
+            SIKSHYA_VERSION,
+            true
+        );
+
         if (function_exists('wp_set_script_translations')) {
             wp_set_script_translations('sikshya-blocks-editor', 'sikshya', $this->plugin->getPluginPath() . 'languages');
+            wp_set_script_translations('sikshya-blocks-catalog-editor', 'sikshya', $this->plugin->getPluginPath() . 'languages');
         }
 
         wp_register_style(

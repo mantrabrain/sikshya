@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sikshya/course-search",
+  "version": "1.0.0",
+  "title": "Course Search",
+  "category": "sikshya",
+  "icon": "search",
+  "description": "A search field that sends visitors to the course archive, optionally with a category filter.",
+  "keywords": ["sikshya", "course", "search", "filter", "catalog"],
+  "textdomain": "sikshya",
+  "editorScript": "sikshya-blocks-editor",
+  "editorStyle": "sikshya-blocks-editor",
+  "style": "sikshya-blocks-catalog",
+  "attributes": {
+    "placeholder": { "type": "string", "default": "" },
+    "buttonLabel": { "type": "string", "default": "" },
+    "showButton": { "type": "boolean", "default": true },
+    "showCategoryFilter": { "type": "boolean", "default": false }
+  },
+  "supports": {
+    "html": false,
+    "multiple": true,
+    "align": ["wide", "full"],
+    "anchor": true,
+    "color": { "background": true, "text": true },
+    "spacing": { "margin": true, "padding": true },
+    "typography": { "fontSize": true, "__experimentalFontFamily": true },
+    "__experimentalBorder": { "color": true, "radius": true, "style": true, "width": true }
+  },
+  "example": { "attributes": { "showCategoryFilter": true } }
+}

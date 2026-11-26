@@ -554,7 +554,7 @@ while (have_posts()) :
                 if (!empty($reviews_vm['enabled'])) {
                     // Back-compat: the reviews partial expects `$vm` (legacy view array).
                     $vm = $legacy_vm;
-                    include __DIR__ . '/partials/single-course-reviews.php';
+                    include sikshya_locate_template('partials/single-course-reviews.php');
                 }
                 ?>
 

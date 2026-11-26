@@ -90,7 +90,7 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                 ['label' => __('Cart', 'sikshya'), 'url' => $u->getCartUrl()],
                 ['label' => __('Checkout', 'sikshya')],
             ];
-            require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+            require sikshya_locate_template('partials/course-discovery-breadcrumb.php');
             ?>
             <h1 class="sikshya-checkout-page__title"><?php esc_html_e('Checkout', 'sikshya'); ?></h1>
             <p class="sikshya-checkout-page__lead">
@@ -109,7 +109,7 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
     </header>
 
     <div class="sikshya-checkout-page__body">
-        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
+        <?php require sikshya_locate_template('partials/course-cart-flash.php'); ?>
         <?php if ($page_model->isEmpty()) : ?>
             <div class="sikshya-checkout-page__empty">
                 <div class="sikshya-checkout-page__empty-copy">

@@ -59,10 +59,15 @@ final class ReportsRepository
             ? round(100 * ($completed_enrollments / $total_enrollments), 1)
             : 0.0;
 
-        $student_users = count_users();
-        $student_role_count = isset($student_users['avail_roles']['sikshya_student'])
-            ? (int) $student_users['avail_roles']['sikshya_student']
-            : 0;
+        /*
+         * Only a fallback for `distinct_learners`, so it must not be paid for
+         * when the enrolment table already answered. Counting users groups
+         * every capabilities row in usermeta — a table scan — and this one was
+         * being run on every reports load and then usually discarded.
+         */
+        $student_role_count = $distinct_learners > 0
+            ? 0
+            : \Sikshya\Services\RoleCountCache::forRole('sikshya_student');
 
         $currency = function_exists('sikshya_get_store_currency_code')
             ? sikshya_get_store_currency_code()

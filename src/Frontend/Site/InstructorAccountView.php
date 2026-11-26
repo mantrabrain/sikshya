@@ -96,7 +96,7 @@ final class InstructorAccountView
             return is_string($path) ? $path : '';
         }
 
-        $candidate = Plugin::getInstance()->getTemplatePath('partials/account-view-instructor.php');
+        $candidate = \Sikshya\Frontend\Theme\TemplateLoader::locate('partials/account-view-instructor.php');
         if (is_readable($candidate)) {
             return $candidate;
         }

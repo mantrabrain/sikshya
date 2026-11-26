@@ -183,6 +183,26 @@ final class CoursesShortcode
         echo '<div class="sikshya-public sikshya-shortcode-courses sik-f-scope">';
 
         if ($q->have_posts()) {
+            /*
+             * Same page-level warm-up the archive does: the card asks for
+             * transient-cached curriculum counts, and a transient read is an
+             * uncached option read, so it was one query per card here too.
+             */
+            $ids_on_page = [];
+            foreach ($q->posts as $p) {
+                if ($p instanceof \WP_Post) {
+                    $ids_on_page[] = (int) $p->ID;
+                }
+            }
+            if ($ids_on_page !== []) {
+                \Sikshya\Services\CourseCurriculumCountPrimer::prime($ids_on_page);
+
+                $uid = get_current_user_id();
+                if ($uid > 0) {
+                    \Sikshya\Frontend\Site\UserCourseStateCache::warm($uid, $ids_on_page);
+                }
+            }
+
             echo '<div class="' . esc_attr($grid_classes) . '">';
             while ($q->have_posts()) {
                 $q->the_post();

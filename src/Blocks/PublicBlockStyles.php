@@ -16,11 +16,32 @@ use Sikshya\Core\Plugin;
  */
 final class PublicBlockStyles
 {
+    /**
+     * Blocks whose markup is the shortcode's, so they need the whole public CSS.
+     */
     private const BLOCK_NAMES = [
         'sikshya/courses',
         'sikshya/login',
         'sikshya/registration',
     ];
+
+    /**
+     * Catalog blocks, which carry their own stylesheet.
+     *
+     * These deliberately do NOT get `sikshya-public-blocks`: frontend.css and
+     * course-listing.css exist to style the plugin's own archive, brand colours
+     * and all, and loading them would undo the point of the catalog blocks,
+     * which is to look like the active theme. They depend on the design-system
+     * tokens only — for the `--sikshya-*` fallbacks and
+     * `.sikshya-screen-reader-text`.
+     */
+    private const CATALOG_BLOCK_NAMES = [
+        'sikshya/course-grid',
+        'sikshya/course-categories',
+        'sikshya/course-search',
+    ];
+
+    public const CATALOG_HANDLE = 'sikshya-blocks-catalog';
 
     /**
      * @var Plugin|null
@@ -82,6 +103,15 @@ final class PublicBlockStyles
             );
         }
 
+        if (!wp_style_is(self::CATALOG_HANDLE, 'registered')) {
+            wp_register_style(
+                self::CATALOG_HANDLE,
+                $plugin->getAssetUrl('css/blocks-catalog.css'),
+                ['sikshya-public-ds'],
+                $version
+            );
+        }
+
         if (!wp_style_is('sikshya-blocks-editor-preview', 'registered')) {
             wp_register_style(
                 'sikshya-blocks-editor-preview',
@@ -110,6 +140,24 @@ final class PublicBlockStyles
 
         foreach (self::BLOCK_NAMES as $block_name) {
             wp_enqueue_block_style($block_name, $args);
+        }
+
+        /*
+         * block.json's `style` handle already covers the front end and the
+         * editor canvas. Registering it here as well with an on-disk `path`
+         * lets WordPress inline it when it is small enough, which is what gets
+         * it into the iframe on editor builds that only look at block styles
+         * registered this way.
+         */
+        $catalog = [
+            'handle' => self::CATALOG_HANDLE,
+            'src' => $plugin->getAssetUrl('css/blocks-catalog.css'),
+            'path' => $plugin->getAssetPath('css/blocks-catalog.css'),
+            'version' => $plugin->version ?? SIKSHYA_VERSION,
+        ];
+
+        foreach (self::CATALOG_BLOCK_NAMES as $block_name) {
+            wp_enqueue_block_style($block_name, $catalog);
         }
     }
 

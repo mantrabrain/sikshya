@@ -96,7 +96,7 @@ final class CertificatesAccountView
             return is_string($path) ? $path : '';
         }
 
-        $candidate = Plugin::getInstance()->getTemplatePath('partials/account-view-certificates.php');
+        $candidate = \Sikshya\Frontend\Theme\TemplateLoader::locate('partials/account-view-certificates.php');
         if (is_readable($candidate)) {
             return $candidate;
         }

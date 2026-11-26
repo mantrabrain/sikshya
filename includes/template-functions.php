@@ -1276,14 +1276,47 @@ if (!function_exists('sikshya_render_rich_text')) {
  */
 function sikshya_render_template_partial(string $relative, array $vars = []): void
 {
-    $path = dirname(__DIR__) . '/' . ltrim($relative, '/');
-    if (!is_readable($path)) {
+    /*
+     * Resolved through the theme loader, so every partial Sikshya ships
+     * (course cards above all) can be replaced from `yourtheme/sikshya/`.
+     * Falls back to the plugin's own copy, which is what this function
+     * returned unconditionally before.
+     */
+    $path = \Sikshya\Frontend\Theme\TemplateLoader::locate($relative);
+    if ($path === '' || !is_readable($path)) {
         return;
     }
     if ($vars !== []) {
         extract($vars, EXTR_SKIP);
     }
     include $path;
+}
+
+/**
+ * Absolute path of a Sikshya template, preferring the active theme's override.
+ *
+ * Use in place of `__DIR__ . '/partials/x.php'` so a theme can replace the
+ * file. Returns the plugin's copy when the theme has none.
+ *
+ * @param string $relative Relative to `templates/` (a leading `templates/` is accepted too).
+ */
+function sikshya_locate_template(string $relative): string
+{
+    return \Sikshya\Frontend\Theme\TemplateLoader::locate($relative);
+}
+
+/**
+ * Load a Sikshya template part in an isolated scope.
+ *
+ * Nothing from the caller's scope is visible to the part; it sees exactly what
+ * $vars provides. Prefer this in new code over `require sikshya_locate_template(...)`,
+ * which inherits the caller's variables.
+ *
+ * @param array<string, mixed> $vars
+ */
+function sikshya_get_template_part(string $relative, array $vars = []): void
+{
+    \Sikshya\Frontend\Theme\TemplateLoader::part($relative, $vars);
 }
 
 /**

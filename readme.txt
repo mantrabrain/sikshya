@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.0.20
+Stable tag: 1.0.21
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -426,15 +426,24 @@ changelog longer than 5,000 words. Every earlier entry is kept in full in `chang
 shipped alongside this file, and in the release history at
 https://github.com/mantrabrain/sikshya/releases
 
+= 1.0.21 - 2026-11-26 =
+* **Three new blocks for building a course catalog: Course Grid, Course Categories and Course Search.** Drop them on any page — a home-page row of featured courses, a catalog page you lay out yourself, a "continue learning" strip for signed-in students. Course Grid filters by category, tag, instructor, price, or a hand-picked list of courses, and it can show only the courses a visitor is enrolled in, or hide those. You choose the columns separately for desktop, tablet and phone, and which parts of the card appear.
+* **The new blocks take their look from your theme, not from Sikshya.** Colours, fonts, spacing and corner radius are read from the theme first, and the buttons use the same class your theme styles its own buttons with — so on a block theme the cards arrive already matching the rest of the site, with no CSS to write. Colour, spacing, typography and border controls in the block sidebar work as they do on a core block, which they did not on the older Sikshya Courses block.
+* **Any Sikshya template can now be replaced from your theme.** Copy a file into a `sikshya/` folder in your theme — `yourtheme/sikshya/single-course.php`, `yourtheme/sikshya/partials/course-card.php` — and Sikshya loads yours instead. Child theme beats parent, parent beats the plugin, and a theme with no overrides behaves exactly as before. This covers every front-end page: archive, single course, lesson, quiz, cart, checkout, account, and each partial they are built from. See `docs/THEME-COMPATIBILITY.md`.
+* **Sikshya's pages now match your theme's content width** without being asked, read from `theme.json` or from the theme's declared content width. A theme can also opt into lending Sikshya its colour palette and fonts with `add_theme_support( 'sikshya', [ 'palette' => true ] )`; nothing is inherited unless the theme asks for it, so no existing site changes appearance on update.
+* **Course listings no longer slow down as you add courses.** Every card asks for its course's lesson and quiz counts, and that answer is cached — but the cache lived in a place WordPress has to fetch one row at a time, so a twelve-card page spent twelve database queries just collecting answers it already had. They are fetched in one read now: a twelve-card listing costs the same number of queries as a three-card one (measured: 19 down to 10, and flat from there). This applies to the course archive and the `[sikshya_courses]` shortcode as well as the new block.
+* **Sikshya → Addons no longer tells you to buy a plan you already own.** If the Sikshya Pro plugin is not installed, Sikshya cannot read your licence at all — that check lives inside Pro. The page was treating "no licence found" as "no licence bought", so every locked add-on was labelled "Requires Growth" and offered an upgrade button, to customers who were already paying for Growth and only needed to install the plugin. It now says what is actually missing, and distinguishes three separate cases: the Pro plugin is not installed, the plugin is installed but no licence is active, or the licence is active on a lower plan. Reported by a customer who had bought a plan and could not tell why nothing unlocked.
+* **The admin dashboard and reports no longer slow down as you gain users.** Counting how many students and instructors you have means reading every user's stored roles, which no database index can speed up — and Sikshya asked for it three times on a single admin page load, including once in the reports screen where the answer was then thrown away unused. The count is now worked out once and remembered until somebody registers, is deleted, or has their role changed, and the reports screen does not ask for it at all when the enrolment records already answer the question.
+* The original Sikshya Courses block is untouched and still works; pages using it render exactly as before.
+
 = 1.0.20 - 2026-11-26 =
 * **Ready for WordPress 7.2**, which is due on 8 December. The whole plugin was run against the 7.2 release candidate — 313 integration tests, covering the course builder, checkout, the Learn pages, quizzes, certificates, the importers, multisite and uninstall — and everything passed unchanged. `Requires at least: 6.0` and `Requires PHP: 7.4` are untouched, so this update is safe for every existing site.
 * Our own test harness now runs the WordPress version it claims to support, rather than an older bundled copy. That is an internal change with no effect on your site, but it is why the 7.2 result can be trusted.
 
-= 1.0.19 - 2026-11-11 =
-* **Lesson, quiz, question and assignment lists are faster, and stay fast as your site grows.** Opening one of those lists asked the database "which quiz holds this question?" once for every row on the page. That question can only be answered by searching through stored settings text, which no index can speed up, so each row read the whole table. On a site with ~292,000 stored settings rows a 20-row page spent 402ms of its 535ms doing that twenty times over — and because the cost follows how much content you have rather than how many rows are on screen, it got worse the longer you used Sikshya. It is now answered once per page: the lists come back about a quarter faster, and the saving grows with the size of your site.
-* Nothing about what you see changes — the same links, in the same order. Verified identical across 200 questions against the previous behaviour, and covered by tests that fail if the per-row version ever comes back.
-
 == Upgrade Notice ==
+
+= 1.0.21 =
+Adds Course Grid, Course Categories and Course Search blocks that inherit your theme's design, and lets a theme override any Sikshya template from a `sikshya/` folder. Also fixes misleading upgrade wording on the Addons screen and removes two listing slowdowns. Nothing breaks: existing pages, blocks and themes render exactly as before.
 
 = 1.0.20 =
 Compatibility release for WordPress 7.2 (due 8 December). Verified against the release candidate with the full test suite; no changes to minimum WordPress or PHP versions.

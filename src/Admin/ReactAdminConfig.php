@@ -832,13 +832,9 @@ final class ReactAdminConfig
         $course_counts = wp_count_posts(PostTypes::COURSE);
         $published = isset($course_counts->publish) ? (int) $course_counts->publish : 0;
         $draft = isset($course_counts->draft) ? (int) $course_counts->draft : 0;
-        $user_counts = count_users();
-        $students = isset($user_counts['avail_roles']['sikshya_student'])
-            ? (int) $user_counts['avail_roles']['sikshya_student']
-            : 0;
-        $instructors = isset($user_counts['avail_roles']['sikshya_instructor'])
-            ? (int) $user_counts['avail_roles']['sikshya_instructor']
-            : 0;
+        // Cached: counting users scans usermeta, and this runs on dashboard load.
+        $students = \Sikshya\Services\RoleCountCache::forRole('sikshya_student');
+        $instructors = \Sikshya\Services\RoleCountCache::forRole('sikshya_instructor');
 
         $snap = ReportController::getReportsPageSnapshot();
         $st = $snap['stats'] ?? [];

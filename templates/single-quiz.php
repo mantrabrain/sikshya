@@ -45,7 +45,7 @@ while (have_posts()) {
 <body class="sikshya-learning-shell sikshya-learning-shell--quiz">
 <a class="sikshya-skipLink" href="#sikshya-learn-content"><?php esc_html_e('Skip to quiz content', 'sikshya'); ?></a>
 <div class="sikshya-learning-app">
-    <?php require_once __DIR__ . '/partials/learn-icons.php'; ?>
+    <?php require_once sikshya_locate_template('partials/learn-icons.php'); ?>
     <div class="sikshya-learnLayout">
         <header class="sikshya-learnTopbar" role="banner">
             <div class="sikshya-learnTopbar__left">
@@ -271,7 +271,7 @@ while (have_posts()) {
                         <?php
                         $outline_blocks = $page_model->getBlocks();
                         $outline_show_progress = $page_model->getShowProgress();
-                        require __DIR__ . '/partials/learn-curriculum-outline.php';
+                        require sikshya_locate_template('partials/learn-curriculum-outline.php');
                         ?>
                     </div>
                     <?php
@@ -581,7 +581,7 @@ while (have_posts()) {
                                         if (!is_array($q) || (isset($q['id']) ? (int) $q['id'] : 0) <= 0) {
                                             continue;
                                         }
-                                        require __DIR__ . '/partials/quiz-question-fieldset.php';
+                                        require sikshya_locate_template('partials/quiz-question-fieldset.php');
                                         ?>
                                     <?php endforeach; ?>
                                     <?php if ($attempts_exhausted) : ?>

@@ -40,7 +40,7 @@ $breadcrumb_items = [
             <div class="sikshya-taxonomy-courses__header sikshya-archive-courses__header">
                 <?php
                 $items = $breadcrumb_items;
-                require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+                require sikshya_locate_template('partials/course-discovery-breadcrumb.php');
                 ?>
 
                 <h1 class="sikshya-archive-courses__title"><?php single_term_title(); ?></h1>
@@ -66,7 +66,7 @@ $breadcrumb_items = [
     </header>
 
     <div class="sikshya-container">
-        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
+        <?php require sikshya_locate_template('partials/course-cart-flash.php'); ?>
 
         <?php if (have_posts()) : ?>
             <div class="sikshya-course-grid sikshya-course-grid--cols-3">

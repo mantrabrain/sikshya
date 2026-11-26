@@ -31,7 +31,7 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 ['label' => __('Home', 'sikshya'), 'url' => $u->getHomeUrl()],
                 ['label' => __('Cart', 'sikshya')],
             ];
-            require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+            require sikshya_locate_template('partials/course-discovery-breadcrumb.php');
             ?>
             <h1 class="sikshya-cart-page__title"><?php esc_html_e('Your cart', 'sikshya'); ?></h1>
             <p class="sikshya-cart-page__lead">
@@ -52,7 +52,7 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
     </header>
 
     <div class="sikshya-cart-page__body">
-        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
+        <?php require sikshya_locate_template('partials/course-cart-flash.php'); ?>
         <?php if ($page_model->isEmpty()) : ?>
             <div class="sikshya-cart-page__empty">
                 <div class="sikshya-cart-page__empty-copy">

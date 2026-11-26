@@ -41,7 +41,7 @@ $breadcrumb_items = [
             <div class="sikshya-archive-courses__header">
                 <?php
                 $items = $breadcrumb_items;
-                require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+                require sikshya_locate_template('partials/course-discovery-breadcrumb.php');
                 ?>
                 <h1 class="sikshya-archive-courses__title"><?php post_type_archive_title(); ?></h1>
                 <?php the_archive_description('<div class="sikshya-archive-courses__desc">', '</div>'); ?>
@@ -58,15 +58,15 @@ $breadcrumb_items = [
     </header>
 
     <div class="sikshya-container">
-        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
+        <?php require sikshya_locate_template('partials/course-cart-flash.php'); ?>
 
         <div class="sikshya-archive-courses__layout<?php echo $show_sidebar ? '' : ' sikshya-archive-courses__layout--no-sidebar'; ?>">
             <?php if ($show_sidebar) : ?>
-                <?php require __DIR__ . '/partials/course-archive-sidebar.php'; ?>
+                <?php require sikshya_locate_template('partials/course-archive-sidebar.php'); ?>
             <?php endif; ?>
 
             <div class="sikshya-archive-courses__main">
-                <?php require __DIR__ . '/partials/course-archive-toolbar.php'; ?>
+                <?php require sikshya_locate_template('partials/course-archive-toolbar.php'); ?>
 
                 <p class="sikshya-archive-courses__results" role="status">
                     <?php
@@ -86,17 +86,28 @@ $breadcrumb_items = [
                     // 2 × N queries (one each per card) before. No-op for
                     // anonymous visitors.
                     $current_user_id_for_warm = (int) get_current_user_id();
-                    if ($current_user_id_for_warm > 0 && isset($GLOBALS['wp_query']) && !empty($GLOBALS['wp_query']->posts)) {
+                    $course_ids_on_page = [];
+                    if (isset($GLOBALS['wp_query']) && !empty($GLOBALS['wp_query']->posts)) {
                         $course_ids_on_page = array_filter(array_map(
                             static fn ($p): int => isset($p->ID) ? (int) $p->ID : 0,
                             (array) $GLOBALS['wp_query']->posts
                         ));
-                        if ($course_ids_on_page !== []) {
-                            \Sikshya\Frontend\Site\UserCourseStateCache::warm(
-                                $current_user_id_for_warm,
-                                $course_ids_on_page
-                            );
-                        }
+                    }
+                    if ($current_user_id_for_warm > 0 && $course_ids_on_page !== []) {
+                        \Sikshya\Frontend\Site\UserCourseStateCache::warm(
+                            $current_user_id_for_warm,
+                            $course_ids_on_page
+                        );
+                    }
+                    if ($course_ids_on_page !== []) {
+                        /*
+                         * Each card asks for its course's lesson/quiz counts,
+                         * which are transient-cached — and transients are not
+                         * autoloaded, so that was one option query per card
+                         * for every visitor, signed in or not. One read for
+                         * the whole page instead.
+                         */
+                        \Sikshya\Services\CourseCurriculumCountPrimer::prime($course_ids_on_page);
                     }
                     ?>
                     <div class="<?php echo esc_attr($grid_classes); ?>">

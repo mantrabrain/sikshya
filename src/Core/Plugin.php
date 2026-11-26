@@ -196,6 +196,19 @@ final class Plugin
             // question list changes underneath it.
             \Sikshya\Services\QuizQuestionInverseLookup::listen();
 
+            // Every front-end template and partial resolves through the loader,
+            // so a theme can override any one of them from its own `sikshya/`
+            // folder. Told where the plugin's own copies live first; without
+            // this it has nothing to fall back to.
+            \Sikshya\Frontend\Theme\TemplateLoader::setPluginTemplateDir($this->getTemplatePath());
+
+            // Content width, palette and type bridged from the active theme.
+            \Sikshya\Frontend\Theme\ThemeCompat::init();
+
+            // Role counts scan usermeta, so they are cached until a user is
+            // added, removed, or has a role changed. Registers those listeners.
+            \Sikshya\Services\RoleCountCache::init();
+
             // Self-diagnosing notices for configuration that silently breaks the
             // LMS (plain permalinks, registration off, priced courses with no
             // gateway). Admin-only; they hook `admin_notices` deliberately.

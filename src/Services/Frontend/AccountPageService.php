@@ -79,7 +79,7 @@ final class AccountPageService
         ];
 
         $partialName = $partialMap[$view] ?? 'dashboard';
-        $defaultPartial = $plugin->getTemplatePath('partials/account-view-' . $partialName . '.php');
+        $defaultPartial = \Sikshya\Frontend\Theme\TemplateLoader::locate('partials/account-view-' . $partialName . '.php');
 
         /**
          * Override path for an account section template (Pro / addons).
@@ -87,7 +87,7 @@ final class AccountPageService
          */
         $partialPath = apply_filters('sikshya_account_view_template', $defaultPartial, $view, $legacy);
         if (!is_string($partialPath) || !is_readable($partialPath)) {
-            $partialPath = $plugin->getTemplatePath('partials/account-view-dashboard.php');
+            $partialPath = \Sikshya\Frontend\Theme\TemplateLoader::locate('partials/account-view-dashboard.php');
         }
 
         return (string) $partialPath;

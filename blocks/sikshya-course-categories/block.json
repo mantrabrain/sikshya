@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sikshya/course-categories",
+  "version": "1.0.0",
+  "title": "Course Categories",
+  "category": "sikshya",
+  "icon": "category",
+  "description": "Links into your course categories, as tiles, pills or a list.",
+  "keywords": ["sikshya", "course", "categories", "taxonomy", "catalog"],
+  "textdomain": "sikshya",
+  "editorScript": "sikshya-blocks-editor",
+  "editorStyle": "sikshya-blocks-editor",
+  "style": "sikshya-blocks-catalog",
+  "attributes": {
+    "displayStyle": { "type": "string", "default": "tiles" },
+    "columns": { "type": "number", "default": 4 },
+    "limit": { "type": "number", "default": 8 },
+    "showCount": { "type": "boolean", "default": true },
+    "showImage": { "type": "boolean", "default": true },
+    "hideEmpty": { "type": "boolean", "default": true },
+    "topLevelOnly": { "type": "boolean", "default": false }
+  },
+  "supports": {
+    "html": false,
+    "multiple": true,
+    "align": ["wide", "full"],
+    "anchor": true,
+    "color": { "background": true, "text": true, "link": true },
+    "spacing": { "margin": true, "padding": true, "blockGap": true },
+    "typography": { "fontSize": true, "__experimentalFontFamily": true },
+    "__experimentalBorder": { "color": true, "radius": true, "style": true, "width": true }
+  },
+  "example": { "attributes": { "columns": 4, "limit": 4 } }
+}

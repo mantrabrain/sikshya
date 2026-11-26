@@ -53,7 +53,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
 <body class="sikshya-learning-shell sikshya-learning-shell--learn<?php echo $is_shell_without_course ? ' sikshya-learning-shell--hub' : ''; ?>">
 <a class="sikshya-skipLink" href="#sikshya-learn-content"><?php esc_html_e('Skip to content', 'sikshya'); ?></a>
 <div class="sikshya-learning-app">
-    <?php require_once __DIR__ . '/partials/learn-icons.php'; ?>
+    <?php require_once sikshya_locate_template('partials/learn-icons.php'); ?>
     <div class="sikshya-learnLayout">
         <header class="sikshya-learnTopbar" role="banner">
             <div class="sikshya-learnTopbar__left">
@@ -120,7 +120,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                         <?php
                         $outline_blocks = $page_model->getCurriculumBlocks();
                         $outline_show_progress = $page_model->isShowProgress();
-                        require __DIR__ . '/partials/learn-curriculum-outline.php';
+                        require sikshya_locate_template('partials/learn-curriculum-outline.php');
                         ?>
                     </div>
                 </div>

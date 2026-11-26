@@ -237,7 +237,7 @@ final class InstructorApplicationView
             return is_string($path) ? $path : '';
         }
 
-        $candidate = Plugin::getInstance()->getTemplatePath('partials/account-view-instructor-apply.php');
+        $candidate = \Sikshya\Frontend\Theme\TemplateLoader::locate('partials/account-view-instructor-apply.php');
         if (is_readable($candidate)) {
             return $candidate;
         }

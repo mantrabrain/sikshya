@@ -38,7 +38,7 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 ['label' => __('Account', 'sikshya'), 'url' => $u->getAccountUrl()],
                 ['label' => __('Order', 'sikshya')],
             ];
-            require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+            require sikshya_locate_template('partials/course-discovery-breadcrumb.php');
             ?>
             <h1 class="sikshya-order-page__title"><?php esc_html_e('Order details', 'sikshya'); ?></h1>
             <p class="sikshya-order-page__lead">

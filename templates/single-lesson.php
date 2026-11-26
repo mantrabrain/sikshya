@@ -53,7 +53,7 @@ while (have_posts()) :
 <body class="<?php echo esc_attr(implode(' ', $body_classes)); ?>">
 <a class="sikshya-skipLink" href="#sikshya-learn-content"><?php esc_html_e('Skip to lesson content', 'sikshya'); ?></a>
 <div class="sikshya-learning-app">
-    <?php require_once __DIR__ . '/partials/learn-icons.php'; ?>
+    <?php require_once sikshya_locate_template('partials/learn-icons.php'); ?>
     <div class="sikshya-learnLayout">
         <header class="sikshya-learnTopbar" role="banner">
             <div class="sikshya-learnTopbar__left">
@@ -186,7 +186,7 @@ while (have_posts()) :
                         <?php
                         $outline_blocks = $page_model->getCurriculumBlocks();
                         $outline_show_progress = $page_model->isShowProgress();
-                        require __DIR__ . '/partials/learn-curriculum-outline.php';
+                        require sikshya_locate_template('partials/learn-curriculum-outline.php');
                         ?>
                     </div>
                     <?php
@@ -404,7 +404,7 @@ while (have_posts()) :
                                 do_action('sikshya_lesson_after_content', $legacy_vm, $page_model);
                                 ?>
                                 <?php if ($page_model->getAssignmentLearnPayload()) : ?>
-                                    <?php require __DIR__ . '/partials/learn-assignment-panel.php'; ?>
+                                    <?php require sikshya_locate_template('partials/learn-assignment-panel.php'); ?>
                                 <?php endif; ?>
                             </div>
                         </div>

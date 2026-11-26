@@ -1,0 +1,575 @@
+/**
+ * Sikshya catalog blocks — course-grid, course-categories, course-search.
+ *
+ * Theme-first by design. Every colour, radius, font and spacing value reads a
+ * `--wp--preset--*` or `--wp--style--*` custom property first and falls back to
+ * a Sikshya token only when the theme does not publish one. On a block theme
+ * that means the cards are the theme's colours; on a classic theme they are the
+ * plugin's. Neither case needs a line of theme CSS.
+ *
+ * Loaded only when one of these blocks is on the page (block.json `style`).
+ *
+ * @package Sikshya
+ * @since 1.0.21
+ */
+
+.sikshya-cg,
+.sikshya-cg-cats,
+.sikshya-course-search {
+  /* Surfaces. `currentColor` mixes are avoided: they break in forced-colors. */
+  --sik-cg-surface: var(--wp--preset--color--base, var(--sikshya-white, #fff));
+  --sik-cg-text: var(--wp--preset--color--contrast, var(--sikshya-gray-900, #111827));
+  --sik-cg-muted: var(--sikshya-gray-600, #4b5563);
+  --sik-cg-border: var(--sikshya-gray-200, #e5e7eb);
+  --sik-cg-accent: var(--wp--preset--color--primary, var(--sikshya-primary, #2c5ba8));
+
+  /* Shape and rhythm. */
+  --sik-cg-radius: var(--wp--custom--border-radius, 12px);
+  --sik-cg-gap: var(--wp--style--block-gap, 1.5rem);
+  --sik-cg-pad: clamp(0.875rem, 2vw, 1.25rem);
+
+  /* Typography inherits by default; the theme's font is the right font. */
+  font-family: inherit;
+  color: var(--sik-cg-text);
+}
+
+/* -------------------------------------------------------------------------
+ * Course grid
+ * ---------------------------------------------------------------------- */
+
+.sikshya-cg__list {
+  display: grid;
+  grid-template-columns: repeat(var(--sikshya-grid-columns-mobile, 1), minmax(0, 1fr));
+  gap: var(--sik-cg-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Container queries would be better, but a block can be placed anywhere and
+ * `container-type` on the wrapper changes how the theme's own layout measures
+ * it. Width media queries are the safe choice inside someone else's design.
+ */
+@media (min-width: 600px) {
+  .sikshya-cg__list {
+    grid-template-columns: repeat(var(--sikshya-grid-columns-tablet, 2), minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .sikshya-cg__list {
+    grid-template-columns: repeat(var(--sikshya-grid-columns, 3), minmax(0, 1fr));
+  }
+}
+
+.sikshya-cg__item {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.sikshya-cg--list .sikshya-cg__list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sikshya-cg--list .sikshya-cg-card {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.sikshya-cg--list .sikshya-cg-card__media {
+  flex: 0 0 min(38%, 20rem);
+}
+
+@media (max-width: 599px) {
+  .sikshya-cg--list .sikshya-cg-card {
+    flex-direction: column;
+  }
+
+  .sikshya-cg--list .sikshya-cg-card__media {
+    flex: 0 0 auto;
+  }
+}
+
+.sikshya-cg__empty {
+  margin: 0;
+  padding: var(--sik-cg-pad);
+  border: 1px dashed var(--sik-cg-border);
+  border-radius: var(--sik-cg-radius);
+  color: var(--sik-cg-muted);
+  text-align: center;
+}
+
+.sikshya-cg__pagination {
+  margin-block-start: var(--sik-cg-gap);
+}
+
+/* -------------------------------------------------------------------------
+ * Card
+ * ---------------------------------------------------------------------- */
+
+.sikshya-cg-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--sik-cg-surface);
+  border: 1px solid var(--sik-cg-border);
+  border-radius: var(--sik-cg-radius);
+  /* A transition only on transform/box-shadow: animating `all` on a card that
+   * holds an image forces a repaint of the image on hover. */
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.sikshya-cg--style-minimal .sikshya-cg-card {
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.sikshya-cg--style-bordered .sikshya-cg-card {
+  box-shadow: none;
+}
+
+.sikshya-cg--style-card .sikshya-cg-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .sikshya-cg--style-card .sikshya-cg-card:hover,
+  .sikshya-cg--style-bordered .sikshya-cg-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Card media */
+
+.sikshya-cg-card__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--sikshya-gray-100, #f3f4f6);
+}
+
+.sikshya-cg-card__media-link {
+  display: block;
+  text-decoration: none;
+}
+
+.sikshya-cg-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sikshya-cg--ratio-16-9 .sikshya-cg-card__image {
+  aspect-ratio: 16 / 9;
+}
+
+.sikshya-cg--ratio-4-3 .sikshya-cg-card__image {
+  aspect-ratio: 4 / 3;
+}
+
+.sikshya-cg--ratio-3-2 .sikshya-cg-card__image {
+  aspect-ratio: 3 / 2;
+}
+
+.sikshya-cg--ratio-1-1 .sikshya-cg-card__image {
+  aspect-ratio: 1 / 1;
+}
+
+.sikshya-cg-card__image--placeholder {
+  /* A span, not an img: there is nothing to describe, so there is no alt to
+   * get wrong. aspect-ratio needs a min-height floor for older engines. */
+  min-height: 9rem;
+  background-image: linear-gradient(135deg, var(--sikshya-gray-100, #f3f4f6), var(--sikshya-gray-200, #e5e7eb));
+}
+
+.sikshya-cg-card__badges {
+  position: absolute;
+  inset-block-start: 0.625rem;
+  inset-inline-start: 0.625rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.sikshya-cg-card__badge {
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: var(--sik-cg-surface);
+  color: var(--sik-cg-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.sikshya-cg-card__badge--sale {
+  /* Token already clears 4.5:1 against white (see public-design-system.css). */
+  background: var(--sikshya-error, #dc2626);
+  color: #fff;
+}
+
+.sikshya-cg-card__progress {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  height: 0.25rem;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.sikshya-cg-card__progress-bar {
+  display: block;
+  height: 100%;
+  background: var(--sik-cg-accent);
+}
+
+/* Card body */
+
+.sikshya-cg-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: var(--sik-cg-pad);
+}
+
+.sikshya-cg-card__terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sikshya-cg-card__term {
+  color: var(--sik-cg-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sikshya-cg-card__term:hover,
+.sikshya-cg-card__term:focus-visible {
+  text-decoration: underline;
+}
+
+.sikshya-cg-card__title {
+  /* Inherits the theme's heading scale rather than setting one. */
+  margin: 0;
+  font-size: inherit;
+  line-height: 1.35;
+}
+
+.sikshya-cg-card__title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sikshya-cg-card__title-link:hover,
+.sikshya-cg-card__title-link:focus-visible {
+  text-decoration: underline;
+}
+
+.sikshya-cg-card__instructor,
+.sikshya-cg-card__excerpt,
+.sikshya-cg-card__rating {
+  margin: 0;
+  color: var(--sik-cg-muted);
+  font-size: 0.875rem;
+}
+
+.sikshya-cg-card__excerpt {
+  /* Keeps every card the same height without cropping mid-word. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+.sikshya-cg-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sikshya-cg-card__stars {
+  color: var(--sikshya-secondary-dark, #d97706);
+  letter-spacing: 0.05em;
+}
+
+.sikshya-cg-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--sik-cg-muted);
+  font-size: 0.8125rem;
+}
+
+.sikshya-cg-card__meta-item {
+  margin: 0;
+  list-style: none;
+}
+
+.sikshya-cg-card__meta-item + .sikshya-cg-card__meta-item::before {
+  /* Separator is decorative; `content` on ::before is not read as text by
+   * screen readers in list context, and each item is its own <li> anyway. */
+  content: "·";
+  margin-inline-end: 0.5rem;
+}
+
+/* Card footer */
+
+.sikshya-cg-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sik-cg-pad) var(--sik-cg-pad);
+}
+
+.sikshya-cg--style-minimal .sikshya-cg-card__footer {
+  padding-inline: 0;
+}
+
+.sikshya-cg-card__price {
+  margin: 0;
+  font-weight: 700;
+}
+
+.sikshya-cg-card__price-was {
+  margin-inline-end: 0.375rem;
+  color: var(--sik-cg-muted);
+  font-weight: 400;
+}
+
+.sikshya-cg-card__price-free,
+.sikshya-cg-card__price-enrolled {
+  color: var(--sikshya-success, #047857);
+}
+
+/*
+ * The CTA carries `wp-element-button`, so a block theme styles it. These rules
+ * are the classic-theme fallback and are written so they lose to the theme:
+ * no !important, and only properties a theme button sets itself.
+ */
+.sikshya-cg-card__cta {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: var(--wp--custom--border-radius, 8px);
+  background: var(--sik-cg-accent);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.wp-site-blocks .sikshya-cg-card__cta,
+body.wp-embed-responsive .sikshya-cg-card__cta {
+  /* On a block theme `wp-element-button` already supplies all of the above;
+   * dropping ours avoids fighting the theme's own padding and radius. */
+  padding: revert;
+  border-radius: revert;
+  background: revert;
+  color: revert;
+  font-size: revert;
+  font-weight: revert;
+}
+
+/* -------------------------------------------------------------------------
+ * Course categories
+ * ---------------------------------------------------------------------- */
+
+.sikshya-cg-cats__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--sik-cg-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .sikshya-cg-cats--tiles .sikshya-cg-cats__list {
+    grid-template-columns: repeat(var(--sikshya-grid-columns, 4), minmax(0, 1fr));
+  }
+}
+
+.sikshya-cg-cats__item {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.sikshya-cg-cats__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--sik-cg-border);
+  border-radius: var(--sik-cg-radius);
+  background: var(--sik-cg-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.sikshya-cg-cats__media {
+  display: block;
+  overflow: hidden;
+  background: var(--sikshya-gray-100, #f3f4f6);
+}
+
+.sikshya-cg-cats__media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.sikshya-cg-cats__media--placeholder {
+  min-height: 6rem;
+  background-image: linear-gradient(135deg, var(--sikshya-gray-100, #f3f4f6), var(--sikshya-gray-200, #e5e7eb));
+}
+
+.sikshya-cg-cats__name {
+  padding: 0.75rem 0.875rem 0;
+  font-weight: 600;
+}
+
+.sikshya-cg-cats__count {
+  padding: 0 0.875rem 0.75rem;
+  color: var(--sik-cg-muted);
+  font-size: 0.8125rem;
+}
+
+/* Pills and list variants reuse the same markup. */
+
+.sikshya-cg-cats--pills .sikshya-cg-cats__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sikshya-cg-cats--pills .sikshya-cg-cats__link {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 999px;
+}
+
+.sikshya-cg-cats--pills .sikshya-cg-cats__media,
+.sikshya-cg-cats--list .sikshya-cg-cats__media {
+  display: none;
+}
+
+.sikshya-cg-cats--pills .sikshya-cg-cats__name,
+.sikshya-cg-cats--pills .sikshya-cg-cats__count,
+.sikshya-cg-cats--list .sikshya-cg-cats__name,
+.sikshya-cg-cats--list .sikshya-cg-cats__count {
+  padding: 0;
+}
+
+.sikshya-cg-cats--list .sikshya-cg-cats__list {
+  display: block;
+}
+
+.sikshya-cg-cats--list .sikshya-cg-cats__link {
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border: 0;
+  border-block-end: 1px solid var(--sik-cg-border);
+  border-radius: 0;
+  background: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Course search
+ * ---------------------------------------------------------------------- */
+
+.sikshya-course-search__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.sikshya-course-search__input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.sikshya-course-search__input,
+.sikshya-course-search__select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--sik-cg-border);
+  border-radius: var(--wp--custom--border-radius, 8px);
+  background: var(--sik-cg-surface);
+  color: var(--sik-cg-text);
+  font: inherit;
+}
+
+.sikshya-course-search__submit {
+  flex: 0 0 auto;
+  padding: 0.5rem 1.125rem;
+  border: 0;
+  border-radius: var(--wp--custom--border-radius, 8px);
+  background: var(--sik-cg-accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wp-site-blocks .sikshya-course-search__submit {
+  padding: revert;
+  border-radius: revert;
+  background: revert;
+  color: revert;
+  font-weight: revert;
+}
+
+/* -------------------------------------------------------------------------
+ * Shared accessibility + high contrast
+ * ---------------------------------------------------------------------- */
+
+.sikshya-cg :focus-visible,
+.sikshya-cg-cats :focus-visible,
+.sikshya-course-search :focus-visible {
+  outline: 2px solid var(--sik-cg-accent);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .sikshya-cg-card,
+  .sikshya-cg-cats__link {
+    border-color: CanvasText;
+  }
+
+  .sikshya-cg-card__progress-bar,
+  .sikshya-cg-card__badge--sale {
+    background: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sikshya-cg-card {
+    transition: none;
+  }
+}

@@ -103,6 +103,24 @@ function addonRequiresPlanLabel(tier: AddonTier): string {
   return 'Free';
 }
 
+/**
+ * Badge text for a locked add-on.
+ *
+ * "Requires Growth" is only true when we know the licence is the blocker. If
+ * the Pro plugin is not installed we cannot know that — the licence check runs
+ * inside Pro — and a customer who had already bought Growth was told by this
+ * badge that they needed the plan they were paying for. Reported by a customer
+ * whose site had no Pro plugin installed; the entire page read as an upsell to
+ * something they already owned.
+ */
+function addonLockedBadgeLabel(tier: AddonTier, proPluginInstalled: boolean): string {
+  if (!proPluginInstalled) {
+    return 'Needs Pro plugin';
+  }
+
+  return `Requires ${addonRequiresPlanLabel(tier)}`;
+}
+
 function addonLicenseLocked(a: AddonRow): boolean {
   return (a.tier === 'starter' || a.tier === 'pro' || a.tier === 'scale') && !a.licenseOk;
 }
@@ -488,18 +506,30 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
         <div className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm dark:border-amber-900/50 dark:from-amber-950/40 dark:to-slate-900">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">{__('Upgrade to Sikshya Pro', 'sikshya')}</p>
-              <p className="mt-1 text-sm leading-relaxed text-amber-900/90 dark:text-amber-200/90">
-                Starter, Growth, and Scale add-ons on this page need an active Sikshya Pro license. After you purchase a
-                plan, install and activate the Sikshya Pro plugin — then you can turn each add-on on here and use its admin
-                screens and learner-facing features.
+              {/*
+                Without the Pro plugin we cannot read the licence at all, so
+                this must not assert that the customer has not bought a plan.
+              */}
+              <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">
+                {!proPluginInstalled
+                  ? __('Install Sikshya Pro to unlock these add-ons', 'sikshya')
+                  : __('Upgrade to Sikshya Pro', 'sikshya')}
               </p>
               {!proPluginInstalled ? (
-                <p className="mt-2 text-xs text-amber-800/80 dark:text-amber-300/80">
-                  The Sikshya Pro plugin is not detected on this site yet. Use the download from your purchase email or
-                  account to install it.
+                <p className="mt-1 text-sm leading-relaxed text-amber-900/90 dark:text-amber-200/90">
+                  The Starter, Growth and Scale add-ons below live in the Sikshya Pro plugin, which is not installed on
+                  this site yet. <span className="font-semibold">If you have already bought a plan</span>, download the
+                  plugin from your purchase email or your store account, install and activate it, then activate your
+                  licence key — the add-ons your plan covers unlock here straight away. No plan yet? The button shows
+                  what each one includes.
                 </p>
-              ) : null}
+              ) : (
+                <p className="mt-1 text-sm leading-relaxed text-amber-900/90 dark:text-amber-200/90">
+                  Starter, Growth, and Scale add-ons on this page need an active Sikshya Pro license. After you purchase a
+                  plan, install and activate the Sikshya Pro plugin — then you can turn each add-on on here and use its admin
+                  screens and learner-facing features.
+                </p>
+              )}
             </div>
             <a
               href={upgradeUrl}
@@ -712,7 +742,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
                       ) : null}
                       {locked ? (
                         <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-200 dark:ring-amber-900/40">
-                          Requires {addonRequiresPlanLabel(a.tier)}
+                          {addonLockedBadgeLabel(a.tier, proPluginInstalled)}
                         </span>
                       ) : null}
                       {a.docsUrl ? (
@@ -752,10 +782,17 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
 
                 {locked ? (
                   <div className="mt-3 flex flex-col gap-2 border-t border-amber-200/70 pt-3 dark:border-amber-900/50">
+                    {/*
+                      Three different blockers, three different sentences. The
+                      previous copy had two, so a customer who owned a plan but
+                      had not installed the Pro plugin was told to buy one.
+                    */}
                     <p className="text-xs font-medium text-amber-950 dark:text-amber-100">
-                      {isProActive
-                        ? `Requires ${tierPlanLabel(a.tier)} plan or higher — upgrade your subscription to enable.`
-                        : 'Requires Sikshya Pro — purchase a plan, install the Pro plugin, then enable this add-on.'}
+                      {!proPluginInstalled
+                        ? 'The Sikshya Pro plugin is not installed on this site. Install and activate it — if your plan already covers this add-on, it unlocks straight away.'
+                        : isProActive
+                          ? `Requires ${tierPlanLabel(a.tier)} plan or higher — upgrade your subscription to enable.`
+                          : 'Sikshya Pro is installed but no active licence was found. Activate your licence key to enable this add-on.'}
                     </p>
                     <a
                       href={upgradeUrl}
@@ -763,7 +800,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
                       rel="noreferrer noopener"
                       className="inline-flex w-fit items-center rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
                     >
-                      Upgrade to unlock
+                      {!proPluginInstalled ? 'Plans & downloads' : 'Upgrade to unlock'}
                     </a>
                   </div>
                 ) : null}

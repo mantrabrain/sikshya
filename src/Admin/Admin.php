@@ -1280,10 +1280,8 @@ class Admin
         $course_counts = wp_count_posts(PostTypes::COURSE);
         $total_courses = isset($course_counts->publish) ? (int) $course_counts->publish : 0;
 
-        $user_counts = count_users();
-        $total_students = isset($user_counts['avail_roles']['sikshya_student'])
-            ? (int) $user_counts['avail_roles']['sikshya_student']
-            : 0;
+        // Cached: counting users scans usermeta (see RoleCountCache).
+        $total_students = \Sikshya\Services\RoleCountCache::forRole('sikshya_student');
 
         $stats = [
             'total_courses' => $total_courses,

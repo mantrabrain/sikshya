@@ -669,16 +669,16 @@ class Frontend
                 switch ($type) {
                     case 'lesson':
                         $post_type = PostTypes::LESSON;
-                        $template  = $this->plugin->getTemplatePath('single-lesson.php');
+                        $template  = \Sikshya\Frontend\Theme\TemplateLoader::locate('single-lesson.php');
                         break;
                     case 'quiz':
                         $post_type = PostTypes::QUIZ;
-                        $template  = $this->plugin->getTemplatePath('single-quiz.php');
+                        $template  = \Sikshya\Frontend\Theme\TemplateLoader::locate('single-quiz.php');
                         break;
                     case 'assignment':
                         $post_type = PostTypes::ASSIGNMENT;
                         // If/when an assignment template exists, use it. Fallback to lesson template for now.
-                        $template  = $this->plugin->getTemplatePath('single-lesson.php');
+                        $template  = \Sikshya\Frontend\Theme\TemplateLoader::locate('single-lesson.php');
                         break;
                 }
 
@@ -802,7 +802,7 @@ class Frontend
             return;
         }
 
-        $path = $this->plugin->getTemplatePath('account.php');
+        $path = \Sikshya\Frontend\Theme\TemplateLoader::locate('account.php');
         if ($path === '' || !is_readable($path)) {
             return;
         }
@@ -817,7 +817,7 @@ class Frontend
     public function loadCustomTemplates(string $template): string
     {
         if (PublicPageUrls::isCourseCategoryRootRequest() && CourseFrontendSettings::areCategoriesEnabled()) {
-            $custom_template = $this->plugin->getTemplatePath('taxonomy-course-category-root.php');
+            $custom_template = \Sikshya\Frontend\Theme\TemplateLoader::locate('taxonomy-course-category-root.php');
             if ($custom_template !== '' && is_readable($custom_template)) {
                 return $custom_template;
             }
@@ -825,49 +825,49 @@ class Frontend
 
         // Load custom templates for Sikshya post types
         if (is_singular(PostTypes::COURSE)) {
-            $custom_template = $this->plugin->getTemplatePath('single-course.php');
+            $custom_template = \Sikshya\Frontend\Theme\TemplateLoader::locate('single-course.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
         }
 
         if (is_singular(PostTypes::LESSON)) {
-            $custom_template = $this->plugin->getTemplatePath('single-lesson.php');
+            $custom_template = \Sikshya\Frontend\Theme\TemplateLoader::locate('single-lesson.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
         }
 
         if (is_singular(PostTypes::QUIZ)) {
-            $custom_template = $this->plugin->getTemplatePath('single-quiz.php');
+            $custom_template = \Sikshya\Frontend\Theme\TemplateLoader::locate('single-quiz.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
         }
 
         if (is_post_type_archive(PostTypes::COURSE)) {
-            $custom_template = $this->plugin->getTemplatePath('archive-sik_course.php');
+            $custom_template = \Sikshya\Frontend\Theme\TemplateLoader::locate('archive-sik_course.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
         }
 
         if (is_tax(Taxonomies::COURSE_CATEGORY)) {
-            $custom_template = $this->plugin->getTemplatePath('taxonomy-course-category.php');
+            $custom_template = \Sikshya\Frontend\Theme\TemplateLoader::locate('taxonomy-course-category.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
         }
 
         if (is_tax(Taxonomies::COURSE_TAG)) {
-            $custom_template = $this->plugin->getTemplatePath('taxonomy-course-tag.php');
+            $custom_template = \Sikshya\Frontend\Theme\TemplateLoader::locate('taxonomy-course-tag.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
         }
 
         if ((string) get_query_var(PermalinkService::INSTRUCTOR_VAR) !== '') {
-            $custom_template = $this->plugin->getTemplatePath('author.php');
+            $custom_template = \Sikshya\Frontend\Theme\TemplateLoader::locate('author.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
@@ -884,7 +884,7 @@ class Frontend
             ] as $key => $file
         ) {
             if (PublicPageUrls::isCurrentVirtualPage($key)) {
-                $path = $this->plugin->getTemplatePath($file);
+                $path = \Sikshya\Frontend\Theme\TemplateLoader::locate($file);
                 if (file_exists($path)) {
                     return $path;
                 }
