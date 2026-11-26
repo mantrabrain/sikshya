@@ -2,6 +2,10 @@ Sikshya LMS - full changelog
 (readme.txt carries only the two most recent releases; WordPress.org truncates
 a changelog longer than 5,000 words.)
 
+= 1.0.20 - 2026-11-26 =
+* **Ready for WordPress 7.2**, which is due on 8 December. The whole plugin was run against the 7.2 release candidate — 313 integration tests, covering the course builder, checkout, the Learn pages, quizzes, certificates, the importers, multisite and uninstall — and everything passed unchanged. `Requires at least: 6.0` and `Requires PHP: 7.4` are untouched, so this update is safe for every existing site.
+* Our own test harness now runs the WordPress version it claims to support, rather than an older bundled copy. That is an internal change with no effect on your site, but it is why the 7.2 result can be trusted.
+
 = 1.0.19 - 2026-11-11 =
 * **Lesson, quiz, question and assignment lists are faster, and stay fast as your site grows.** Opening one of those lists asked the database "which quiz holds this question?" once for every row on the page. That question can only be answered by searching through stored settings text, which no index can speed up, so each row read the whole table. On a site with ~292,000 stored settings rows a 20-row page spent 402ms of its 535ms doing that twenty times over — and because the cost follows how much content you have rather than how many rows are on screen, it got worse the longer you used Sikshya. It is now answered once per page: the lists come back about a quarter faster, and the saving grows with the size of your site.
 * Nothing about what you see changes — the same links, in the same order. Verified identical across 200 questions against the previous behaviour, and covered by tests that fail if the per-row version ever comes back.

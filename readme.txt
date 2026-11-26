@@ -3,9 +3,9 @@ Contributors: mantrabrain
 Donate link: https://mantrabrain.com/
 Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.0.19
+Stable tag: 1.0.20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -426,20 +426,18 @@ changelog longer than 5,000 words. Every earlier entry is kept in full in `chang
 shipped alongside this file, and in the release history at
 https://github.com/mantrabrain/sikshya/releases
 
+= 1.0.20 - 2026-11-26 =
+* **Ready for WordPress 7.2**, which is due on 8 December. The whole plugin was run against the 7.2 release candidate — 313 integration tests, covering the course builder, checkout, the Learn pages, quizzes, certificates, the importers, multisite and uninstall — and everything passed unchanged. `Requires at least: 6.0` and `Requires PHP: 7.4` are untouched, so this update is safe for every existing site.
+* Our own test harness now runs the WordPress version it claims to support, rather than an older bundled copy. That is an internal change with no effect on your site, but it is why the 7.2 result can be trusted.
+
 = 1.0.19 - 2026-11-11 =
 * **Lesson, quiz, question and assignment lists are faster, and stay fast as your site grows.** Opening one of those lists asked the database "which quiz holds this question?" once for every row on the page. That question can only be answered by searching through stored settings text, which no index can speed up, so each row read the whole table. On a site with ~292,000 stored settings rows a 20-row page spent 402ms of its 535ms doing that twenty times over — and because the cost follows how much content you have rather than how many rows are on screen, it got worse the longer you used Sikshya. It is now answered once per page: the lists come back about a quarter faster, and the saving grows with the size of your site.
 * Nothing about what you see changes — the same links, in the same order. Verified identical across 200 questions against the previous behaviour, and covered by tests that fail if the per-row version ever comes back.
 
-= 1.0.18 - 2026-11-06 =
-**Security release. If you sell courses with Sikshya, update now.**
-* **Paid lesson content and quiz answer keys were readable over the WordPress REST API without logging in.** Sikshya registers its post meta with `show_in_rest` so the editor can save it; WordPress also reads that flag as "publish this field to anyone who may read the post", which for a published post is everybody. `auth_callback` does not change it — WordPress consults that when writing, not when answering a read. So `wp-json/wp/v2/sik_question` handed an anonymous visitor the correct answer, the options and the explanation for every question on the site, and `wp-json/wp/v2/sik_lesson` handed over lesson bodies, video URLs, transcripts, live-class join links and SCORM launch URLs — while the course page and the Learn shell correctly refused that same visitor, because those are WordPress's own routes and Sikshya's enrolment check never ran on them.
-* Private meta is now withheld by default. Every key beginning with an underscore is stripped from a REST response unless the reader may edit that post — so a meta key added in a future release is protected the day it is written, rather than being public until somebody remembers it. Course prices stay public, because the course page prints them anyway.
-* The body of a lesson, quiz, question or assignment is withheld from anyone who cannot edit it, **unless the author marked the lesson free**, which is a deliberate preview and still works.
-* Questions are no longer listed over the REST API to anyone who cannot author content. A question's title is the question, so hiding only the answer key would still have handed over the whole question bank.
-* **Nothing changes for authors.** Administrators and instructors read and write exactly as before; the block editor and the Sikshya admin are unaffected.
-* Reported privately and responsibly by an independent security researcher, with a clear reproduction. Our thanks — it was a real finding and the report is what made the fix quick.
-
 == Upgrade Notice ==
+
+= 1.0.20 =
+Compatibility release for WordPress 7.2 (due 8 December). Verified against the release candidate with the full test suite; no changes to minimum WordPress or PHP versions.
 
 = 1.0.19 =
 Performance: lesson, quiz, question and assignment lists no longer search the whole settings table once per row. Noticeably faster on large sites, and no change to what you see.
