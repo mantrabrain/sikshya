@@ -148,6 +148,18 @@ theme with no override gets the plugin's file, unchanged.
 | `partials/quiz-question-fieldset.php` | One quiz question |
 | `partials/account-view-*.php` | Each account screen |
 
+Sikshya Pro ships two front-end templates of its own, overridden the same way
+(Pro 1.0.14 or newer):
+
+| File | Page |
+| --- | --- |
+| `vendor-storefront.php` | A marketplace vendor's public storefront |
+| `account-view-marketplace.php` | The marketplace screen in the learner account |
+
+Note they sit at the top of your `sikshya/` folder, not under `partials/` —
+the override path mirrors the plugin's own layout, and in Pro both live
+directly in `templates/`.
+
 ### Rules of the road
 
 - **Partials are markup only.** The data they render is prepared before they
