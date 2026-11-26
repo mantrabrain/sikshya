@@ -4,6 +4,10 @@ namespace Sikshya\Frontend\Site;
 
 use Sikshya\Database\Repositories\InstructorMetricsRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Determines whether a user should see the instructor (teaching) account experience.
  *

@@ -4,6 +4,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Utils\RichText;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Per-site email template overrides and custom templates.
  *

@@ -13,6 +13,10 @@ use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\PublicCurriculumService;
 use Sikshya\Services\Settings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Builds the single-lesson shell view model for enrolled / preview learners.
  *

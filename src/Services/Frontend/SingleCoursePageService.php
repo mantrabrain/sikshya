@@ -5,6 +5,10 @@ namespace Sikshya\Services\Frontend;
 use Sikshya\Frontend\Site\SingleCourseTemplateData;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Single-course landing page builder (service layer wrapper).
  *

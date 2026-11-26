@@ -6,6 +6,10 @@ use Sikshya\Admin\SetupWizardController;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Admin Asset Management Service
  *

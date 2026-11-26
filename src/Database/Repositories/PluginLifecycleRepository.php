@@ -4,6 +4,10 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\Tables;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Deactivation / uninstall maintenance (options table, custom table drops).
  *

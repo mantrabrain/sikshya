@@ -4,6 +4,10 @@ namespace Sikshya\Admin;
 
 use Sikshya\Constants\Taxonomies;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Routes course category management away from native WordPress term screens.
  *

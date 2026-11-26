@@ -6,6 +6,10 @@ use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Services\LessonCourseLink;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Quizzes List Table
  *

@@ -8,6 +8,10 @@ use Sikshya\Database\Tables\EnrollmentsTable;
 use Sikshya\Database\Tables\PaymentsTable;
 use Sikshya\Services\Settings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Admin reports / gradebook-style aggregates over custom tables.
  *

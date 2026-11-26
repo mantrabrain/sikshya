@@ -7,6 +7,10 @@ use Sikshya\Services\PermalinkService;
 use WP_Error;
 use WP_User;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Shortcodes:
  * - [sikshya_login]

@@ -2,6 +2,10 @@
 
 namespace Sikshya\Utils;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Central rich text sanitization + rendering helpers.
  *

@@ -4,6 +4,10 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\ProgressRepository;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Enrollment progress % and completion rules from global course settings.
  *

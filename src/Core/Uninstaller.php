@@ -11,6 +11,10 @@ use Sikshya\Migration\LegacyMigrator;
 use Sikshya\Services\Settings;
 use Sikshya\Services\StatsUsage;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Plugin Uninstaller
  *

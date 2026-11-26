@@ -4,6 +4,10 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\PaymentsTable;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Legacy payment rows (sikshya_payments).
  *

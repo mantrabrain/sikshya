@@ -2,6 +2,10 @@
 
 namespace Sikshya\Services;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Resolves "Send to" expressions (merge tags or legacy learner/admin/instructor) to a single email address.
  *

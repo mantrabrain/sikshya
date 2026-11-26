@@ -4,6 +4,10 @@ namespace Sikshya\Frontend\Controllers;
 
 use Sikshya\Core\Plugin;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Frontend Progress Controller
  *

@@ -6,6 +6,10 @@ use Sikshya\Addons\Addons;
 use Sikshya\Licensing\FeatureRegistry;
 use Sikshya\Licensing\TierCapabilities;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Add-on / plan gates for transactional email templates (match {@see SettingsManager} semantics).
  *

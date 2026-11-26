@@ -6,6 +6,10 @@ use Sikshya\Commerce\PaymentGatewayRegistry;
 use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * @package Sikshya\Frontend\Site
  */

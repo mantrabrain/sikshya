@@ -2,6 +2,10 @@
 
 namespace Sikshya\Blocks;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Wraps dynamic block HTML for editor SSR previews.
  *

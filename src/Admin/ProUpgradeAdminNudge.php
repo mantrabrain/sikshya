@@ -5,6 +5,10 @@ namespace Sikshya\Admin;
 use Sikshya\Constants\AdminPages;
 use Sikshya\Licensing\PricingUrl;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * “Upgrade to Pro” entry points when no commercial Sikshya tier is active.
  *

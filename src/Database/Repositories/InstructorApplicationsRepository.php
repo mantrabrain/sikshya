@@ -2,6 +2,10 @@
 
 namespace Sikshya\Database\Repositories;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * User-meta queries for instructor applications (pending / approved / rejected).
  *

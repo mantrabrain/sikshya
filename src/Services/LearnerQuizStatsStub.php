@@ -2,6 +2,10 @@
 
 namespace Sikshya\Services;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Placeholder until quiz stats aggregation is wired for the learner dashboard.
  *

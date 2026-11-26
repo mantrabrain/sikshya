@@ -7,6 +7,10 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Services\LessonCourseLink;
 use WP_Post;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Lesson Model
  *

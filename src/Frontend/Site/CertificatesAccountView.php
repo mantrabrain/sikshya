@@ -5,6 +5,10 @@ namespace Sikshya\Frontend\Site;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\LearnerCertificateService;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Learner account: Certificates view + sidebar link.
  *

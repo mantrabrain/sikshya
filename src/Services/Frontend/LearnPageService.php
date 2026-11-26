@@ -13,6 +13,10 @@ use Sikshya\Services\Settings;
 use Sikshya\Frontend\Site\CurriculumOutlineMeta;
 use Sikshya\Frontend\Site\PublicPageUrls;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Application service: learn hub / course curriculum / bundle views.
  * Produces a {@see LearnPageModel} for model-only templates. No HTML.

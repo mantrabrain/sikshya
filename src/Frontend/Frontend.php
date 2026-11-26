@@ -25,6 +25,10 @@ use Sikshya\Frontend\Controllers\AssignmentController;
 use Sikshya\Blocks\ContentHasSikshyaBlock;
 use Sikshya\Shortcodes\AuthShortcodes;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Frontend Management Class
  *

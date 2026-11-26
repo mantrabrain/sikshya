@@ -12,6 +12,10 @@ use Sikshya\Models\Lesson;
 use Sikshya\Models\Quiz;
 use Sikshya\Models\Enrollment;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Course Controller
  *

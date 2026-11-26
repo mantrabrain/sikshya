@@ -4,6 +4,10 @@ namespace Sikshya\Blocks;
 
 use Sikshya\Core\Plugin;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Registers and attaches Sikshya public CSS to Gutenberg blocks.
  *

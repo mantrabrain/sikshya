@@ -7,6 +7,10 @@ use Sikshya\Core\Plugin;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\Settings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 final class SetupWizardController
 {
     public const MENU_SLUG = 'sikshya-setup';

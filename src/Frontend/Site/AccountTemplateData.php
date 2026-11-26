@@ -14,6 +14,10 @@ use Sikshya\Services\LearnerCurriculumHelper;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\PublicCurriculumService;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Learner dashboard data for the account page.
  *

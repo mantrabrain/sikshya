@@ -10,6 +10,10 @@ use WP_REST_Request;
 use Sikshya\Addons\Addons;
 use WP_REST_Server;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Main API Class
  *

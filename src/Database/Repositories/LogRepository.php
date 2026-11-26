@@ -4,6 +4,10 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\LogsTable;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Write-only log store (custom table).
  *

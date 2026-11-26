@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Sikshya\Security;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Envelope-encrypted secret storage.
  *

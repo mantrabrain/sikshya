@@ -4,6 +4,10 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\CertificatesTable;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Issued certificates (custom table).
  *

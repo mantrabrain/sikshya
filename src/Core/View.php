@@ -2,6 +2,10 @@
 
 namespace Sikshya\Core;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * View Class
  *

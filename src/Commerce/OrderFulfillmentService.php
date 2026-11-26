@@ -7,6 +7,10 @@ use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\Settings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Marks orders paid, enrolls learners, writes legacy payment rows.
  *

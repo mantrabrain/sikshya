@@ -2,6 +2,10 @@
 
 namespace Sikshya\Frontend\Site;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Resolves cart / enrollment flash messages from the request (query args + short-lived transients).
  *

@@ -4,6 +4,10 @@ namespace Sikshya\Admin;
 
 use Sikshya\Constants\PostTypes;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Renders the React admin mount point and injects bootstrap config.
  */

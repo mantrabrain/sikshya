@@ -4,6 +4,10 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Tables\AssignmentSubmissionsTable;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Assignment submissions (custom table).
  *

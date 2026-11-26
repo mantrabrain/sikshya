@@ -16,6 +16,10 @@ use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\QuestionMedia;
 use Sikshya\Services\Settings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * @package Sikshya\Frontend\Site
  */

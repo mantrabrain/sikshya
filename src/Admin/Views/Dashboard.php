@@ -2,6 +2,10 @@
 
 namespace Sikshya\Admin\Views;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Custom Dashboard Component
  *
